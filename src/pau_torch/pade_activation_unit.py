@@ -1,5 +1,7 @@
 import torch.nn as nn
 
+from pau.Constants import *
+
 try:
     from pau_torch.pade_cuda_functions import *
 except:
@@ -7,23 +9,13 @@ except:
 
 from pau_torch.pade_pytorch_functions import *
 
-init_w_numerator = [0.09163206842254161,
-                    0.5049965361843953,
-                    0.7451269450654521,
-                    0.45290252844805917,
-                    0.11193217514133497,
-                    0.010166300350864386]
-
-init_w_denominator = [-9.411908117465748e-07,
-                      0.896831954111865,
-                      2.070929650028975e-06,
-                      0.020131018048667716]
 
 class PAU(nn.Module):
 
-    def __init__(self, w_numerator=init_w_numerator, w_denominator=init_w_denominator, cuda=True, version="B"):
+    def __init__(self, w_numerator=init_w_numerator, w_denominator=init_w_denominator, center=center, cuda=True, version="A"):
         super(PAU, self).__init__()
 
+        self.center = nn.Parameter(torch.FloatTensor([center]), requires_grad=True)
         self.weight_numerator = nn.Parameter(torch.FloatTensor(w_numerator), requires_grad=True)
         self.weight_denominator = nn.Parameter(torch.FloatTensor(w_denominator), requires_grad=True)
 
@@ -55,5 +47,5 @@ class PAU(nn.Module):
             self.activation_function = pau_func
 
     def forward(self, x):
-        out = self.activation_function(x, self.weight_numerator, self.weight_denominator, self.training)
+        out = self.activation_function(x + self.center, self.weight_numerator, self.weight_denominator, self.training)
         return out
