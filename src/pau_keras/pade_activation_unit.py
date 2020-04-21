@@ -5,11 +5,12 @@ from pau_keras.pade_keras_functions import *
 
 
 class PAU(Layer):
-    def __init__(self, w_numerator=init_w_numerator, w_denominator=init_w_denominator, center=center, version="A", trainable=True):
+    def __init__(self, w_numerator=init_w_numerator, w_denominator=init_w_denominator, center=center, version="A",
+                 trainable=True, train_center=True, train_numerator=True, train_denominator=True):
         super(PAU, self).__init__()
-        self.center = tf.Variable(initial_value=center, trainable=trainable)
-        self.numerator = tf.Variable(initial_value=w_numerator, trainable=trainable)
-        self.denominator = tf.Variable(initial_value=init_w_denominator, trainable=trainable)
+        self.center = tf.Variable(initial_value=center, trainable=trainable and train_center)
+        self.numerator = tf.Variable(initial_value=w_numerator, trainable=trainable and train_numerator)
+        self.denominator = tf.Variable(initial_value=w_denominator, trainable=trainable and train_denominator)
 
         if version == "A":
             pau_func = PAU_PYTORCH_A_F

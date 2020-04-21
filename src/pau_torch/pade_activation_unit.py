@@ -12,12 +12,13 @@ from pau_torch.pade_pytorch_functions import *
 
 class PAU(nn.Module):
 
-    def __init__(self, w_numerator=init_w_numerator, w_denominator=init_w_denominator, center=center, cuda=True, version="A"):
+    def __init__(self, w_numerator=init_w_numerator, w_denominator=init_w_denominator, center=center, cuda=True,
+                 version="A", trainable=True, train_center=True, train_numerator=True, train_denominator=True):
         super(PAU, self).__init__()
 
-        self.center = nn.Parameter(torch.FloatTensor([center]), requires_grad=True)
-        self.weight_numerator = nn.Parameter(torch.FloatTensor(w_numerator), requires_grad=True)
-        self.weight_denominator = nn.Parameter(torch.FloatTensor(w_denominator), requires_grad=True)
+        self.center = nn.Parameter(torch.FloatTensor([center]), requires_grad=trainable and train_center)
+        self.numerator = nn.Parameter(torch.FloatTensor(w_numerator), requires_grad=trainable and train_numerator)
+        self.denominator = nn.Parameter(torch.FloatTensor(w_denominator), requires_grad=trainable and train_denominator)
 
         if cuda:
             if version == "A":
@@ -47,5 +48,5 @@ class PAU(nn.Module):
             self.activation_function = pau_func
 
     def forward(self, x):
-        out = self.activation_function(x + self.center, self.weight_numerator, self.weight_denominator, self.training)
+        out = self.activation_function(x + self.center, self.numerator, self.denominator, self.training)
         return out
