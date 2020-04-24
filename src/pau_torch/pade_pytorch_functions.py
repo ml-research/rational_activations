@@ -45,7 +45,7 @@ def PAU_PYTORCH_B_F(x, weight_numerator, weight_denominator, training):
     for j, w_d in enumerate(weight_denominator):
         denominator = denominator + w_d.mul(xps[j + 1])
 
-    return numerator.div((1.0 + denominator).abs()).view(x.shape)
+    return numerator.div((1.0 + denominator.abs())).view(x.shape)
 
 def PAU_PYTORCH_C_F(x, weight_numerator, weight_denominator, training):
     # P(X) / Q(X) = a_0 + a_1 * X + ... + a_n * X ^ n /
@@ -63,7 +63,7 @@ def PAU_PYTORCH_C_F(x, weight_numerator, weight_denominator, training):
     for j, w_d in enumerate(weight_denominator):
         denominator = denominator + w_d.mul(xps[j + 1])
 
-    return numerator.div((0.1 + denominator).abs()).view(x.shape)
+    return numerator.div((0.1 + denominator.abs())).view(x.shape)
 
 def PAU_PYTORCH_D_F(x, weight_numerator, weight_denominator, training):
     raise NotImplementedError()
