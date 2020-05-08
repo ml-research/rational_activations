@@ -18,11 +18,11 @@ def PAU_PYTORCH_A_F(x, weight_numerator, weight_denominator, training):
 
     xps = get_xps(weight_denominator, weight_numerator, z)
 
-    numerator = 0
+    numerator = torch.FloatTensor([0])
     for i, w_n in enumerate(weight_numerator):
         numerator = numerator + w_n.mul(xps[i])
 
-    denominator = 1.0
+    denominator = torch.FloatTensor([1.0])
     for j, w_d in enumerate(weight_denominator):
         denominator = denominator + w_d.mul(xps[j + 1]).abs()
 
@@ -37,11 +37,11 @@ def PAU_PYTORCH_B_F(x, weight_numerator, weight_denominator, training):
 
     xps = get_xps(weight_denominator, weight_numerator, z)
 
-    numerator = 0
+    numerator = torch.FloatTensor([0])
     for i, w_n in enumerate(weight_numerator):
         numerator = numerator + w_n.mul(xps[i])
 
-    denominator = 0
+    denominator = torch.FloatTensor([0])
     for j, w_d in enumerate(weight_denominator):
         denominator = denominator + w_d.mul(xps[j + 1])
 
@@ -55,11 +55,11 @@ def PAU_PYTORCH_C_F(x, weight_numerator, weight_denominator, training):
 
     xps = get_xps(weight_denominator, weight_numerator, z)
 
-    numerator = 0
+    numerator = torch.FloatTensor([0])
     for i, w_n in enumerate(weight_numerator):
         numerator = numerator + w_n.mul(xps[i])
 
-    denominator = 0
+    denominator = torch.FloatTensor([0])
     for j, w_d in enumerate(weight_denominator):
         denominator = denominator + w_d.mul(xps[j + 1])
 
@@ -79,13 +79,13 @@ def PAU_PYTORCH_D_F(x, weight_numerator, weight_denominator, training, random_de
 
     xps = get_xps(weight_denominator, weight_numerator, z)
 
-    numerator = 0
+    numerator = torch.FloatTensor([0])
     for i, w_n in enumerate(weight_numerator):
         w_n_noised = w_n.mul(torch.FloatTensor(
             z.shape).uniform_(1-random_deviation, 1+random_deviation))
         numerator = numerator + w_n_noised.mul(xps[i])
 
-    denominator = 0
+    denominator = torch.FloatTensor([0])
     for j, w_d in enumerate(weight_denominator):
         w_d_noised = w_d.mul(torch.FloatTensor(
             z.shape).uniform_(1-random_deviation, 1+random_deviation))
