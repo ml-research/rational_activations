@@ -3,10 +3,11 @@ from pathlib import Path
 import airspeed
 from setuptools import setup, find_packages
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
-
+from torch.cuda import is_available as torch_cuda_available
 # degrees
 #degrees = [(3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (5, 4)]
 degrees = [(5, 4)]
+
 
 def generate_cpp_module(fname, degrees=degrees, versions=None):
     file_content = airspeed.Template("""
@@ -36,13 +37,13 @@ def generate_cpp_module(fname, degrees=degrees, versions=None):
     std::vector<torch::Tensor> pau_cuda_backward_${vname}_$degs[0]_$degs[1]($backward_header);
     #end
 
-    
+
     #foreach ($degs in $degrees)
     at::Tensor pau_forward_${vname}_$degs[0]_$degs[1]($forward_header) {
         CHECK_INPUT(x);
         CHECK_INPUT(n);
         CHECK_INPUT(d);
-    
+
         return pau_cuda_forward_${vname}_$degs[0]_$degs[1]($forward_invocation);
     }
     std::vector<torch::Tensor> pau_backward_${vname}_$degs[0]_$degs[1]($backward_header) {
@@ -50,7 +51,7 @@ def generate_cpp_module(fname, degrees=degrees, versions=None):
         CHECK_INPUT(x);
         CHECK_INPUT(n);
         CHECK_INPUT(d);
-    
+
         return pau_cuda_backward_${vname}_$degs[0]_$degs[1]($backward_invocation);
     }
     #end
@@ -98,15 +99,16 @@ constexpr uint32_t THREADS_PER_BLOCK = 512;
     with open(fname, "w") as text_file:
         text_file.write(content)
 
-version_names = []
-template_contents = ""
-for template_fname in sorted(glob.glob("cuda/versions/*.cu")):
-    version_names.append(Path(template_fname).stem)
-    with open(template_fname) as infile:
-        template_contents += infile.read()
+if torch_cuda_available():
+    version_names = []
+    template_contents = ""
+    for template_fname in sorted(glob.glob("cuda/versions/*.cu")):
+        version_names.append(Path(template_fname).stem)
+        with open(template_fname) as infile:
+            template_contents += infile.read()
 
-generate_cpp_module(fname='cuda/pau_cuda.cpp', versions=version_names)
-generate_cpp_kernels_module(fname='cuda/pau_cuda_kernels.cu', template_contents=template_contents)
+    generate_cpp_module(fname='cuda/pau_cuda.cpp', versions=version_names)
+    generate_cpp_kernels_module(fname='cuda/pau_cuda_kernels.cu', template_contents=template_contents)
 
 
 with open("README.md", "r") as fh:
@@ -114,7 +116,6 @@ with open("README.md", "r") as fh:
 
 with open("requirements.txt", "r") as fh:
     requirements = fh.readlines()
-
 
 setup(
     name='pau',
@@ -136,11 +137,11 @@ setup(
             'cuda/pau_cuda.cpp',
             'cuda/pau_cuda_kernels.cu',
         ],
-                      extra_compile_args={'cxx': [],
-                                          'nvcc': ['-gencode=arch=compute_60,code="sm_60,compute_60"', '-lineinfo']
-                                         }
-                      ),
-    ],
+        extra_compile_args={'cxx': [],
+            'nvcc': ['-gencode=arch=compute_60,code="sm_60,compute_60"', '-lineinfo']
+        }
+    ),
+    ] if torch_cuda_available() else [],
     cmdclass={
         'build_ext': BuildExtension
     })
