@@ -1,20 +1,25 @@
 import torch.nn as nn
-
+from torch.cuda import is_available as torch_cuda_available
 from pau.Constants import *
 
-try:
-    from pau_torch.pade_cuda_functions import *
-except:
-    print('error importing pade_cuda, is cuda not avialable?')
+
+if torch_cuda_available():
+    try:
+        from pau_torch.pade_cuda_functions import *
+    except:
+        print('error importing pade_cuda, is cuda not avialable?')
 
 from pau_torch.pade_pytorch_functions import *
 
 
 class PAU(nn.Module):
 
-    def __init__(self, w_numerator=init_w_numerator, w_denominator=init_w_denominator, center=center, cuda=True,
+    def __init__(self, w_numerator=init_w_numerator, w_denominator=init_w_denominator, center=center, cuda=None,
                  version="A", trainable=True, train_center=True, train_numerator=True, train_denominator=True):
         super(PAU, self).__init__()
+
+        if cuda is None:
+            cuda = torch_cuda_available()
 
         self.center = nn.Parameter(torch.FloatTensor([center]), requires_grad=trainable and train_center)
         self.numerator = nn.Parameter(torch.FloatTensor(w_numerator), requires_grad=trainable and train_numerator)
