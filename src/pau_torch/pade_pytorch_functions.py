@@ -12,7 +12,7 @@ def get_xps(weight_denominator, weight_numerator, z):
 
 def PAU_PYTORCH_A_F(x, weight_numerator, weight_denominator, training):
     # P(X) / Q(X) = a_0 + a_1 * X + ... + a_n * X ^ n /
-    #               1 + | b_0 | | X | + | b_1 | | X | ^ 2 + ... + | b_i | | X | ^ {i + 1}
+    #               1 + | b_0 * X | + | b_1 * X | ^ 2 + ... + | b_i * X | ^ {i + 1}
 
     z = x.view(-1)
 
@@ -49,7 +49,7 @@ def PAU_PYTORCH_B_F(x, weight_numerator, weight_denominator, training):
 
 def PAU_PYTORCH_C_F(x, weight_numerator, weight_denominator, training):
     # P(X) / Q(X) = a_0 + a_1 * X + ... + a_n * X ^ n /
-    #               eps + |b_0*X + b_1*X^2 + ... + b_{n-1}*X^n|
+    #               eps + |b_1*X + b_1*X^2 + ... + b_{n-1}*X^n|
 
     z = x.view(-1)
 
@@ -61,7 +61,7 @@ def PAU_PYTORCH_C_F(x, weight_numerator, weight_denominator, training):
 
     denominator = torch.FloatTensor([0])
     for j, w_d in enumerate(weight_denominator):
-        denominator = denominator + w_d.mul(xps[j + 1])
+        denominator = denominator + w_d.mul(xps[j])
 
     return numerator.div((0.1 + denominator.abs())).view(x.shape)
 

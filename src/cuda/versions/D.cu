@@ -27,7 +27,7 @@ __global__ void pau_cuda_forward_D_kernel_$degs[0]_$degs[1](const bool training,
         #foreach( $idx in [0..$coefs_a] )
         scalar_t a_$idx = a[$idx];
         #end
-    
+
         #foreach( $idx in [0..$coefs_b] )
         scalar_t b_$idx = b[$idx];
         #end
@@ -48,7 +48,7 @@ __global__ void pau_cuda_forward_D_kernel_$degs[0]_$degs[1](const bool training,
             b_$idx = curand_uniform4(&state).x * (upper-lower) + lower;
             #end
         }
-        
+
         scalar_t xp1 = x[index];
 
         #foreach( $idx in [2..$max_x] )#set( $value = $idx - 1 )
@@ -79,14 +79,14 @@ at::Tensor pau_cuda_forward_D_$degs[0]_$degs[1](const bool training, const unsig
     int blockSize = THREADS_PER_BLOCK;
     int numBlocks = (x_size + blockSize - 1) / blockSize;
 
-    AT_DISPATCH_FLOATING_TYPES(x.type(), "pau_cuda_forward_D_$degs[0]_$degs[1]", ([&] {
+    AT_DISPATCH_FLOATING_TYPES(x.scalar_type(), "pau_cuda_forward_D_$degs[0]_$degs[1]", ([&] {
     pau_cuda_forward_D_kernel_$degs[0]_$degs[1]<scalar_t>
         <<<numBlocks, blockSize>>>(
             training, iteration,
-            x.data<scalar_t>(),
-            n.data<scalar_t>(),
-            d.data<scalar_t>(),
-            result.data<scalar_t>(),
+            x.data_ptr<scalar_t>(),
+            n.data_ptr<scalar_t>(),
+            d.data_ptr<scalar_t>(),
+            result.data_ptr<scalar_t>(),
             x_size);
         }));
 
@@ -255,17 +255,17 @@ std::vector<torch::Tensor> pau_cuda_backward_D_$degs[0]_$degs[1](const bool trai
 
     int blockSize = THREADS_PER_BLOCK;
 
-    AT_DISPATCH_FLOATING_TYPES(x.type(), "pau_cuda_backward_D_$degs[0]_$degs[1]", ([&] {
+    AT_DISPATCH_FLOATING_TYPES(x.scalar_type(), "pau_cuda_backward_D_$degs[0]_$degs[1]", ([&] {
     pau_cuda_backward_D_kernel_$degs[0]_$degs[1]<scalar_t>
         <<<16, blockSize>>>(
             training, iteration,
-            grad_output.data<scalar_t>(),
-            x.data<scalar_t>(),
-            n.data<scalar_t>(),
-            d.data<scalar_t>(),
-            d_x.data<scalar_t>(),
-            d_n.data<double>(),
-            d_d.data<double>(),
+            grad_output.data_ptr<scalar_t>(),
+            x.data_ptr<scalar_t>(),
+            n.data_ptr<scalar_t>(),
+            d.data_ptr<scalar_t>(),
+            d_x.data_ptr<scalar_t>(),
+            d_n.data_ptr<double>(),
+            d_d.data_ptr<double>(),
             x_size);
     }));
 
@@ -274,7 +274,3 @@ std::vector<torch::Tensor> pau_cuda_backward_D_$degs[0]_$degs[1](const bool trai
 
 
 #end
-
-
-
-

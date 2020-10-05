@@ -57,13 +57,13 @@ at::Tensor pau_cuda_forward_B_$degs[0]_$degs[1](torch::Tensor x, torch::Tensor n
     int blockSize = THREADS_PER_BLOCK;
     int numBlocks = (x_size + blockSize - 1) / blockSize;
 
-    AT_DISPATCH_FLOATING_TYPES(x.type(), "pau_cuda_forward_B_$degs[0]_$degs[1]", ([&] {
+    AT_DISPATCH_FLOATING_TYPES(x.scalar_type(), "pau_cuda_forward_B_$degs[0]_$degs[1]", ([&] {
     pau_cuda_forward_B_kernel_$degs[0]_$degs[1]<scalar_t>
         <<<numBlocks, blockSize>>>(
-            x.data<scalar_t>(),
-            n.data<scalar_t>(),
-            d.data<scalar_t>(),
-            result.data<scalar_t>(),
+            x.data_ptr<scalar_t>(),
+            n.data_ptr<scalar_t>(),
+            d.data_ptr<scalar_t>(),
+            result.data_ptr<scalar_t>(),
             x_size);
         }));
 
@@ -205,16 +205,16 @@ std::vector<torch::Tensor> pau_cuda_backward_B_$degs[0]_$degs[1](torch::Tensor g
 
     int blockSize = THREADS_PER_BLOCK;
 
-    AT_DISPATCH_FLOATING_TYPES(x.type(), "pau_cuda_backward_B_$degs[0]_$degs[1]", ([&] {
+    AT_DISPATCH_FLOATING_TYPES(x.scalar_type(), "pau_cuda_backward_B_$degs[0]_$degs[1]", ([&] {
     pau_cuda_backward_B_kernel_$degs[0]_$degs[1]<scalar_t>
         <<<16, blockSize>>>(
-            grad_output.data<scalar_t>(),
-            x.data<scalar_t>(),
-            n.data<scalar_t>(),
-            d.data<scalar_t>(),
-            d_x.data<scalar_t>(),
-            d_n.data<double>(),
-            d_d.data<double>(),
+            grad_output.data_ptr<scalar_t>(),
+            x.data_ptr<scalar_t>(),
+            n.data_ptr<scalar_t>(),
+            d.data_ptr<scalar_t>(),
+            d_x.data_ptr<scalar_t>(),
+            d_n.data_ptr<double>(),
+            d_d.data_ptr<double>(),
             x_size);
     }));
 
@@ -223,7 +223,3 @@ std::vector<torch::Tensor> pau_cuda_backward_B_$degs[0]_$degs[1](torch::Tensor g
 
 
 #end
-
-
-
-

@@ -54,7 +54,7 @@ class PAU_CUDA_D_F(torch.autograd.Function):
 
         ctx.save_for_backward(input, w_numerator, w_denominator, torch.tensor(local_cnt, dtype=torch.long))
 
-        PAUDF_F.cnt += 1
+        PAU_CUDA_D_F.cnt += 1
         x = forward_D_5_4(training, local_cnt, input, w_numerator, w_denominator)
         return x
 

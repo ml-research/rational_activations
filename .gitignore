@@ -1,2 +1,10 @@
 # Project exclude paths
 /venv/
+*.pyx
+.idea 
+src/.tox
+src/build
+src/dist
+*__pycache__*
+*egg-info
+*pau_cuda*.so

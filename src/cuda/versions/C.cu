@@ -6,7 +6,7 @@
 #set( $degs_a = $degs[0] )
 #set( $degs_b = $degs[1] )
 #set( $coefs_a = $degs_a )
-#set( $coefs_b = $degs_b - 1 )
+#set( $coefs_b = $degs_b )
 #set( $a_counts = $coefs_a + 1 )
 #set( $b_counts = $coefs_b + 1 )
 #set( $max_x = $degs[2] )
@@ -23,7 +23,7 @@ __global__ void pau_cuda_forward_C_kernel_$degs[0]_$degs[1]( const scalar_t* __r
     scalar_t b_$idx = b[$idx];
     #end
 
-    scalar_t eps = scalar_t(0.0000001);
+    scalar_t eps = scalar_t(0.1);
 
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
         index < x_size;
@@ -59,31 +59,18 @@ at::Tensor pau_cuda_forward_C_$degs[0]_$degs[1](torch::Tensor x, torch::Tensor n
     int blockSize = THREADS_PER_BLOCK;
     int numBlocks = (x_size + blockSize - 1) / blockSize;
 
-    AT_DISPATCH_FLOATING_TYPES(x.type(), "pau_cuda_forward_C_$degs[0]_$degs[1]", ([&] {
+    AT_DISPATCH_FLOATING_TYPES(x.scalar_type(), "pau_cuda_forward_C_$degs[0]_$degs[1]", ([&] {
     pau_cuda_forward_C_kernel_$degs[0]_$degs[1]<scalar_t>
         <<<numBlocks, blockSize>>>(
-            x.data<scalar_t>(),
-            n.data<scalar_t>(),
-            d.data<scalar_t>(),
-            result.data<scalar_t>(),
+            x.data_ptr<scalar_t>(),
+            n.data_ptr<scalar_t>(),
+            d.data_ptr<scalar_t>(),
+            result.data_ptr<scalar_t>(),
             x_size);
         }));
 
     return result;
 }
-
-
-
-
-//P(X) = a_0 + a_1*X + a_2*X^2 ...
-//Q(X) = eps + |A(X)|
-//R(X) = a_1 + 2*a_2*X + 3*a_3*X ...
-//A(X) = b_0 + b_1*X + b_2*X^2 + b_3*X^3
-//S(X) = sign(A(X)) * ( b_1 + 2*b_2*X + 3*b_3*X^2 ...)
-//dF/dx = (-P(X)/Q(X)^2)*S(X) + R(X)/Q(X)
-//dF/da_i = x^i/Q(X), i \in {0,$degs[0]}
-//dF/db_i = (-P(X)/Q(X)^2) * sign(A(X)) * X^i , i \in {0,$degs[1]}
-//eps = 0.0000001
 
 template <typename scalar_t>
 __global__ void pau_cuda_backward_C_kernel_$degs[0]_$degs[1](
@@ -99,7 +86,7 @@ __global__ void pau_cuda_backward_C_kernel_$degs[0]_$degs[1](
     __shared__ double sda[$a_counts];
     __shared__ double sdb[$b_counts];
 
-    scalar_t eps = scalar_t(0.0000001);
+    scalar_t eps = scalar_t(0.1);
 
     if( threadIdx.x == 0){
         #foreach( $idx in [0..$coefs_a] )
@@ -212,16 +199,16 @@ std::vector<torch::Tensor> pau_cuda_backward_C_$degs[0]_$degs[1](torch::Tensor g
 
     int blockSize = THREADS_PER_BLOCK;
 
-    AT_DISPATCH_FLOATING_TYPES(x.type(), "pau_cuda_backward_C_$degs[0]_$degs[1]", ([&] {
+    AT_DISPATCH_FLOATING_TYPES(x.scalar_type(), "pau_cuda_backward_C_$degs[0]_$degs[1]", ([&] {
     pau_cuda_backward_C_kernel_$degs[0]_$degs[1]<scalar_t>
         <<<16, blockSize>>>(
-            grad_output.data<scalar_t>(),
-            x.data<scalar_t>(),
-            n.data<scalar_t>(),
-            d.data<scalar_t>(),
-            d_x.data<scalar_t>(),
-            d_n.data<double>(),
-            d_d.data<double>(),
+            grad_output.data_ptr<scalar_t>(),
+            x.data_ptr<scalar_t>(),
+            n.data_ptr<scalar_t>(),
+            d.data_ptr<scalar_t>(),
+            d_x.data_ptr<scalar_t>(),
+            d_n.data_ptr<double>(),
+            d_d.data_ptr<double>(),
             x_size);
     }));
 
@@ -229,11 +216,3 @@ std::vector<torch::Tensor> pau_cuda_backward_C_$degs[0]_$degs[1](torch::Tensor g
 }
 
 #end
-
-
-
-
-
-
-
-

@@ -7,6 +7,7 @@ from torch.cuda import is_available as torch_cuda_available
 # degrees
 #degrees = [(3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (5, 4)]
 degrees = [(5, 4)]
+degrees = [(5, 4), (7, 6)]
 
 
 def generate_cpp_module(fname, degrees=degrees, versions=None):
@@ -15,8 +16,8 @@ def generate_cpp_module(fname, degrees=degrees, versions=None):
 \#include <vector>
 \#include <iostream>
 
-#define CHECK_CUDA(x) AT_ASSERTM(x.type().is_cuda(), #x " must be a CUDA tensor")
-#define CHECK_CONTIGUOUS(x) AT_ASSERTM(x.is_contiguous(), #x " must be contiguous")
+#define CHECK_CUDA(x) TORCH_CHECK(x.is_cuda(), #x " must be a CUDA tensor")
+#define CHECK_CONTIGUOUS(x) TORCH_CHECK(x.is_contiguous(), #x " must be contiguous")
 #define CHECK_INPUT(x) CHECK_CUDA(x); CHECK_CONTIGUOUS(x)
 
 
@@ -119,19 +120,23 @@ with open("requirements.txt", "r") as fh:
 
 setup(
     name='pau',
-    version='0.0.15',
-    author="Alejandro Molina et al.",
-    author_email="molina@cs.tu-darmstadt.de",
+    version='0.0.16',
+    author="Alejandro Molina, Quentin Delfosse, Patrick Schramowski",
+    author_email="molina@cs.tu-darmstadt.de, quentin.delfosse@cs.tu-darmstadt.de",
     description="Pade Activation Unit",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/ml-research/pau",
     packages=find_packages(),
+    package_data={'': ['*.json']},
+    include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: Apache Software License"
     ],
-    #install_requires=requirements,
+    install_requires=requirements,
     ext_modules=[
         CUDAExtension('pau_cuda', [
             'cuda/pau_cuda.cpp',
@@ -144,4 +149,6 @@ setup(
     ] if torch_cuda_available() else [],
     cmdclass={
         'build_ext': BuildExtension
-    })
+    },
+    setup_requires=['airspeed', 'numpy', 'torch', 'scipy'],
+    python_requires='>=3.5.0')
