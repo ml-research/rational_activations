@@ -10,6 +10,11 @@ cd Python-3.7.9
 ./configure --enable-optimizations
 make altinstall
 
+#install the requirements for different pythons
+python3.6 -m pip install -U pip
+python3.6 -m pip install -r requirements.txt
+
+yum install -y python3-devel.x86_64
 # generate the wheels
 python3.6 setup.py bdist_wheel
 python3.7 setup.py bdist_wheel

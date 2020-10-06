@@ -1,7 +1,11 @@
 import torch.nn as nn
 from torch.cuda import is_available as torch_cuda_available
-from pau.Constants import *
+# from pau.Constants import *
 from pau.utils import get_parameters
+from .pade_cuda_functions import PAU_CUDA_A_F, PAU_CUDA_B_F, PAU_CUDA_C_F, \
+                                 PAU_CUDA_D_F
+from .pade_pytorch_functions import PAU_PYTORCH_A_F, PAU_PYTORCH_B_F, \
+                                    PAU_PYTORCH_C_F, PAU_PYTORCH_D_F
 
 
 if torch_cuda_available():
@@ -23,11 +27,15 @@ class PAU(nn.Module):
             cuda = torch_cuda_available()
         device = "cuda" if cuda else "cpu"
 
-        center, w_numerator, w_denominator = get_parameters(version, degrees, approx_func)
+        center, w_numerator, w_denominator = get_parameters(version, degrees,
+                                                            approx_func)
 
-        self.center = nn.Parameter(torch.FloatTensor([center]).to(device), requires_grad=trainable and train_center)
-        self.numerator = nn.Parameter(torch.FloatTensor(w_numerator).to(device), requires_grad=trainable and train_numerator)
-        self.denominator = nn.Parameter(torch.FloatTensor(w_denominator).to(device), requires_grad=trainable and train_denominator)
+        self.center = nn.Parameter(torch.FloatTensor([center]).to(device),
+                                   requires_grad=trainable and train_center)
+        self.numerator = nn.Parameter(torch.FloatTensor(w_numerator).to(device),
+                                      requires_grad=trainable and train_numerator)
+        self.denominator = nn.Parameter(torch.FloatTensor(w_denominator).to(device),
+                                        requires_grad=trainable and train_denominator)
         self.degrees = degrees
         self.version = version
         self.training = trainable
