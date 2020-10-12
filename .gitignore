@@ -8,3 +8,4 @@ src/dist
 *__pycache__*
 *egg-info
 *pau_cuda*.so
+*wheelhouse*
