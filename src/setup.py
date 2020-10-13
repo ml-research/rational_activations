@@ -2,6 +2,7 @@ import glob
 from pathlib import Path
 import airspeed
 from setuptools import setup, find_packages
+from distutils.command.clean import clean
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 from torch.cuda import is_available as torch_cuda_available
 # degrees
@@ -118,6 +119,14 @@ with open("README.md", "r") as fh:
 with open("requirements.txt", "r") as fh:
     requirements = fh.readlines()
 
+
+class clean_all(clean):
+    def run(self):
+        self.all = True
+        super().run()
+        print("Cleaned everything")
+
+
 setup(
     name='pau',
     version='0.0.16',
@@ -134,6 +143,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: Apache Software License"
     ],
     install_requires=requirements,
@@ -148,7 +158,8 @@ setup(
     ),
     ] if torch_cuda_available() else [],
     cmdclass={
-        'build_ext': BuildExtension
+        'build_ext': BuildExtension,
+        'clean': clean_all
     },
     setup_requires=['airspeed', 'numpy', 'torch', 'scipy'],
-    python_requires='>=3.5.0')
+    python_requires='>=3.5.0',)

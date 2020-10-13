@@ -8,4 +8,5 @@ src/dist
 *__pycache__*
 *egg-info
 *pau_cuda*.so
-*wheelhouse*
+src/pypi_build_scripts
+src/scripts
