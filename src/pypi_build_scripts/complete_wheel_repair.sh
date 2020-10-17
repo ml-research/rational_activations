@@ -1,0 +1,80 @@
+#!/bin/bash
+set -e
+
+cwd=$(pwd)
+
+case $PYTHON_V in
+  python3.6)
+    PY_V="36"
+    ;;
+  python3.7)
+    PY_V="37"
+    ;;
+  python3.8)
+    PY_V="38"
+    ;;
+  *)
+    printf "Please provide a python in \$PYTHON_V
+            \npython3.6 or python3.7 or python3.8"
+    exit 1
+    ;;
+esac
+
+# printf "auditwheel repairing\n"
+# auditwheel -v repair --plat manylinux2014_x86_64 dist/pau*$PY_V*linux_x86_64.whl
+cd wheelhouse/
+$PYTHON_V -m wheel unpack pau-*$PY_V*.whl
+cd pau-*/pau.libs/
+CORRUPTED_FILES_DIR='corrupted_files/'
+mkdir $CORRUPTED_FILES_DIR
+CORRUPTED_FILES=`find . -maxdepth 1 -type f | grep .so | sed 's/.\///g' `
+WRONG_FILENAMES=()
+REQUIREMENTS=`patchelf --print-needed ../pau_cuda.cpython-*$PY_V*-x86_64-linux-gnu.so`
+printf "patching all files by hand\n"
+for CORRUPTED_F in $CORRUPTED_FILES
+do
+  if [[ $CORRUPTED_F == *"-"* ]]; then
+    WRONG_FILENAMES+=($CORRUPTED_F)
+    log "--------------------------------------------------------"
+    ORI_FILENAME="${CORRUPTED_F%-*}.so${CORRUPTED_F##*.so}"
+    log "Found $CORRUPTED_F, searching original $ORI_FILENAME"
+    if [[ `find $TORCH_LIB -name $ORI_FILENAME` ]]; then
+      log "Found $ORI_FILENAME"
+      cp $TORCH_LIB/$ORI_FILENAME .
+      mv $CORRUPTED_F $CORRUPTED_FILES_DIR
+    elif [[ `find $CUDA_LIB -name $ORI_FILENAME` ]]; then
+      log "Found $ORI_FILENAME"
+      cp $CUDA_LIB/$ORI_FILENAME .
+      mv $CORRUPTED_F $CORRUPTED_FILES_DIR
+    else
+      printf "Haven't been able to locate $ORI_FILENAME\
+              \nTrying with $CORRUPTED_F"
+      if [[ `find $TORCH_LIB -name $CORRUPTED_F` ]]; then
+        log "Found $CORRUPTED_F\n Nothing to be changed"
+        continue
+      elif [[ `find $CUDA_LIB -name $CORRUPTED_F` ]]; then
+        log "Found $CORRUPTED_F\n Nothing to be changed"
+        continue
+      else
+        exit 1
+      fi
+    fi
+    if [[ "${REQUIREMENTS}" =~ "$CORRUPTED_F" ]]; then
+      patchelf --replace-needed $CORRUPTED_F $ORI_FILENAME ../pau_cuda.cpython-*$PY_V*-x86_64-linux-gnu.so
+    fi
+    log "removing line \"pau.libs/$CORRUPTED_F ...\" from RECORD"
+    sed -i "/pau.libs\/$CORRUPTED_F/d" ../*.dist-info/RECORD
+    export SHA256=($(sha256sum $ORI_FILENAME))
+    log "And adding line \"pau.libs/$ORI_FILENAME ...\" into it"
+    echo "pau.libs/$ORI_FILENAME,sha256=$SHA256,`stat --printf="%s" ../pau.libs/$ORI_FILENAME`" >> ../*.dist-info/RECORD
+  fi
+done
+rm -rf $CORRUPTED_FILES_DIR
+cd ../../
+rm pau-*$PY_V*-manylinux2014_x86_64.whl
+PAU_WHEEL_DIR=`find . -maxdepth 1 -type d | grep pau`
+$PYTHON_V -m wheel pack $PAU_WHEEL_DIR  # creates the new wheel
+rm -R `ls -1 -d pau-*/`  # removes the pau directory only
+cd $cwd
+
+unset TORCH_LIB CUDA_LIB PY_V  # To be sure they are reseted
