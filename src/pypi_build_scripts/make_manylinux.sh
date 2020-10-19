@@ -11,17 +11,13 @@ do
   esac
 done
 
-function log () {
-    if [[ $_V -eq 1 ]]; then
-        printf "$@\n"
-    fi
-}
+
 
 # docker run -ti --gpus all --name manyl_cuda101 -v `pwd`:/prauper_src soumith/manylinux-cuda101:latest bash
 # docker run -ti --gpus all --name manyl_cuda101 -v `pwd`:/prauper_src soumith/manylinux-cuda100:latest bash
 if [ ! python3.7 -c "" &> /dev/null || ! python3.8 -c "" &> /dev/null ]; then
   printf "python3.7 and/or python3.8 not installed\n Installing...\n"
-  bash install_all_python.sh
+  bash pypi_build_scripts/install_all_python.sh
 fi
 
 
@@ -58,14 +54,14 @@ unset PYTHON_V TORCH_LIB
 
 
 # generate the wheels
-for i in 2
+for i in 0 1 2
 do
   PYTHON_V=${python_list[$i]}
   TORCH_LIB=${torch_lib_list[$i]}
   export LD_LIBRARY_PATH=/usr/local/lib:$TORCH_LIB  # for it to be able to find the .so files
-  # $PYTHON_V setup.py bdist_wheel
+  $PYTHON_V setup.py bdist_wheel
   set -- "${@:2}"
-  source ./complete_wheel_repair.sh
+  source pypi_build_scripts/complete_wheel_repair.sh
   $PYTHON_V setup.py clean
 done
 

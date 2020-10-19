@@ -20,13 +20,20 @@ case $PYTHON_V in
     ;;
 esac
 
-# printf "auditwheel repairing\n"
-# auditwheel -v repair --plat manylinux2014_x86_64 dist/pau*$PY_V*linux_x86_64.whl
+function log () {
+  if [[ $_V -eq 1 ]]; then
+    # if [[ 1 ]]; then
+        echo "$@"
+    fi
+}
+
+printf "auditwheel repairing\n"
+auditwheel -v repair --plat manylinux2014_x86_64 dist/pau*$PY_V*linux_x86_64.whl
 cd wheelhouse/
 $PYTHON_V -m wheel unpack pau-*$PY_V*.whl
 cd pau-*/pau.libs/
 CORRUPTED_FILES_DIR='corrupted_files/'
-mkdir $CORRUPTED_FILES_DIR
+mkdir -p $CORRUPTED_FILES_DIR
 CORRUPTED_FILES=`find . -maxdepth 1 -type f | grep .so | sed 's/.\///g' `
 WRONG_FILENAMES=()
 REQUIREMENTS=`patchelf --print-needed ../pau_cuda.cpython-*$PY_V*-x86_64-linux-gnu.so`
@@ -39,9 +46,14 @@ do
     ORI_FILENAME="${CORRUPTED_F%-*}.so${CORRUPTED_F##*.so}"
     log "Found $CORRUPTED_F, searching original $ORI_FILENAME"
     if [[ `find $TORCH_LIB -name $ORI_FILENAME` ]]; then
-      log "Found $ORI_FILENAME"
-      cp $TORCH_LIB/$ORI_FILENAME .
+      log "Found $ORI_FILENAME, avoiding replacement, just removing for model size..."
+      # cp $TORCH_LIB/$ORI_FILENAME .
       mv $CORRUPTED_F $CORRUPTED_FILES_DIR
+      sed -i "/pau.libs\/$CORRUPTED_F/d" ../*.dist-info/RECORD
+      if [[ "${REQUIREMENTS}" =~ "$CORRUPTED_F" ]]; then
+        patchelf --replace-needed $CORRUPTED_F $ORI_FILENAME ../pau_cuda.cpython-*$PY_V*-x86_64-linux-gnu.so
+      fi
+      continue
     elif [[ `find $CUDA_LIB -name $ORI_FILENAME` ]]; then
       log "Found $ORI_FILENAME"
       cp $CUDA_LIB/$ORI_FILENAME .
