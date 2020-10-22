@@ -21,13 +21,21 @@ And, therefore relieves the network designer of having to commit to a potentiall
 ## 2. Dependencies
     PyTorch>=1.1.0
     CUDA>=10.1
-    airspeed>=0.5.11
 
 ## 3. Installation
 
-PAU is implemented as a pytorch extension using CUDA 10.1 or CUDA 10.2. So all that is needed is to install the extension.
+PAU is implemented as a pytorch extension using CUDA 10.2. So all that is needed is to install the extension.
 
-    # pip install pau
+    pip3 install --upgrade pip
+    pip3 install pau
+
+If installation does not work, please run:
+
+    pip3 install wheel
+
+For CUDA 10.1, download the wheel corresponding to your python3 version in the _wheelhouse_ repo and install it with:
+
+    pip3 install pau-0.0.16-101-cp{your_version}-manylinux2014_x86_64.whl
 
 If you encounter any trouble installing pau, please contact [this person](quentin.delfosse@cs.tu-darmstadt.de).
 
