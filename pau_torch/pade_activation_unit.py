@@ -1,6 +1,13 @@
+"""
+Padé Activation Units - Rational Activation Functions for pytorch
+=================================================================
+
+This module allows you to create Rational Neural Networks using Padé Activation
+Units - Learnabe Rational activation functions.
+"""
+
 import torch.nn as nn
 from torch.cuda import is_available as torch_cuda_available
-# from pau.Constants import *
 from pau.utils import get_parameters
 from .pade_cuda_functions import PAU_CUDA_A_F, PAU_CUDA_B_F, PAU_CUDA_C_F, \
                                  PAU_CUDA_D_F
@@ -18,9 +25,40 @@ from pau_torch.pade_pytorch_functions import *
 
 
 class PAU(nn.Module):
+    """
+    PAU activation function inherited from ``torch.nn.Module``
 
-    def __init__(self, approx_func="leaky_relu", degrees=(5,4), cuda=None,
-                 version="A", trainable=True, train_center=True, train_numerator=True, train_denominator=True):
+    Arguments:
+            approx_func (str):
+                The name of the approximated function for initialisation. \
+                The different initialable functions are available in
+                `pau.paus_config.json`. \n
+                Default ``leaky_relu``.
+            degrees (tuple of int):
+                The degrees of the numerator (P) and denominator (Q).\n
+                Default ``(5, 4)``
+            cuda (bool):
+                Use GPU CUDA version. If None, use cuda if available on the
+                machine\n
+                Default ``None``
+            version (str):
+                Version of PAU to use. PAU(x) = P(x)/Q(x)\n
+                `A`: Q(x) = 1 + \|b_1.x\| + \|b_2.x\| + ... + \|b_n.x\|\n
+                `B`: Q(x) = 1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
+                `C`: Q(x) = 0.1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
+                `D`: like `B` with noise\n
+                Default ``A``
+            trainable (bool):
+                If the weights are trainable, i.e, if they are updated during
+                backward pass\n
+                Default ``True``
+    Returns:
+        Module: PAU module
+    """
+
+    def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=None,
+                 version="A", trainable=True, train_center=True,
+                 train_numerator=True, train_denominator=True):
         super(PAU, self).__init__()
 
         if cuda is None:
@@ -39,6 +77,8 @@ class PAU(nn.Module):
         self.degrees = degrees
         self.version = version
         self.training = trainable
+
+        self.init_approximation = approx_func
 
         if cuda:
             if version == "A":
@@ -68,12 +108,12 @@ class PAU(nn.Module):
             self.activation_function = pau_func
 
     def forward(self, x):
-        out = self.activation_function(x + self.center, self.numerator, self.denominator, self.training)
+        out = self.activation_function(x + self.center, self.numerator,
+                                       self.denominator, self.training)
         return out
 
     def __repr__(self):
-        desc = f"Pade Activation Unit (version {self.version}) of degrees {self.degrees} running on {self.center.device}"
-        return desc
+        return f"Pade Activation Unit (version {self.version}) of degrees {self.degrees} running on {self.center.device}"
 
     def cpu(self):
         if self.version == "A":

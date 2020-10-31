@@ -1,5 +1,4 @@
 import numpy as np
-import time
 
 
 def PAU_version_A(x, w_array, d_array):

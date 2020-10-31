@@ -1,1 +1,1 @@
-from pau_torch.pade_activation_unit import PAU
+from .pade_activation_unit import PAU

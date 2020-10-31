@@ -5,10 +5,9 @@ from setuptools import setup, find_packages
 from distutils.command.clean import clean
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 from torch.cuda import is_available as torch_cuda_available
-# degrees
-#degrees = [(3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (5, 4)]
-degrees = [(5, 4)]
-degrees = [(5, 4), (7, 6)]
+from .pau import __version__
+degrees = [(3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (5, 4), (7, 6)]
+# degrees = [(5, 4), (7, 6)]
 
 
 def generate_cpp_module(fname, degrees=degrees, versions=None):
@@ -129,7 +128,7 @@ class clean_all(clean):
 
 setup(
     name='pau',
-    version='0.0.16',
+    version=__version__,
     author="Alejandro Molina, Quentin Delfosse, Patrick Schramowski",
     author_email="molina@cs.tu-darmstadt.de, quentin.delfosse@cs.tu-darmstadt.de",
     description="Pade Activation Unit",
@@ -161,5 +160,5 @@ setup(
         'build_ext': BuildExtension,
         'clean': clean_all
     },
-    setup_requires=['airspeed', 'numpy', 'torch', 'scipy'],
+    setup_requires=['torch'],
     python_requires='>=3.5.0',)

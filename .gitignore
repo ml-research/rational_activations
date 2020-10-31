@@ -10,3 +10,4 @@ src/dist
 *pau_cuda*.so
 #src/pypi_build_scripts
 #src/scripts
+*build

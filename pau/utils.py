@@ -6,27 +6,10 @@ from scipy.optimize.optimize import OptimizeWarning
 from scipy.optimize._lsq.least_squares import prepare_bounds
 from scipy.optimize.minpack import leastsq, _wrap_jac
 import matplotlib.pyplot as plt
-import argparse
 import os
 from pathlib import Path
 
 np.random.seed(0)
-
-
-parser = argparse.ArgumentParser()
-parser.add_argument("-t", "--version", help="version of PAU to be used",
-                    action="store", dest="version", default="A",
-                    choices=['A', 'B', 'C', 'D'])
-parser.add_argument("-ub", help="Upper bound", type=int,
-                    action="store", dest="ub", default=3)
-parser.add_argument("-lb", help="Lower bound", type=int,
-                    action="store", dest="lb", default=-3)
-parser.add_argument("-nd", help="Degree of the numerator (P)", type=int,
-                    action="store", dest="nd", default=5)
-parser.add_argument("-dd", help="Degree of the denominator (Q)", type=int,
-                    action="store", dest="dd", default=4)
-parser.add_argument("-p", "--plot", help="Plot the result",
-                    action="store_true", dest="plot")
 
 
 def _wrap_func(func, xdata, ydata, degrees):
@@ -114,17 +97,19 @@ def plot_result(x_array, pau_array, target_array,
     plt.show()
 
 
-def append_to_config_file(args, approx_name, w_params, d_params):
+def append_to_config_file(params, approx_name, w_params, d_params):
     ans = input("Do you want to store them in the json file ? (y/n)")
     if ans == "y" or ans == "yes":
-        pau_full_name = f"PAU_version_{args.version}{args.nd}/{args.dd}"
-        with open('paus_config.json') as json_file:
+        pau_full_name = f'PAU_version_{params["version"]}{params["nd"]}/{params["dd"]}'
+        import ipdb; ipdb.set_trace()
+        cfd = os.path.dirname(os.path.realpath(__file__))
+        with open(f'{cfd}/paus_config.json') as json_file:
             paus_dict = json.load(json_file)  # pau_version -> approx_func
         approx_name = approx_name.lower()
         if pau_full_name in paus_dict:
             if approx_name in paus_dict[pau_full_name]:
-                ans = input(f"PAU_{args.version} approximation of {approx_name} already exist.\
-                              \nDo you want to replace it ? (y/n)")
+                ans = input(f'PAU_{params["version"]} approximation of {approx_name} already exist.\
+                              \nDo you want to replace it ? (y/n)')
                 if not(ans == "y" or ans == "yes"):
                     print("Parameters not stored")
                     exit(0)
@@ -132,9 +117,9 @@ def append_to_config_file(args, approx_name, w_params, d_params):
             paus_dict[pau_full_name] = {}
         paus_params = {"center": 0.0, "init_w_numerator": w_params.tolist(),
                        "init_w_denominator": d_params.tolist(),
-                       "ub": args.ub, "lb": args.lb}
+                       "ub": params["ub"], "lb": params["lb"]}
         paus_dict[pau_full_name][approx_name] = paus_params
-        with open('paus_config.json', 'w') as outfile:
+        with open(f'{cfd}/paus_config.json', 'w') as outfile:
             json.dump(paus_dict, outfile, indent=1)
         print("Parameters stored in paus_config.json")
     else:
@@ -151,13 +136,11 @@ def get_parameters(pau_version, degrees, approx_func):
         paus_dict = json.load(json_file)
     config_not_found = f"{pau_full_name} approximating {approx_func} not found in {config_file}.\
                           \nPlease add it (modify and run find_init_weights.py)"
-    if not pau_full_name in paus_dict:
+    if pau_full_name not in paus_dict:
         print(config_not_found)
         exit(1)
-    if not approx_func in paus_dict[pau_full_name]:
+    if approx_func not in paus_dict[pau_full_name]:
         print(config_not_found)
         exit(1)
     params = paus_dict[pau_full_name][approx_func]
     return params["center"], params["init_w_numerator"], params["init_w_denominator"]
-
-# print(get_parameters("A", (5, 4), "leaky_relu"))
