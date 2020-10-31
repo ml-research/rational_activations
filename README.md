@@ -45,7 +45,7 @@ PAU can be integrated in the same way as any other common activation function.
 
 ~~~~
 import torch
-from pau.utils import PAU
+from pau_torch import PAU
 
 model = torch.nn.Sequential(
     torch.nn.Linear(D_in, H),
