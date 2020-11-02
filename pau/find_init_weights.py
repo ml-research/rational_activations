@@ -6,10 +6,48 @@ Finding the weights of the to map an specific activation function
 
 import json
 import numpy as np
-from .utils import fit_pau_to_base_function, plot_result, append_to_config_file
+from .utils import fit_pau_to_base_function
 from .paus_py import PAU_version_A, PAU_version_B, PAU_version_C
-import torch.nn.functional as F
+import matplotlib.pyplot as plt
 import torch
+import os
+
+def plot_result(x_array, pau_array, target_array,
+                original_func_name="Original function"):
+    plt.plot(x_array, pau_array, label="PAU approx")
+    plt.plot(x_array, target_array, label=original_func_name)
+    plt.legend()
+    plt.grid()
+    plt.show()
+
+
+def append_to_config_file(params, approx_name, w_params, d_params):
+    ans = input("Do you want to store them in the json file ? (y/n)")
+    if ans == "y" or ans == "yes":
+        pau_full_name = f'PAU_version_{params["version"]}{params["nd"]}/{params["dd"]}'
+        cfd = os.path.dirname(os.path.realpath(__file__))
+        with open(f'{cfd}/paus_config.json') as json_file:
+            paus_dict = json.load(json_file)  # pau_version -> approx_func
+        approx_name = approx_name.lower()
+        if pau_full_name in paus_dict:
+            if approx_name in paus_dict[pau_full_name]:
+                ans = input(f'PAU_{params["version"]} approximation of {approx_name} already exist.\
+                              \nDo you want to replace it ? (y/n)')
+                if not(ans == "y" or ans == "yes"):
+                    print("Parameters not stored")
+                    exit(0)
+        else:
+            paus_dict[pau_full_name] = {}
+        paus_params = {"center": 0.0, "init_w_numerator": w_params.tolist(),
+                       "init_w_denominator": d_params.tolist(),
+                       "ub": params["ub"], "lb": params["lb"]}
+        paus_dict[pau_full_name][approx_name] = paus_params
+        with open(f'{cfd}/paus_config.json', 'w') as outfile:
+            json.dump(paus_dict, outfile, indent=1)
+        print("Parameters stored in paus_config.json")
+    else:
+        print("Parameters not stored")
+        exit(0)
 
 
 def typed_input(text, type, choice_list = None):

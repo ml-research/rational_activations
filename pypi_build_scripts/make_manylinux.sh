@@ -11,7 +11,7 @@ do
   esac
 done
 
-
+CUDA_V="cuda102"
 
 # docker run -ti --gpus all --name manyl_cuda101 -v `pwd`:/prauper_src soumith/manylinux-cuda101:latest bash
 # docker run -ti --gpus all --name manyl_cuda101 -v `pwd`:/prauper_src soumith/manylinux-cuda100:latest bash
@@ -54,12 +54,12 @@ unset PYTHON_V TORCH_LIB
 
 
 # generate the wheels
-for i in 1 #2
+for i in 2
 do
   PYTHON_V=${python_list[$i]}
   TORCH_LIB=${torch_lib_list[$i]}
   export LD_LIBRARY_PATH=/usr/local/lib:$TORCH_LIB  # for it to be able to find the .so files
-  # $PYTHON_V setup.py bdist_wheel
+  $PYTHON_V setup.py bdist_wheel
   set -- "${@:2}"
   source pypi_build_scripts/complete_wheel_repair.sh
   $PYTHON_V setup.py clean

@@ -19,7 +19,7 @@ PAU matches or outperforms common activations in terms of predictive performance
 And, therefore relieves the network designer of having to commit to a potentially underperforming choice.
 
 ## 2. Dependencies
-    PyTorch>=1.1.0
+    PyTorch>=1.4.0
     CUDA>=10.1
 
 ## 3. Installation
@@ -33,7 +33,7 @@ If installation does not work, please run:
 
     pip3 install wheel
 
-For CUDA 10.1, download the wheel corresponding to your python3 version in the _wheelhouse_ repo and install it with:
+For CUDA 10.1 (and thus 1.4.0>=torch>= 1.5.0), download the wheel corresponding to your python3 version in the _wheelhouse_ repo and install it with:
 
     pip3 install pau-0.0.16-101-cp{your_version}-manylinux2014_x86_64.whl
 
@@ -65,3 +65,14 @@ $ python experiments/main.py --dataset mnist --arch conv --optimizer adam --lr 2
     # ARCH: selected neural network architecture: vgg, lenet or conv
     # OPTIMIZER: either adam or sgd
     # LR: learning rate
+
+
+## 6. To be implemented
+- [X] Make a documentation
+- [X] Create tutorial in the doc
+- [ ] Tensorflow working version
+- [ ] Automatically find initial approx weights for function list
+- [ ] Repair + enhance Automatic manylinux production script.
+- [ ] Add python3.9 support
+- [ ] Make an CUDA 11.0 compatible version
+- [ ] Repair the tox test and have them checking before commit 

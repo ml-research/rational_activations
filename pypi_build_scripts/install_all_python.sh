@@ -18,22 +18,23 @@ make altinstall
 rm /usr/src/Python-3.7.9.tgz
 rm /usr/src/Python-3.8.3.tgz
 cd $cwd
+pip3 install auditwheel
 
 echo "Installed python3.7 and python3.8"
 
 #install the requirements for different pythons
 echo "Installing all requirements for python3.6"
 python3.6 -m pip install -U pip
-python3.6 -m pip install wheel
+python3.6 -m pip install wheel airspeed numpy
 python3.6 -m pip install -r requirements.txt
 echo "Installed all requirements for python3.6"
 echo "Installing all requirements for python3.7"
 python3.7 -m pip install -U pip
-python3.7 -m pip install wheel
+python3.7 -m pip install wheel airspeed numpy
 python3.7 -m pip install -r requirements.txt
 echo "Installed all requirements for python3.7"
 echo "Installing all requirements for python3.8"
 python3.8 -m pip install -U pip
-python3.8 -m pip install wheel
+python3.8 -m pip install wheel airspeed numpy
 python3.8 -m pip install -r requirements.txt
 echo "Installed all requirements for python3.8"

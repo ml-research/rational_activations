@@ -20,12 +20,14 @@ case $PYTHON_V in
     ;;
 esac
 
+
 function log () {
   if [[ $_V -eq 1 ]]; then
     # if [[ 1 ]]; then
         echo "$@"
     fi
 }
+
 
 printf "auditwheel repairing\n"
 auditwheel -v repair --plat manylinux2014_x86_64 dist/pau*$PY_V*linux_x86_64.whl
@@ -87,6 +89,8 @@ rm pau-*$PY_V*-manylinux2014_x86_64.whl
 PAU_WHEEL_DIR=`find . -maxdepth 1 -type d | grep pau`
 $PYTHON_V -m wheel pack $PAU_WHEEL_DIR  # creates the new wheel
 rm -R `ls -1 -d pau-*/`  # removes the pau directory only
+mkdir -p $CUDA_V
+mv pau-*$PY_V*-manylinux2014_x86_64.whl $CUDA_V
 cd $cwd
 
 unset TORCH_LIB CUDA_LIB PY_V  # To be sure they are reseted

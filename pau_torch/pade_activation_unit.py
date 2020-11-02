@@ -8,7 +8,7 @@ Units - Learnabe Rational activation functions.
 
 import torch.nn as nn
 from torch.cuda import is_available as torch_cuda_available
-from pau.utils import get_parameters
+from pau.get_weights import get_parameters
 from .pade_cuda_functions import PAU_CUDA_A_F, PAU_CUDA_B_F, PAU_CUDA_C_F, \
                                  PAU_CUDA_D_F
 from .pade_pytorch_functions import PAU_PYTORCH_A_F, PAU_PYTORCH_B_F, \

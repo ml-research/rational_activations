@@ -1,6 +1,0 @@
-action: GLOB, msg: packaging
-cwd: /home/quentin/Documents/prauper
-cmd: /usr/bin/python3 setup.py sdist --formats=zip --dist-dir /home/quentin/Documents/prauper/.tox/dist
-running sdist
-running egg_info
-error: [Errno 13] Permission denied

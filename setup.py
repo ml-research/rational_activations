@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 from distutils.command.clean import clean
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 from torch.cuda import is_available as torch_cuda_available
-from .pau import __version__
+from pau import __version__
 degrees = [(3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (5, 4), (7, 6)]
 # degrees = [(5, 4), (7, 6)]
 

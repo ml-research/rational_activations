@@ -11,3 +11,5 @@ src/dist
 #src/pypi_build_scripts
 #src/scripts
 *build
+dist
+.tox
