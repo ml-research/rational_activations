@@ -1,6 +1,6 @@
 import torch
 
-from pau_cuda import *
+from cuda import *
 
 
 class PAU_CUDA_A_F(torch.autograd.Function):
