@@ -1,4 +1,5 @@
 from tensorflow.python.keras.engine.base_layer import Layer
+import tensorflow as tf
 
 
 from pau.get_weights import get_parameters
@@ -10,6 +11,7 @@ class PAU(Layer):
                  version="A", trainable=True, train_center=True,
                  train_numerator=True, train_denominator=True):
         super(PAU, self).__init__()
+
         center, w_numerator, w_denominator = get_parameters(version, degrees, approx_func)
         self.center = tf.Variable(initial_value=center, trainable=trainable and train_center)
         self.numerator = tf.Variable(initial_value=w_numerator, trainable=trainable and train_numerator)
