@@ -1,5 +1,0 @@
-# requirements for pau_torch 
-matplotlib
-numpy
-scipy
-

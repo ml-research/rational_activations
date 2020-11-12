@@ -1,12 +1,12 @@
-=================================================
-Welcome to Padé Activation Units's documentation!
-=================================================
+================================================
+Welcome to Rational Activations's documentation!
+================================================
 
 .. highlight:: python
 
-Padé Activation Units are learnable rational activation function to create
-rational neural networks.
-So far, only the pytorch implementation is available.
+Rational Activations provided in this package are learnable rational activation
+function to create rational neural networks.
+So far, only the pytorch and MXNET implementation are available.
 
 Requirements:
 #############
@@ -14,6 +14,7 @@ This project depends on:
 
 - pytorch
 - numpy, scipy (if you want to add different initially approximated functions)
+- matplotlib (if you want to use the plotting properties)
 
 Download and install:
 You can download from the
@@ -21,11 +22,11 @@ You can download from the
 
 ::
 
-    pip3 install pau
+    pip3 install rational
 
 To use it:
 
-.. literalinclude:: tutorials/code/how_to_use_pau.py
+.. literalinclude:: tutorials/code/how_to_use_rational.py
    :lines: 1-6
 
 .. toctree::

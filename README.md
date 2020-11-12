@@ -1,11 +1,11 @@
-# PAU - Padé Activation Units
+# Rational - Padé Activation Units
 Padé Activation Units: End-to-end Learning of Activation Functions in Deep Neural Network
 
 Arxiv link: https://arxiv.org/abs/1907.06732
 
 ## 1. About Padé Activation Units
 
-Padé Activation Units (PAU) are a novel learnable activation function. PAUs encode activation functions as rational functions, trainable in an end-to-end fashion using backpropagation and can be seemingless integrated into any neural network in the same way as common activation functions (e.g. ReLU).
+Padé Activation Units (Rational) are a novel learnable activation function. Rationals encode activation functions as rational functions, trainable in an end-to-end fashion using backpropagation and can be seemingless integrated into any neural network in the same way as common activation functions (e.g. ReLU).
 
 <table border="0">
 <tr>
@@ -15,7 +15,7 @@ Padé Activation Units (PAU) are a novel learnable activation function. PAUs enc
 </tr>
 </table>
 
-PAU matches or outperforms common activations in terms of predictive performance and training time.
+Rational matches or outperforms common activations in terms of predictive performance and training time.
 And, therefore relieves the network designer of having to commit to a potentially underperforming choice.
 
 ## 2. Dependencies
@@ -24,10 +24,10 @@ And, therefore relieves the network designer of having to commit to a potentiall
 
 ## 3. Installation
 
-PAU is implemented as a pytorch extension using CUDA 10.2. So all that is needed is to install the extension.
+Rational is implemented as a pytorch extension using CUDA 10.2. So all that is needed is to install the extension.
 
     pip3 install --upgrade pip
-    pip3 install pau
+    pip3 install rational
 
 If installation does not work, please run:
 
@@ -35,21 +35,21 @@ If installation does not work, please run:
 
 For CUDA 10.1 (and thus 1.4.0>=torch>= 1.5.0), download the wheel corresponding to your python3 version in the _wheelhouse_ repo and install it with:
 
-    pip3 install pau-0.0.16-101-cp{your_version}-manylinux2014_x86_64.whl
+    pip3 install rational-0.0.16-101-cp{your_version}-manylinux2014_x86_64.whl
 
-If you encounter any trouble installing pau, please contact [this person](quentin.delfosse@cs.tu-darmstadt.de).
+If you encounter any trouble installing rational, please contact [this person](quentin.delfosse@cs.tu-darmstadt.de).
 
-## 4. Using PAU in Neural Networks
+## 4. Using Rational in Neural Networks
 
-PAU can be integrated in the same way as any other common activation function.
+Rational can be integrated in the same way as any other common activation function.
 
 ~~~~
 import torch
-from pau_torch import PAU
+from rational_torch import Rational
 
 model = torch.nn.Sequential(
     torch.nn.Linear(D_in, H),
-    PAU(), # e.g. instead of torch.nn.ReLU()
+    Rational(), # e.g. instead of torch.nn.ReLU()
     torch.nn.Linear(H, D_out),
 )
 ~~~~

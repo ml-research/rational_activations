@@ -14,7 +14,7 @@
 #set( $max_x = $degs[2] )
 
 template <typename scalar_t>
-__global__ void pau_cuda_forward_D_kernel_$degs[0]_$degs[1](const bool training, const unsigned long long iteration, const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
+__global__ void rational_cuda_forward_D_kernel_$degs[0]_$degs[1](const bool training, const unsigned long long iteration, const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
     scalar_t lower = 0;
@@ -72,15 +72,15 @@ __global__ void pau_cuda_forward_D_kernel_$degs[0]_$degs[1](const bool training,
 }
 
 
-at::Tensor pau_cuda_forward_D_$degs[0]_$degs[1](const bool training, const unsigned long long iteration, torch::Tensor x, torch::Tensor n, torch::Tensor d){
+at::Tensor rational_cuda_forward_D_$degs[0]_$degs[1](const bool training, const unsigned long long iteration, torch::Tensor x, torch::Tensor n, torch::Tensor d){
     auto result = at::empty_like(x);
     const auto x_size = x.numel();
 
     int blockSize = THREADS_PER_BLOCK;
     int numBlocks = (x_size + blockSize - 1) / blockSize;
 
-    AT_DISPATCH_FLOATING_TYPES(x.scalar_type(), "pau_cuda_forward_D_$degs[0]_$degs[1]", ([&] {
-    pau_cuda_forward_D_kernel_$degs[0]_$degs[1]<scalar_t>
+    AT_DISPATCH_FLOATING_TYPES(x.scalar_type(), "rational_cuda_forward_D_$degs[0]_$degs[1]", ([&] {
+    rational_cuda_forward_D_kernel_$degs[0]_$degs[1]<scalar_t>
         <<<numBlocks, blockSize>>>(
             training, iteration,
             x.data_ptr<scalar_t>(),
@@ -107,7 +107,7 @@ at::Tensor pau_cuda_forward_D_$degs[0]_$degs[1](const bool training, const unsig
 
 
 template <typename scalar_t>
-__global__ void pau_cuda_backward_D_kernel_$degs[0]_$degs[1](
+__global__ void rational_cuda_backward_D_kernel_$degs[0]_$degs[1](
     const bool training, const unsigned long long iteration,
     const scalar_t* __restrict__ grad_output,
     const scalar_t* __restrict__ x,
@@ -247,7 +247,7 @@ __global__ void pau_cuda_backward_D_kernel_$degs[0]_$degs[1](
 
 
 
-std::vector<torch::Tensor> pau_cuda_backward_D_$degs[0]_$degs[1](const bool training, const unsigned long long iteration, torch::Tensor grad_output, torch::Tensor x, torch::Tensor n, torch::Tensor d){
+std::vector<torch::Tensor> rational_cuda_backward_D_$degs[0]_$degs[1](const bool training, const unsigned long long iteration, torch::Tensor grad_output, torch::Tensor x, torch::Tensor n, torch::Tensor d){
     const auto x_size = x.numel();
     auto d_x = at::empty_like(x);
     auto d_n = at::zeros_like(n).toType(at::kDouble);
@@ -255,8 +255,8 @@ std::vector<torch::Tensor> pau_cuda_backward_D_$degs[0]_$degs[1](const bool trai
 
     int blockSize = THREADS_PER_BLOCK;
 
-    AT_DISPATCH_FLOATING_TYPES(x.scalar_type(), "pau_cuda_backward_D_$degs[0]_$degs[1]", ([&] {
-    pau_cuda_backward_D_kernel_$degs[0]_$degs[1]<scalar_t>
+    AT_DISPATCH_FLOATING_TYPES(x.scalar_type(), "rational_cuda_backward_D_$degs[0]_$degs[1]", ([&] {
+    rational_cuda_backward_D_kernel_$degs[0]_$degs[1]<scalar_t>
         <<<16, blockSize>>>(
             training, iteration,
             grad_output.data_ptr<scalar_t>(),

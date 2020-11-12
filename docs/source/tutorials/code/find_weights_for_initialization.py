@@ -1,4 +1,4 @@
-from pau.find_init_weights import find_weights
+from rational.find_init_weights import find_weights
 import torch.nn.functional as F  # To get the tanh function
 
 find_weights(F.tanh)
@@ -9,7 +9,7 @@ find_weights(F.tanh)
 # degree of the denominator Q: 4
 # lower bound: -3
 # upper bound: 3
-# PAU Version: B
+# Rational Version: B
 
 # Found coeffient :
 # P: [2.11729498e-09 9.99994250e-01 6.27633277e-07 1.07708645e-01
@@ -20,9 +20,9 @@ find_weights(F.tanh)
 
 # Do you want to store them in the json file ? (y/n)y
 
-from pau_torch import PAU
+from rational_torch import Rational
 
-rational_tanh_B = PAU("tanh", version="B")
+rational_tanh_B = Rational("tanh", version="B")
 print(rational_tanh_B.init_approximation)
 # 'tanh'
 print(rational_tanh_B.numerator.cpu().detach().numpy())

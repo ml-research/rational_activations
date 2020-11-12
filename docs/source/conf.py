@@ -18,7 +18,7 @@ from rational import __version__
 
 # -- Project information -----------------------------------------------------
 
-project = 'Padé Activation Units'
+project = 'Rational Activations'
 copyright = '2020, Quentin Delfosse, Alejandro Molina, Patrick Schramowski'
 author = 'Quentin Delfosse, Alejandro Molina, Patrick Schramowski'
 

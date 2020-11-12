@@ -6,15 +6,15 @@ Finding the weights of the to map an specific activation function
 
 import json
 import numpy as np
-from .utils import fit_pau_to_base_function
-from .paus_py import PAU_version_A, PAU_version_B, PAU_version_C
+from .utils import fit_rational_to_base_function
+from .rationals_py import Rational_version_A, Rational_version_B, Rational_version_C
 import matplotlib.pyplot as plt
 import torch
 import os
 
-def plot_result(x_array, pau_array, target_array,
+def plot_result(x_array, rational_array, target_array,
                 original_func_name="Original function"):
-    plt.plot(x_array, pau_array, label="PAU approx")
+    plt.plot(x_array, rational_array, label="Rational approx")
     plt.plot(x_array, target_array, label=original_func_name)
     plt.legend()
     plt.grid()
@@ -24,27 +24,27 @@ def plot_result(x_array, pau_array, target_array,
 def append_to_config_file(params, approx_name, w_params, d_params):
     ans = input("Do you want to store them in the json file ? (y/n)")
     if ans == "y" or ans == "yes":
-        pau_full_name = f'PAU_version_{params["version"]}{params["nd"]}/{params["dd"]}'
+        rational_full_name = f'Rational_version_{params["version"]}{params["nd"]}/{params["dd"]}'
         cfd = os.path.dirname(os.path.realpath(__file__))
-        with open(f'{cfd}/paus_config.json') as json_file:
-            paus_dict = json.load(json_file)  # pau_version -> approx_func
+        with open(f'{cfd}/rationals_config.json') as json_file:
+            rationals_dict = json.load(json_file)  # rational_version -> approx_func
         approx_name = approx_name.lower()
-        if pau_full_name in paus_dict:
-            if approx_name in paus_dict[pau_full_name]:
-                ans = input(f'PAU_{params["version"]} approximation of {approx_name} already exist.\
+        if rational_full_name in rationals_dict:
+            if approx_name in rationals_dict[rational_full_name]:
+                ans = input(f'Rational_{params["version"]} approximation of {approx_name} already exist.\
                               \nDo you want to replace it ? (y/n)')
                 if not(ans == "y" or ans == "yes"):
                     print("Parameters not stored")
                     exit(0)
         else:
-            paus_dict[pau_full_name] = {}
-        paus_params = {"center": 0.0, "init_w_numerator": w_params.tolist(),
+            rationals_dict[rational_full_name] = {}
+        rationals_params = {"init_w_numerator": w_params.tolist(),
                        "init_w_denominator": d_params.tolist(),
                        "ub": params["ub"], "lb": params["lb"]}
-        paus_dict[pau_full_name][approx_name] = paus_params
-        with open(f'{cfd}/paus_config.json', 'w') as outfile:
-            json.dump(paus_dict, outfile, indent=1)
-        print("Parameters stored in paus_config.json")
+        rationals_dict[rational_full_name][approx_name] = rationals_params
+        with open(f'{cfd}/rationals_config.json', 'w') as outfile:
+            json.dump(rationals_dict, outfile, indent=1)
+        print("Parameters stored in rationals_config.json")
     else:
         print("Parameters not stored")
         exit(0)
@@ -86,23 +86,23 @@ def find_weights(function):
     ub = typed_input("upper bound: ", float)
     step = (ub - lb) / 100000
     x = np.arange(lb, ub, step)
-    version = typed_input("PAU Version: ", str, ["A", "B", "C", "D"])
+    version = typed_input("Rational Version: ", str, ["A", "B", "C", "D"])
     if version == 'A':
-        pau = PAU_version_A
+        rational = Rational_version_A
     elif version == 'B':
-        pau = PAU_version_B
+        rational = Rational_version_B
     elif version == 'C':
-        pau = PAU_version_C
+        rational = Rational_version_C
     elif version == 'D':
-        pau = PAU_version_B
+        rational = Rational_version_B
 
-    w_params, d_params = fit_pau_to_base_function(pau, function_to_approx, x,
+    w_params, d_params = fit_rational_to_base_function(rational, function_to_approx, x,
                                                   degrees=degrees,
                                                   version=version)
     print(f"Found coeffient :\nP: {w_params}\nQ: {d_params}")
     plot = input("Do you want a plot of the result (y/n)") in ["y", "yes"]
     if plot:
-        plot_result(x, pau(x, w_params, d_params), function_to_approx(x),
+        plot_result(x, rational(x, w_params, d_params), function_to_approx(x),
                     approx_name)
     params = {"version": version, "name": approx_name, "ub": ub, "lb": lb,
               "nd": nd, "dd": dd}

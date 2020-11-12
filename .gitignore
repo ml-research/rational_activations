@@ -7,7 +7,7 @@ src/build
 src/dist
 *__pycache__*
 *egg-info
-*pau_cuda*.so
+*rational_cuda*.so
 #src/pypi_build_scripts
 #src/scripts
 *build

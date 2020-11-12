@@ -1,5 +1,5 @@
-pau_torch
+rational_torch
 =========
 
-.. automodule:: pau_torch
-    :members: PAU
+.. automodule:: rational_torch
+    :members: Rational

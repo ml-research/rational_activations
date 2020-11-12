@@ -20,22 +20,22 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_A_kernel_3_3( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
-
+    
+    
     scalar_t ab_0 = abs(b[0]);
-
+    
     scalar_t ab_1 = abs(b[1]);
-
+    
     scalar_t ab_2 = abs(b[2]);
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
         index < x_size;
         index += blockDim.x * gridDim.x){
@@ -44,20 +44,20 @@ __global__ void rational_cuda_forward_A_kernel_3_3( const scalar_t* __restrict__
 
                 scalar_t xp2 = xp1 * xp1;
                 scalar_t xp3 = xp2 * xp1;
-
-
+        
+        
         scalar_t axp1 = abs(xp1);
-
+        
         scalar_t axp2 = abs(xp2);
-
+        
         scalar_t axp3 = abs(xp3);
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
                 ;
 
@@ -116,49 +116,49 @@ __global__ void rational_cuda_backward_A_kernel_3_3(
     __shared__ double sdb[3];
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
     scalar_t ab_0 = abs(b_0);
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
     scalar_t ab_1 = abs(b_1);
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
     scalar_t ab_2 = abs(b_2);
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -170,13 +170,13 @@ __global__ void rational_cuda_backward_A_kernel_3_3(
         scalar_t axp2 = abs(xp2);
                 scalar_t xp3 = xp2 * xp1;
         scalar_t axp3 = abs(xp3);
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
                 ;
 
@@ -210,52 +210,52 @@ __global__ void rational_cuda_backward_A_kernel_3_3(
         d_b1 += d_i_b1 * grad_o;
                 scalar_t d_i_b2 = mpq2 * copysign( scalar_t(1.0), b_2 ) * axp3;
         d_b2 += d_i_b2 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
             }
 }
@@ -294,26 +294,26 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_A_kernel_4_4( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
-
+    
+    
     scalar_t ab_0 = abs(b[0]);
-
+    
     scalar_t ab_1 = abs(b[1]);
-
+    
     scalar_t ab_2 = abs(b[2]);
-
+    
     scalar_t ab_3 = abs(b[3]);
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
         index < x_size;
         index += blockDim.x * gridDim.x){
@@ -323,24 +323,24 @@ __global__ void rational_cuda_forward_A_kernel_4_4( const scalar_t* __restrict__
                 scalar_t xp2 = xp1 * xp1;
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
-
-
+        
+        
         scalar_t axp1 = abs(xp1);
-
+        
         scalar_t axp2 = abs(xp2);
-
+        
         scalar_t axp3 = abs(xp3);
-
+        
         scalar_t axp4 = abs(xp4);
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
                 ;
 
@@ -400,60 +400,60 @@ __global__ void rational_cuda_backward_A_kernel_4_4(
     __shared__ double sdb[4];
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
     scalar_t ab_0 = abs(b_0);
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
     scalar_t ab_1 = abs(b_1);
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
     scalar_t ab_2 = abs(b_2);
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
     scalar_t ab_3 = abs(b_3);
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -467,15 +467,15 @@ __global__ void rational_cuda_backward_A_kernel_4_4(
         scalar_t axp3 = abs(xp3);
                 scalar_t xp4 = xp3 * xp1;
         scalar_t axp4 = abs(xp4);
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
                 ;
 
@@ -514,63 +514,63 @@ __global__ void rational_cuda_backward_A_kernel_4_4(
         d_b2 += d_i_b2 * grad_o;
                 scalar_t d_i_b3 = mpq2 * copysign( scalar_t(1.0), b_3 ) * axp4;
         d_b3 += d_i_b3 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
             }
 }
@@ -609,30 +609,30 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_A_kernel_5_5( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
+    
     scalar_t a_5 = a[5];
-
-
+    
+    
     scalar_t ab_0 = abs(b[0]);
-
+    
     scalar_t ab_1 = abs(b[1]);
-
+    
     scalar_t ab_2 = abs(b[2]);
-
+    
     scalar_t ab_3 = abs(b[3]);
-
+    
     scalar_t ab_4 = abs(b[4]);
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
         index < x_size;
         index += blockDim.x * gridDim.x){
@@ -643,28 +643,28 @@ __global__ void rational_cuda_forward_A_kernel_5_5( const scalar_t* __restrict__
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
-
-
+        
+        
         scalar_t axp1 = abs(xp1);
-
+        
         scalar_t axp2 = abs(xp2);
-
+        
         scalar_t axp3 = abs(xp3);
-
+        
         scalar_t axp4 = abs(xp4);
-
+        
         scalar_t axp5 = abs(xp5);
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
                 ;
 
@@ -725,71 +725,71 @@ __global__ void rational_cuda_backward_A_kernel_5_5(
     __shared__ double sdb[5];
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
+    
     scalar_t d_a5 = 0;
     scalar_t a_5 = a[5];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
     scalar_t ab_0 = abs(b_0);
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
     scalar_t ab_1 = abs(b_1);
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
     scalar_t ab_2 = abs(b_2);
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
     scalar_t ab_3 = abs(b_3);
-
+    
     scalar_t d_b4 = 0;
     scalar_t b_4 = b[4];
     scalar_t ab_4 = abs(b_4);
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -805,17 +805,17 @@ __global__ void rational_cuda_backward_A_kernel_5_5(
         scalar_t axp4 = abs(xp4);
                 scalar_t xp5 = xp4 * xp1;
         scalar_t axp5 = abs(xp5);
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
                 ;
 
@@ -859,74 +859,74 @@ __global__ void rational_cuda_backward_A_kernel_5_5(
         d_b3 += d_i_b3 * grad_o;
                 scalar_t d_i_b4 = mpq2 * copysign( scalar_t(1.0), b_4 ) * axp5;
         d_b4 += d_i_b4 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
-
+        
         scalar_t d_i_a5  = xp5/Q;
         d_a5 += d_i_a5 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
             }
 }
@@ -965,34 +965,34 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_A_kernel_6_6( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
+    
     scalar_t a_5 = a[5];
-
+    
     scalar_t a_6 = a[6];
-
-
+    
+    
     scalar_t ab_0 = abs(b[0]);
-
+    
     scalar_t ab_1 = abs(b[1]);
-
+    
     scalar_t ab_2 = abs(b[2]);
-
+    
     scalar_t ab_3 = abs(b[3]);
-
+    
     scalar_t ab_4 = abs(b[4]);
-
+    
     scalar_t ab_5 = abs(b[5]);
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
         index < x_size;
         index += blockDim.x * gridDim.x){
@@ -1004,32 +1004,32 @@ __global__ void rational_cuda_forward_A_kernel_6_6( const scalar_t* __restrict__
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
-
-
+        
+        
         scalar_t axp1 = abs(xp1);
-
+        
         scalar_t axp2 = abs(xp2);
-
+        
         scalar_t axp3 = abs(xp3);
-
+        
         scalar_t axp4 = abs(xp4);
-
+        
         scalar_t axp5 = abs(xp5);
-
+        
         scalar_t axp6 = abs(xp6);
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
-
+        
         + a_6 * xp6
                 ;
 
@@ -1091,82 +1091,82 @@ __global__ void rational_cuda_backward_A_kernel_6_6(
     __shared__ double sdb[6];
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+        
         sda[6] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
-
+        
         sdb[5] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
+    
     scalar_t d_a5 = 0;
     scalar_t a_5 = a[5];
-
+    
     scalar_t d_a6 = 0;
     scalar_t a_6 = a[6];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
     scalar_t ab_0 = abs(b_0);
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
     scalar_t ab_1 = abs(b_1);
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
     scalar_t ab_2 = abs(b_2);
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
     scalar_t ab_3 = abs(b_3);
-
+    
     scalar_t d_b4 = 0;
     scalar_t b_4 = b[4];
     scalar_t ab_4 = abs(b_4);
-
+    
     scalar_t d_b5 = 0;
     scalar_t b_5 = b[5];
     scalar_t ab_5 = abs(b_5);
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -1184,19 +1184,19 @@ __global__ void rational_cuda_backward_A_kernel_6_6(
         scalar_t axp5 = abs(xp5);
                 scalar_t xp6 = xp5 * xp1;
         scalar_t axp6 = abs(xp6);
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
-
+        
         + a_6*xp6
                 ;
 
@@ -1245,85 +1245,85 @@ __global__ void rational_cuda_backward_A_kernel_6_6(
         d_b4 += d_i_b4 * grad_o;
                 scalar_t d_i_b5 = mpq2 * copysign( scalar_t(1.0), b_5 ) * axp6;
         d_b5 += d_i_b5 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
-
+        
         scalar_t d_i_a5  = xp5/Q;
         d_a5 += d_i_a5 * grad_o;
-
+        
         scalar_t d_i_a6  = xp6/Q;
         d_a6 += d_i_a6 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+    
     atomicAdd(&sda[6], d_a6);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     atomicAdd(&sdb[5], d_b5);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+        
         atomicAdd(&d_a[6], sda[6]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
-
+        
         atomicAdd(&d_b[5], sdb[5]);
             }
 }
@@ -1362,38 +1362,38 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_A_kernel_7_7( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
+    
     scalar_t a_5 = a[5];
-
+    
     scalar_t a_6 = a[6];
-
+    
     scalar_t a_7 = a[7];
-
-
+    
+    
     scalar_t ab_0 = abs(b[0]);
-
+    
     scalar_t ab_1 = abs(b[1]);
-
+    
     scalar_t ab_2 = abs(b[2]);
-
+    
     scalar_t ab_3 = abs(b[3]);
-
+    
     scalar_t ab_4 = abs(b[4]);
-
+    
     scalar_t ab_5 = abs(b[5]);
-
+    
     scalar_t ab_6 = abs(b[6]);
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
         index < x_size;
         index += blockDim.x * gridDim.x){
@@ -1406,36 +1406,36 @@ __global__ void rational_cuda_forward_A_kernel_7_7( const scalar_t* __restrict__
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
-
-
+        
+        
         scalar_t axp1 = abs(xp1);
-
+        
         scalar_t axp2 = abs(xp2);
-
+        
         scalar_t axp3 = abs(xp3);
-
+        
         scalar_t axp4 = abs(xp4);
-
+        
         scalar_t axp5 = abs(xp5);
-
+        
         scalar_t axp6 = abs(xp6);
-
+        
         scalar_t axp7 = abs(xp7);
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
-
+        
         + a_6 * xp6
-
+        
         + a_7 * xp7
                 ;
 
@@ -1498,93 +1498,93 @@ __global__ void rational_cuda_backward_A_kernel_7_7(
     __shared__ double sdb[7];
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+        
         sda[6] = 0;
-
+        
         sda[7] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
-
+        
         sdb[5] = 0;
-
+        
         sdb[6] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
+    
     scalar_t d_a5 = 0;
     scalar_t a_5 = a[5];
-
+    
     scalar_t d_a6 = 0;
     scalar_t a_6 = a[6];
-
+    
     scalar_t d_a7 = 0;
     scalar_t a_7 = a[7];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
     scalar_t ab_0 = abs(b_0);
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
     scalar_t ab_1 = abs(b_1);
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
     scalar_t ab_2 = abs(b_2);
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
     scalar_t ab_3 = abs(b_3);
-
+    
     scalar_t d_b4 = 0;
     scalar_t b_4 = b[4];
     scalar_t ab_4 = abs(b_4);
-
+    
     scalar_t d_b5 = 0;
     scalar_t b_5 = b[5];
     scalar_t ab_5 = abs(b_5);
-
+    
     scalar_t d_b6 = 0;
     scalar_t b_6 = b[6];
     scalar_t ab_6 = abs(b_6);
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -1604,21 +1604,21 @@ __global__ void rational_cuda_backward_A_kernel_7_7(
         scalar_t axp6 = abs(xp6);
                 scalar_t xp7 = xp6 * xp1;
         scalar_t axp7 = abs(xp7);
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
-
+        
         + a_6*xp6
-
+        
         + a_7*xp7
                 ;
 
@@ -1672,96 +1672,96 @@ __global__ void rational_cuda_backward_A_kernel_7_7(
         d_b5 += d_i_b5 * grad_o;
                 scalar_t d_i_b6 = mpq2 * copysign( scalar_t(1.0), b_6 ) * axp7;
         d_b6 += d_i_b6 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
-
+        
         scalar_t d_i_a5  = xp5/Q;
         d_a5 += d_i_a5 * grad_o;
-
+        
         scalar_t d_i_a6  = xp6/Q;
         d_a6 += d_i_a6 * grad_o;
-
+        
         scalar_t d_i_a7  = xp7/Q;
         d_a7 += d_i_a7 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+    
     atomicAdd(&sda[6], d_a6);
-
+    
     atomicAdd(&sda[7], d_a7);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     atomicAdd(&sdb[5], d_b5);
-
+    
     atomicAdd(&sdb[6], d_b6);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+        
         atomicAdd(&d_a[6], sda[6]);
-
+        
         atomicAdd(&d_a[7], sda[7]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
-
+        
         atomicAdd(&d_b[5], sdb[5]);
-
+        
         atomicAdd(&d_b[6], sdb[6]);
             }
 }
@@ -1800,42 +1800,42 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_A_kernel_8_8( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
+    
     scalar_t a_5 = a[5];
-
+    
     scalar_t a_6 = a[6];
-
+    
     scalar_t a_7 = a[7];
-
+    
     scalar_t a_8 = a[8];
-
-
+    
+    
     scalar_t ab_0 = abs(b[0]);
-
+    
     scalar_t ab_1 = abs(b[1]);
-
+    
     scalar_t ab_2 = abs(b[2]);
-
+    
     scalar_t ab_3 = abs(b[3]);
-
+    
     scalar_t ab_4 = abs(b[4]);
-
+    
     scalar_t ab_5 = abs(b[5]);
-
+    
     scalar_t ab_6 = abs(b[6]);
-
+    
     scalar_t ab_7 = abs(b[7]);
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
         index < x_size;
         index += blockDim.x * gridDim.x){
@@ -1849,40 +1849,40 @@ __global__ void rational_cuda_forward_A_kernel_8_8( const scalar_t* __restrict__
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
                 scalar_t xp8 = xp7 * xp1;
-
-
+        
+        
         scalar_t axp1 = abs(xp1);
-
+        
         scalar_t axp2 = abs(xp2);
-
+        
         scalar_t axp3 = abs(xp3);
-
+        
         scalar_t axp4 = abs(xp4);
-
+        
         scalar_t axp5 = abs(xp5);
-
+        
         scalar_t axp6 = abs(xp6);
-
+        
         scalar_t axp7 = abs(xp7);
-
+        
         scalar_t axp8 = abs(xp8);
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
-
+        
         + a_6 * xp6
-
+        
         + a_7 * xp7
-
+        
         + a_8 * xp8
                 ;
 
@@ -1946,104 +1946,104 @@ __global__ void rational_cuda_backward_A_kernel_8_8(
     __shared__ double sdb[8];
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+        
         sda[6] = 0;
-
+        
         sda[7] = 0;
-
+        
         sda[8] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
-
+        
         sdb[5] = 0;
-
+        
         sdb[6] = 0;
-
+        
         sdb[7] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
+    
     scalar_t d_a5 = 0;
     scalar_t a_5 = a[5];
-
+    
     scalar_t d_a6 = 0;
     scalar_t a_6 = a[6];
-
+    
     scalar_t d_a7 = 0;
     scalar_t a_7 = a[7];
-
+    
     scalar_t d_a8 = 0;
     scalar_t a_8 = a[8];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
     scalar_t ab_0 = abs(b_0);
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
     scalar_t ab_1 = abs(b_1);
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
     scalar_t ab_2 = abs(b_2);
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
     scalar_t ab_3 = abs(b_3);
-
+    
     scalar_t d_b4 = 0;
     scalar_t b_4 = b[4];
     scalar_t ab_4 = abs(b_4);
-
+    
     scalar_t d_b5 = 0;
     scalar_t b_5 = b[5];
     scalar_t ab_5 = abs(b_5);
-
+    
     scalar_t d_b6 = 0;
     scalar_t b_6 = b[6];
     scalar_t ab_6 = abs(b_6);
-
+    
     scalar_t d_b7 = 0;
     scalar_t b_7 = b[7];
     scalar_t ab_7 = abs(b_7);
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -2065,23 +2065,23 @@ __global__ void rational_cuda_backward_A_kernel_8_8(
         scalar_t axp7 = abs(xp7);
                 scalar_t xp8 = xp7 * xp1;
         scalar_t axp8 = abs(xp8);
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
-
+        
         + a_6*xp6
-
+        
         + a_7*xp7
-
+        
         + a_8*xp8
                 ;
 
@@ -2140,107 +2140,107 @@ __global__ void rational_cuda_backward_A_kernel_8_8(
         d_b6 += d_i_b6 * grad_o;
                 scalar_t d_i_b7 = mpq2 * copysign( scalar_t(1.0), b_7 ) * axp8;
         d_b7 += d_i_b7 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
-
+        
         scalar_t d_i_a5  = xp5/Q;
         d_a5 += d_i_a5 * grad_o;
-
+        
         scalar_t d_i_a6  = xp6/Q;
         d_a6 += d_i_a6 * grad_o;
-
+        
         scalar_t d_i_a7  = xp7/Q;
         d_a7 += d_i_a7 * grad_o;
-
+        
         scalar_t d_i_a8  = xp8/Q;
         d_a8 += d_i_a8 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+    
     atomicAdd(&sda[6], d_a6);
-
+    
     atomicAdd(&sda[7], d_a7);
-
+    
     atomicAdd(&sda[8], d_a8);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     atomicAdd(&sdb[5], d_b5);
-
+    
     atomicAdd(&sdb[6], d_b6);
-
+    
     atomicAdd(&sdb[7], d_b7);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+        
         atomicAdd(&d_a[6], sda[6]);
-
+        
         atomicAdd(&d_a[7], sda[7]);
-
+        
         atomicAdd(&d_a[8], sda[8]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
-
+        
         atomicAdd(&d_b[5], sdb[5]);
-
+        
         atomicAdd(&d_b[6], sdb[6]);
-
+        
         atomicAdd(&d_b[7], sdb[7]);
             }
 }
@@ -2279,28 +2279,28 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_A_kernel_5_4( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
+    
     scalar_t a_5 = a[5];
-
-
+    
+    
     scalar_t ab_0 = abs(b[0]);
-
+    
     scalar_t ab_1 = abs(b[1]);
-
+    
     scalar_t ab_2 = abs(b[2]);
-
+    
     scalar_t ab_3 = abs(b[3]);
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
         index < x_size;
         index += blockDim.x * gridDim.x){
@@ -2311,26 +2311,26 @@ __global__ void rational_cuda_forward_A_kernel_5_4( const scalar_t* __restrict__
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
-
-
+        
+        
         scalar_t axp1 = abs(xp1);
-
+        
         scalar_t axp2 = abs(xp2);
-
+        
         scalar_t axp3 = abs(xp3);
-
+        
         scalar_t axp4 = abs(xp4);
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
                 ;
 
@@ -2390,65 +2390,65 @@ __global__ void rational_cuda_backward_A_kernel_5_4(
     __shared__ double sdb[4];
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
+    
     scalar_t d_a5 = 0;
     scalar_t a_5 = a[5];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
     scalar_t ab_0 = abs(b_0);
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
     scalar_t ab_1 = abs(b_1);
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
     scalar_t ab_2 = abs(b_2);
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
     scalar_t ab_3 = abs(b_3);
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -2464,17 +2464,17 @@ __global__ void rational_cuda_backward_A_kernel_5_4(
         scalar_t axp4 = abs(xp4);
                 scalar_t xp5 = xp4 * xp1;
         scalar_t axp5 = abs(xp5);
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
                 ;
 
@@ -2514,70 +2514,70 @@ __global__ void rational_cuda_backward_A_kernel_5_4(
         d_b2 += d_i_b2 * grad_o;
                 scalar_t d_i_b3 = mpq2 * copysign( scalar_t(1.0), b_3 ) * axp4;
         d_b3 += d_i_b3 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
-
+        
         scalar_t d_i_a5  = xp5/Q;
         d_a5 += d_i_a5 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
             }
 }
@@ -2616,36 +2616,36 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_A_kernel_7_6( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
+    
     scalar_t a_5 = a[5];
-
+    
     scalar_t a_6 = a[6];
-
+    
     scalar_t a_7 = a[7];
-
-
+    
+    
     scalar_t ab_0 = abs(b[0]);
-
+    
     scalar_t ab_1 = abs(b[1]);
-
+    
     scalar_t ab_2 = abs(b[2]);
-
+    
     scalar_t ab_3 = abs(b[3]);
-
+    
     scalar_t ab_4 = abs(b[4]);
-
+    
     scalar_t ab_5 = abs(b[5]);
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
         index < x_size;
         index += blockDim.x * gridDim.x){
@@ -2658,34 +2658,34 @@ __global__ void rational_cuda_forward_A_kernel_7_6( const scalar_t* __restrict__
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
-
-
+        
+        
         scalar_t axp1 = abs(xp1);
-
+        
         scalar_t axp2 = abs(xp2);
-
+        
         scalar_t axp3 = abs(xp3);
-
+        
         scalar_t axp4 = abs(xp4);
-
+        
         scalar_t axp5 = abs(xp5);
-
+        
         scalar_t axp6 = abs(xp6);
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
-
+        
         + a_6 * xp6
-
+        
         + a_7 * xp7
                 ;
 
@@ -2747,87 +2747,87 @@ __global__ void rational_cuda_backward_A_kernel_7_6(
     __shared__ double sdb[6];
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+        
         sda[6] = 0;
-
+        
         sda[7] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
-
+        
         sdb[5] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
+    
     scalar_t d_a5 = 0;
     scalar_t a_5 = a[5];
-
+    
     scalar_t d_a6 = 0;
     scalar_t a_6 = a[6];
-
+    
     scalar_t d_a7 = 0;
     scalar_t a_7 = a[7];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
     scalar_t ab_0 = abs(b_0);
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
     scalar_t ab_1 = abs(b_1);
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
     scalar_t ab_2 = abs(b_2);
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
     scalar_t ab_3 = abs(b_3);
-
+    
     scalar_t d_b4 = 0;
     scalar_t b_4 = b[4];
     scalar_t ab_4 = abs(b_4);
-
+    
     scalar_t d_b5 = 0;
     scalar_t b_5 = b[5];
     scalar_t ab_5 = abs(b_5);
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -2847,21 +2847,21 @@ __global__ void rational_cuda_backward_A_kernel_7_6(
         scalar_t axp6 = abs(xp6);
                 scalar_t xp7 = xp6 * xp1;
         scalar_t axp7 = abs(xp7);
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
-
+        
         + a_6*xp6
-
+        
         + a_7*xp7
                 ;
 
@@ -2911,92 +2911,92 @@ __global__ void rational_cuda_backward_A_kernel_7_6(
         d_b4 += d_i_b4 * grad_o;
                 scalar_t d_i_b5 = mpq2 * copysign( scalar_t(1.0), b_5 ) * axp6;
         d_b5 += d_i_b5 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
-
+        
         scalar_t d_i_a5  = xp5/Q;
         d_a5 += d_i_a5 * grad_o;
-
+        
         scalar_t d_i_a6  = xp6/Q;
         d_a6 += d_i_a6 * grad_o;
-
+        
         scalar_t d_i_a7  = xp7/Q;
         d_a7 += d_i_a7 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+    
     atomicAdd(&sda[6], d_a6);
-
+    
     atomicAdd(&sda[7], d_a7);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     atomicAdd(&sdb[5], d_b5);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+        
         atomicAdd(&d_a[6], sda[6]);
-
+        
         atomicAdd(&d_a[7], sda[7]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
-
+        
         atomicAdd(&d_b[5], sdb[5]);
             }
 }
@@ -3036,22 +3036,22 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_B_kernel_3_3( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
-
+    
+    
     scalar_t b_0 = b[0];
-
+    
     scalar_t b_1 = b[1];
-
+    
     scalar_t b_2 = b[2];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
         index < x_size;
         index += blockDim.x * gridDim.x){
@@ -3060,13 +3060,13 @@ __global__ void rational_cuda_forward_B_kernel_3_3( const scalar_t* __restrict__
 
                 scalar_t xp2 = xp1 * xp1;
                 scalar_t xp3 = xp2 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
                 ;
 
@@ -3129,46 +3129,46 @@ __global__ void rational_cuda_backward_B_kernel_3_3(
     __shared__ double sdb[3];
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -3177,13 +3177,13 @@ __global__ void rational_cuda_backward_B_kernel_3_3(
 
                 scalar_t xp2 = xp1 * xp1;
                 scalar_t xp3 = xp2 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
                 ;
 
@@ -3219,52 +3219,52 @@ __global__ void rational_cuda_backward_B_kernel_3_3(
         d_b1 += d_i_b1 * grad_o;
                 scalar_t d_i_b2 = mpq2 * copysign( scalar_t(1.0), A ) * xp3;
         d_b2 += d_i_b2 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
             }
 }
@@ -3307,26 +3307,26 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_B_kernel_4_4( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
-
+    
+    
     scalar_t b_0 = b[0];
-
+    
     scalar_t b_1 = b[1];
-
+    
     scalar_t b_2 = b[2];
-
+    
     scalar_t b_3 = b[3];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
         index < x_size;
         index += blockDim.x * gridDim.x){
@@ -3336,15 +3336,15 @@ __global__ void rational_cuda_forward_B_kernel_4_4( const scalar_t* __restrict__
                 scalar_t xp2 = xp1 * xp1;
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
                 ;
 
@@ -3408,56 +3408,56 @@ __global__ void rational_cuda_backward_B_kernel_4_4(
     __shared__ double sdb[4];
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -3467,15 +3467,15 @@ __global__ void rational_cuda_backward_B_kernel_4_4(
                 scalar_t xp2 = xp1 * xp1;
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
                 ;
 
@@ -3516,63 +3516,63 @@ __global__ void rational_cuda_backward_B_kernel_4_4(
         d_b2 += d_i_b2 * grad_o;
                 scalar_t d_i_b3 = mpq2 * copysign( scalar_t(1.0), A ) * xp4;
         d_b3 += d_i_b3 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
             }
 }
@@ -3615,30 +3615,30 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_B_kernel_5_5( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
+    
     scalar_t a_5 = a[5];
-
-
+    
+    
     scalar_t b_0 = b[0];
-
+    
     scalar_t b_1 = b[1];
-
+    
     scalar_t b_2 = b[2];
-
+    
     scalar_t b_3 = b[3];
-
+    
     scalar_t b_4 = b[4];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
         index < x_size;
         index += blockDim.x * gridDim.x){
@@ -3649,17 +3649,17 @@ __global__ void rational_cuda_forward_B_kernel_5_5( const scalar_t* __restrict__
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
                 ;
 
@@ -3724,66 +3724,66 @@ __global__ void rational_cuda_backward_B_kernel_5_5(
     __shared__ double sdb[5];
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
+    
     scalar_t d_a5 = 0;
     scalar_t a_5 = a[5];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
-
+    
     scalar_t d_b4 = 0;
     scalar_t b_4 = b[4];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -3794,17 +3794,17 @@ __global__ void rational_cuda_backward_B_kernel_5_5(
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
                 ;
 
@@ -3850,74 +3850,74 @@ __global__ void rational_cuda_backward_B_kernel_5_5(
         d_b3 += d_i_b3 * grad_o;
                 scalar_t d_i_b4 = mpq2 * copysign( scalar_t(1.0), A ) * xp5;
         d_b4 += d_i_b4 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
-
+        
         scalar_t d_i_a5  = xp5/Q;
         d_a5 += d_i_a5 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
             }
 }
@@ -3960,34 +3960,34 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_B_kernel_6_6( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
+    
     scalar_t a_5 = a[5];
-
+    
     scalar_t a_6 = a[6];
-
-
+    
+    
     scalar_t b_0 = b[0];
-
+    
     scalar_t b_1 = b[1];
-
+    
     scalar_t b_2 = b[2];
-
+    
     scalar_t b_3 = b[3];
-
+    
     scalar_t b_4 = b[4];
-
+    
     scalar_t b_5 = b[5];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
         index < x_size;
         index += blockDim.x * gridDim.x){
@@ -3999,19 +3999,19 @@ __global__ void rational_cuda_forward_B_kernel_6_6( const scalar_t* __restrict__
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
-
+        
         + a_6 * xp6
                 ;
 
@@ -4077,76 +4077,76 @@ __global__ void rational_cuda_backward_B_kernel_6_6(
     __shared__ double sdb[6];
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+        
         sda[6] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
-
+        
         sdb[5] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
+    
     scalar_t d_a5 = 0;
     scalar_t a_5 = a[5];
-
+    
     scalar_t d_a6 = 0;
     scalar_t a_6 = a[6];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
-
+    
     scalar_t d_b4 = 0;
     scalar_t b_4 = b[4];
-
+    
     scalar_t d_b5 = 0;
     scalar_t b_5 = b[5];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -4158,19 +4158,19 @@ __global__ void rational_cuda_backward_B_kernel_6_6(
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
-
+        
         + a_6*xp6
                 ;
 
@@ -4221,85 +4221,85 @@ __global__ void rational_cuda_backward_B_kernel_6_6(
         d_b4 += d_i_b4 * grad_o;
                 scalar_t d_i_b5 = mpq2 * copysign( scalar_t(1.0), A ) * xp6;
         d_b5 += d_i_b5 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
-
+        
         scalar_t d_i_a5  = xp5/Q;
         d_a5 += d_i_a5 * grad_o;
-
+        
         scalar_t d_i_a6  = xp6/Q;
         d_a6 += d_i_a6 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+    
     atomicAdd(&sda[6], d_a6);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     atomicAdd(&sdb[5], d_b5);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+        
         atomicAdd(&d_a[6], sda[6]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
-
+        
         atomicAdd(&d_b[5], sdb[5]);
             }
 }
@@ -4342,38 +4342,38 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_B_kernel_7_7( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
+    
     scalar_t a_5 = a[5];
-
+    
     scalar_t a_6 = a[6];
-
+    
     scalar_t a_7 = a[7];
-
-
+    
+    
     scalar_t b_0 = b[0];
-
+    
     scalar_t b_1 = b[1];
-
+    
     scalar_t b_2 = b[2];
-
+    
     scalar_t b_3 = b[3];
-
+    
     scalar_t b_4 = b[4];
-
+    
     scalar_t b_5 = b[5];
-
+    
     scalar_t b_6 = b[6];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
         index < x_size;
         index += blockDim.x * gridDim.x){
@@ -4386,21 +4386,21 @@ __global__ void rational_cuda_forward_B_kernel_7_7( const scalar_t* __restrict__
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
-
+        
         + a_6 * xp6
-
+        
         + a_7 * xp7
                 ;
 
@@ -4467,86 +4467,86 @@ __global__ void rational_cuda_backward_B_kernel_7_7(
     __shared__ double sdb[7];
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+        
         sda[6] = 0;
-
+        
         sda[7] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
-
+        
         sdb[5] = 0;
-
+        
         sdb[6] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
+    
     scalar_t d_a5 = 0;
     scalar_t a_5 = a[5];
-
+    
     scalar_t d_a6 = 0;
     scalar_t a_6 = a[6];
-
+    
     scalar_t d_a7 = 0;
     scalar_t a_7 = a[7];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
-
+    
     scalar_t d_b4 = 0;
     scalar_t b_4 = b[4];
-
+    
     scalar_t d_b5 = 0;
     scalar_t b_5 = b[5];
-
+    
     scalar_t d_b6 = 0;
     scalar_t b_6 = b[6];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -4559,21 +4559,21 @@ __global__ void rational_cuda_backward_B_kernel_7_7(
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
-
+        
         + a_6*xp6
-
+        
         + a_7*xp7
                 ;
 
@@ -4629,96 +4629,96 @@ __global__ void rational_cuda_backward_B_kernel_7_7(
         d_b5 += d_i_b5 * grad_o;
                 scalar_t d_i_b6 = mpq2 * copysign( scalar_t(1.0), A ) * xp7;
         d_b6 += d_i_b6 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
-
+        
         scalar_t d_i_a5  = xp5/Q;
         d_a5 += d_i_a5 * grad_o;
-
+        
         scalar_t d_i_a6  = xp6/Q;
         d_a6 += d_i_a6 * grad_o;
-
+        
         scalar_t d_i_a7  = xp7/Q;
         d_a7 += d_i_a7 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+    
     atomicAdd(&sda[6], d_a6);
-
+    
     atomicAdd(&sda[7], d_a7);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     atomicAdd(&sdb[5], d_b5);
-
+    
     atomicAdd(&sdb[6], d_b6);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+        
         atomicAdd(&d_a[6], sda[6]);
-
+        
         atomicAdd(&d_a[7], sda[7]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
-
+        
         atomicAdd(&d_b[5], sdb[5]);
-
+        
         atomicAdd(&d_b[6], sdb[6]);
             }
 }
@@ -4761,42 +4761,42 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_B_kernel_8_8( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
+    
     scalar_t a_5 = a[5];
-
+    
     scalar_t a_6 = a[6];
-
+    
     scalar_t a_7 = a[7];
-
+    
     scalar_t a_8 = a[8];
-
-
+    
+    
     scalar_t b_0 = b[0];
-
+    
     scalar_t b_1 = b[1];
-
+    
     scalar_t b_2 = b[2];
-
+    
     scalar_t b_3 = b[3];
-
+    
     scalar_t b_4 = b[4];
-
+    
     scalar_t b_5 = b[5];
-
+    
     scalar_t b_6 = b[6];
-
+    
     scalar_t b_7 = b[7];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
         index < x_size;
         index += blockDim.x * gridDim.x){
@@ -4810,23 +4810,23 @@ __global__ void rational_cuda_forward_B_kernel_8_8( const scalar_t* __restrict__
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
                 scalar_t xp8 = xp7 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
-
+        
         + a_6 * xp6
-
+        
         + a_7 * xp7
-
+        
         + a_8 * xp8
                 ;
 
@@ -4894,96 +4894,96 @@ __global__ void rational_cuda_backward_B_kernel_8_8(
     __shared__ double sdb[8];
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+        
         sda[6] = 0;
-
+        
         sda[7] = 0;
-
+        
         sda[8] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
-
+        
         sdb[5] = 0;
-
+        
         sdb[6] = 0;
-
+        
         sdb[7] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
+    
     scalar_t d_a5 = 0;
     scalar_t a_5 = a[5];
-
+    
     scalar_t d_a6 = 0;
     scalar_t a_6 = a[6];
-
+    
     scalar_t d_a7 = 0;
     scalar_t a_7 = a[7];
-
+    
     scalar_t d_a8 = 0;
     scalar_t a_8 = a[8];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
-
+    
     scalar_t d_b4 = 0;
     scalar_t b_4 = b[4];
-
+    
     scalar_t d_b5 = 0;
     scalar_t b_5 = b[5];
-
+    
     scalar_t d_b6 = 0;
     scalar_t b_6 = b[6];
-
+    
     scalar_t d_b7 = 0;
     scalar_t b_7 = b[7];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -4997,23 +4997,23 @@ __global__ void rational_cuda_backward_B_kernel_8_8(
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
                 scalar_t xp8 = xp7 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
-
+        
         + a_6*xp6
-
+        
         + a_7*xp7
-
+        
         + a_8*xp8
                 ;
 
@@ -5074,107 +5074,107 @@ __global__ void rational_cuda_backward_B_kernel_8_8(
         d_b6 += d_i_b6 * grad_o;
                 scalar_t d_i_b7 = mpq2 * copysign( scalar_t(1.0), A ) * xp8;
         d_b7 += d_i_b7 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
-
+        
         scalar_t d_i_a5  = xp5/Q;
         d_a5 += d_i_a5 * grad_o;
-
+        
         scalar_t d_i_a6  = xp6/Q;
         d_a6 += d_i_a6 * grad_o;
-
+        
         scalar_t d_i_a7  = xp7/Q;
         d_a7 += d_i_a7 * grad_o;
-
+        
         scalar_t d_i_a8  = xp8/Q;
         d_a8 += d_i_a8 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+    
     atomicAdd(&sda[6], d_a6);
-
+    
     atomicAdd(&sda[7], d_a7);
-
+    
     atomicAdd(&sda[8], d_a8);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     atomicAdd(&sdb[5], d_b5);
-
+    
     atomicAdd(&sdb[6], d_b6);
-
+    
     atomicAdd(&sdb[7], d_b7);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+        
         atomicAdd(&d_a[6], sda[6]);
-
+        
         atomicAdd(&d_a[7], sda[7]);
-
+        
         atomicAdd(&d_a[8], sda[8]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
-
+        
         atomicAdd(&d_b[5], sdb[5]);
-
+        
         atomicAdd(&d_b[6], sdb[6]);
-
+        
         atomicAdd(&d_b[7], sdb[7]);
             }
 }
@@ -5217,28 +5217,28 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_B_kernel_5_4( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
+    
     scalar_t a_5 = a[5];
-
-
+    
+    
     scalar_t b_0 = b[0];
-
+    
     scalar_t b_1 = b[1];
-
+    
     scalar_t b_2 = b[2];
-
+    
     scalar_t b_3 = b[3];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
         index < x_size;
         index += blockDim.x * gridDim.x){
@@ -5249,17 +5249,17 @@ __global__ void rational_cuda_forward_B_kernel_5_4( const scalar_t* __restrict__
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
                 ;
 
@@ -5323,61 +5323,61 @@ __global__ void rational_cuda_backward_B_kernel_5_4(
     __shared__ double sdb[4];
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
+    
     scalar_t d_a5 = 0;
     scalar_t a_5 = a[5];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -5388,17 +5388,17 @@ __global__ void rational_cuda_backward_B_kernel_5_4(
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
                 ;
 
@@ -5440,70 +5440,70 @@ __global__ void rational_cuda_backward_B_kernel_5_4(
         d_b2 += d_i_b2 * grad_o;
                 scalar_t d_i_b3 = mpq2 * copysign( scalar_t(1.0), A ) * xp4;
         d_b3 += d_i_b3 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
-
+        
         scalar_t d_i_a5  = xp5/Q;
         d_a5 += d_i_a5 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
             }
 }
@@ -5546,36 +5546,36 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_B_kernel_7_6( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
+    
     scalar_t a_5 = a[5];
-
+    
     scalar_t a_6 = a[6];
-
+    
     scalar_t a_7 = a[7];
-
-
+    
+    
     scalar_t b_0 = b[0];
-
+    
     scalar_t b_1 = b[1];
-
+    
     scalar_t b_2 = b[2];
-
+    
     scalar_t b_3 = b[3];
-
+    
     scalar_t b_4 = b[4];
-
+    
     scalar_t b_5 = b[5];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
         index < x_size;
         index += blockDim.x * gridDim.x){
@@ -5588,21 +5588,21 @@ __global__ void rational_cuda_forward_B_kernel_7_6( const scalar_t* __restrict__
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
-
+        
         + a_6 * xp6
-
+        
         + a_7 * xp7
                 ;
 
@@ -5668,81 +5668,81 @@ __global__ void rational_cuda_backward_B_kernel_7_6(
     __shared__ double sdb[6];
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+        
         sda[6] = 0;
-
+        
         sda[7] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
-
+        
         sdb[5] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
+    
     scalar_t d_a5 = 0;
     scalar_t a_5 = a[5];
-
+    
     scalar_t d_a6 = 0;
     scalar_t a_6 = a[6];
-
+    
     scalar_t d_a7 = 0;
     scalar_t a_7 = a[7];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
-
+    
     scalar_t d_b4 = 0;
     scalar_t b_4 = b[4];
-
+    
     scalar_t d_b5 = 0;
     scalar_t b_5 = b[5];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -5755,21 +5755,21 @@ __global__ void rational_cuda_backward_B_kernel_7_6(
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
-
+        
         + a_6*xp6
-
+        
         + a_7*xp7
                 ;
 
@@ -5821,92 +5821,92 @@ __global__ void rational_cuda_backward_B_kernel_7_6(
         d_b4 += d_i_b4 * grad_o;
                 scalar_t d_i_b5 = mpq2 * copysign( scalar_t(1.0), A ) * xp6;
         d_b5 += d_i_b5 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
-
+        
         scalar_t d_i_a5  = xp5/Q;
         d_a5 += d_i_a5 * grad_o;
-
+        
         scalar_t d_i_a6  = xp6/Q;
         d_a6 += d_i_a6 * grad_o;
-
+        
         scalar_t d_i_a7  = xp7/Q;
         d_a7 += d_i_a7 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+    
     atomicAdd(&sda[6], d_a6);
-
+    
     atomicAdd(&sda[7], d_a7);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     atomicAdd(&sdb[5], d_b5);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+        
         atomicAdd(&d_a[6], sda[6]);
-
+        
         atomicAdd(&d_a[7], sda[7]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
-
+        
         atomicAdd(&d_b[5], sdb[5]);
             }
 }
@@ -5949,24 +5949,24 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_C_kernel_3_3( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
-
+    
+    
     scalar_t b_0 = b[0];
-
+    
     scalar_t b_1 = b[1];
-
+    
     scalar_t b_2 = b[2];
-
+    
     scalar_t b_3 = b[3];
-
+    
     scalar_t eps = scalar_t(0.1);
 
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -5977,22 +5977,22 @@ __global__ void rational_cuda_forward_C_kernel_3_3( const scalar_t* __restrict__
 
                 scalar_t xp2 = xp1 * xp1;
                 scalar_t xp3 = xp2 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
                 ;
 
         scalar_t Q = eps + abs(b_0
-
+        
         + b_1 * xp1
-
+        
         + b_2 * xp2
-
+        
         + b_3 * xp3
                 );
 
@@ -6038,51 +6038,51 @@ __global__ void rational_cuda_backward_C_kernel_3_3(
     scalar_t eps = scalar_t(0.1);
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -6091,22 +6091,22 @@ __global__ void rational_cuda_backward_C_kernel_3_3(
 
                 scalar_t xp2 = xp1 * xp1;
                 scalar_t xp3 = xp2 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
                 ;
 
         scalar_t A = b_0
-
+        
         + b_1 * xp1
-
+        
         + b_2 * xp2
-
+        
         + b_3 * xp3
                 ;
 
@@ -6133,16 +6133,16 @@ __global__ void rational_cuda_backward_C_kernel_3_3(
         scalar_t d_i_b0 = mpq2 * copysign( scalar_t(1.0), A );
         d_b0 += d_i_b0 * grad_o;
 
-
+        
         scalar_t d_i_b1 = mpq2 * copysign( scalar_t(1.0), A ) * xp1;
         d_b1 += d_i_b1 * grad_o;
-
+        
         scalar_t d_i_b2 = mpq2 * copysign( scalar_t(1.0), A ) * xp2;
         d_b2 += d_i_b2 * grad_o;
-
+        
         scalar_t d_i_b3 = mpq2 * copysign( scalar_t(1.0), A ) * xp3;
         d_b3 += d_i_b3 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
@@ -6154,41 +6154,41 @@ __global__ void rational_cuda_backward_C_kernel_3_3(
         d_a3 += d_i_a3 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
             }
 }
@@ -6230,28 +6230,28 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_C_kernel_4_4( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
-
+    
+    
     scalar_t b_0 = b[0];
-
+    
     scalar_t b_1 = b[1];
-
+    
     scalar_t b_2 = b[2];
-
+    
     scalar_t b_3 = b[3];
-
+    
     scalar_t b_4 = b[4];
-
+    
     scalar_t eps = scalar_t(0.1);
 
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -6263,26 +6263,26 @@ __global__ void rational_cuda_forward_C_kernel_4_4( const scalar_t* __restrict__
                 scalar_t xp2 = xp1 * xp1;
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
                 ;
 
         scalar_t Q = eps + abs(b_0
-
+        
         + b_1 * xp1
-
+        
         + b_2 * xp2
-
+        
         + b_3 * xp3
-
+        
         + b_4 * xp4
                 );
 
@@ -6328,61 +6328,61 @@ __global__ void rational_cuda_backward_C_kernel_4_4(
     scalar_t eps = scalar_t(0.1);
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
-
+    
     scalar_t d_b4 = 0;
     scalar_t b_4 = b[4];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -6392,26 +6392,26 @@ __global__ void rational_cuda_backward_C_kernel_4_4(
                 scalar_t xp2 = xp1 * xp1;
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
                 ;
 
         scalar_t A = b_0
-
+        
         + b_1 * xp1
-
+        
         + b_2 * xp2
-
+        
         + b_3 * xp3
-
+        
         + b_4 * xp4
                 ;
 
@@ -6440,19 +6440,19 @@ __global__ void rational_cuda_backward_C_kernel_4_4(
         scalar_t d_i_b0 = mpq2 * copysign( scalar_t(1.0), A );
         d_b0 += d_i_b0 * grad_o;
 
-
+        
         scalar_t d_i_b1 = mpq2 * copysign( scalar_t(1.0), A ) * xp1;
         d_b1 += d_i_b1 * grad_o;
-
+        
         scalar_t d_i_b2 = mpq2 * copysign( scalar_t(1.0), A ) * xp2;
         d_b2 += d_i_b2 * grad_o;
-
+        
         scalar_t d_i_b3 = mpq2 * copysign( scalar_t(1.0), A ) * xp3;
         d_b3 += d_i_b3 * grad_o;
-
+        
         scalar_t d_i_b4 = mpq2 * copysign( scalar_t(1.0), A ) * xp4;
         d_b4 += d_i_b4 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
@@ -6466,49 +6466,49 @@ __global__ void rational_cuda_backward_C_kernel_4_4(
         d_a4 += d_i_a4 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
             }
 }
@@ -6550,32 +6550,32 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_C_kernel_5_5( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
+    
     scalar_t a_5 = a[5];
-
-
+    
+    
     scalar_t b_0 = b[0];
-
+    
     scalar_t b_1 = b[1];
-
+    
     scalar_t b_2 = b[2];
-
+    
     scalar_t b_3 = b[3];
-
+    
     scalar_t b_4 = b[4];
-
+    
     scalar_t b_5 = b[5];
-
+    
     scalar_t eps = scalar_t(0.1);
 
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -6588,30 +6588,30 @@ __global__ void rational_cuda_forward_C_kernel_5_5( const scalar_t* __restrict__
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
                 ;
 
         scalar_t Q = eps + abs(b_0
-
+        
         + b_1 * xp1
-
+        
         + b_2 * xp2
-
+        
         + b_3 * xp3
-
+        
         + b_4 * xp4
-
+        
         + b_5 * xp5
                 );
 
@@ -6657,71 +6657,71 @@ __global__ void rational_cuda_backward_C_kernel_5_5(
     scalar_t eps = scalar_t(0.1);
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
-
+        
         sdb[5] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
+    
     scalar_t d_a5 = 0;
     scalar_t a_5 = a[5];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
-
+    
     scalar_t d_b4 = 0;
     scalar_t b_4 = b[4];
-
+    
     scalar_t d_b5 = 0;
     scalar_t b_5 = b[5];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -6732,30 +6732,30 @@ __global__ void rational_cuda_backward_C_kernel_5_5(
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
                 ;
 
         scalar_t A = b_0
-
+        
         + b_1 * xp1
-
+        
         + b_2 * xp2
-
+        
         + b_3 * xp3
-
+        
         + b_4 * xp4
-
+        
         + b_5 * xp5
                 ;
 
@@ -6786,22 +6786,22 @@ __global__ void rational_cuda_backward_C_kernel_5_5(
         scalar_t d_i_b0 = mpq2 * copysign( scalar_t(1.0), A );
         d_b0 += d_i_b0 * grad_o;
 
-
+        
         scalar_t d_i_b1 = mpq2 * copysign( scalar_t(1.0), A ) * xp1;
         d_b1 += d_i_b1 * grad_o;
-
+        
         scalar_t d_i_b2 = mpq2 * copysign( scalar_t(1.0), A ) * xp2;
         d_b2 += d_i_b2 * grad_o;
-
+        
         scalar_t d_i_b3 = mpq2 * copysign( scalar_t(1.0), A ) * xp3;
         d_b3 += d_i_b3 * grad_o;
-
+        
         scalar_t d_i_b4 = mpq2 * copysign( scalar_t(1.0), A ) * xp4;
         d_b4 += d_i_b4 * grad_o;
-
+        
         scalar_t d_i_b5 = mpq2 * copysign( scalar_t(1.0), A ) * xp5;
         d_b5 += d_i_b5 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
@@ -6817,57 +6817,57 @@ __global__ void rational_cuda_backward_C_kernel_5_5(
         d_a5 += d_i_a5 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     atomicAdd(&sdb[5], d_b5);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
-
+        
         atomicAdd(&d_b[5], sdb[5]);
             }
 }
@@ -6909,36 +6909,36 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_C_kernel_6_6( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
+    
     scalar_t a_5 = a[5];
-
+    
     scalar_t a_6 = a[6];
-
-
+    
+    
     scalar_t b_0 = b[0];
-
+    
     scalar_t b_1 = b[1];
-
+    
     scalar_t b_2 = b[2];
-
+    
     scalar_t b_3 = b[3];
-
+    
     scalar_t b_4 = b[4];
-
+    
     scalar_t b_5 = b[5];
-
+    
     scalar_t b_6 = b[6];
-
+    
     scalar_t eps = scalar_t(0.1);
 
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -6952,34 +6952,34 @@ __global__ void rational_cuda_forward_C_kernel_6_6( const scalar_t* __restrict__
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
-
+        
         + a_6 * xp6
                 ;
 
         scalar_t Q = eps + abs(b_0
-
+        
         + b_1 * xp1
-
+        
         + b_2 * xp2
-
+        
         + b_3 * xp3
-
+        
         + b_4 * xp4
-
+        
         + b_5 * xp5
-
+        
         + b_6 * xp6
                 );
 
@@ -7025,81 +7025,81 @@ __global__ void rational_cuda_backward_C_kernel_6_6(
     scalar_t eps = scalar_t(0.1);
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+        
         sda[6] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
-
+        
         sdb[5] = 0;
-
+        
         sdb[6] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
+    
     scalar_t d_a5 = 0;
     scalar_t a_5 = a[5];
-
+    
     scalar_t d_a6 = 0;
     scalar_t a_6 = a[6];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
-
+    
     scalar_t d_b4 = 0;
     scalar_t b_4 = b[4];
-
+    
     scalar_t d_b5 = 0;
     scalar_t b_5 = b[5];
-
+    
     scalar_t d_b6 = 0;
     scalar_t b_6 = b[6];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -7111,34 +7111,34 @@ __global__ void rational_cuda_backward_C_kernel_6_6(
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
-
+        
         + a_6*xp6
                 ;
 
         scalar_t A = b_0
-
+        
         + b_1 * xp1
-
+        
         + b_2 * xp2
-
+        
         + b_3 * xp3
-
+        
         + b_4 * xp4
-
+        
         + b_5 * xp5
-
+        
         + b_6 * xp6
                 ;
 
@@ -7171,25 +7171,25 @@ __global__ void rational_cuda_backward_C_kernel_6_6(
         scalar_t d_i_b0 = mpq2 * copysign( scalar_t(1.0), A );
         d_b0 += d_i_b0 * grad_o;
 
-
+        
         scalar_t d_i_b1 = mpq2 * copysign( scalar_t(1.0), A ) * xp1;
         d_b1 += d_i_b1 * grad_o;
-
+        
         scalar_t d_i_b2 = mpq2 * copysign( scalar_t(1.0), A ) * xp2;
         d_b2 += d_i_b2 * grad_o;
-
+        
         scalar_t d_i_b3 = mpq2 * copysign( scalar_t(1.0), A ) * xp3;
         d_b3 += d_i_b3 * grad_o;
-
+        
         scalar_t d_i_b4 = mpq2 * copysign( scalar_t(1.0), A ) * xp4;
         d_b4 += d_i_b4 * grad_o;
-
+        
         scalar_t d_i_b5 = mpq2 * copysign( scalar_t(1.0), A ) * xp5;
         d_b5 += d_i_b5 * grad_o;
-
+        
         scalar_t d_i_b6 = mpq2 * copysign( scalar_t(1.0), A ) * xp6;
         d_b6 += d_i_b6 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
@@ -7207,65 +7207,65 @@ __global__ void rational_cuda_backward_C_kernel_6_6(
         d_a6 += d_i_a6 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+    
     atomicAdd(&sda[6], d_a6);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     atomicAdd(&sdb[5], d_b5);
-
+    
     atomicAdd(&sdb[6], d_b6);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+        
         atomicAdd(&d_a[6], sda[6]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
-
+        
         atomicAdd(&d_b[5], sdb[5]);
-
+        
         atomicAdd(&d_b[6], sdb[6]);
             }
 }
@@ -7307,40 +7307,40 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_C_kernel_7_7( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
+    
     scalar_t a_5 = a[5];
-
+    
     scalar_t a_6 = a[6];
-
+    
     scalar_t a_7 = a[7];
-
-
+    
+    
     scalar_t b_0 = b[0];
-
+    
     scalar_t b_1 = b[1];
-
+    
     scalar_t b_2 = b[2];
-
+    
     scalar_t b_3 = b[3];
-
+    
     scalar_t b_4 = b[4];
-
+    
     scalar_t b_5 = b[5];
-
+    
     scalar_t b_6 = b[6];
-
+    
     scalar_t b_7 = b[7];
-
+    
     scalar_t eps = scalar_t(0.1);
 
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -7355,38 +7355,38 @@ __global__ void rational_cuda_forward_C_kernel_7_7( const scalar_t* __restrict__
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
-
+        
         + a_6 * xp6
-
+        
         + a_7 * xp7
                 ;
 
         scalar_t Q = eps + abs(b_0
-
+        
         + b_1 * xp1
-
+        
         + b_2 * xp2
-
+        
         + b_3 * xp3
-
+        
         + b_4 * xp4
-
+        
         + b_5 * xp5
-
+        
         + b_6 * xp6
-
+        
         + b_7 * xp7
                 );
 
@@ -7432,91 +7432,91 @@ __global__ void rational_cuda_backward_C_kernel_7_7(
     scalar_t eps = scalar_t(0.1);
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+        
         sda[6] = 0;
-
+        
         sda[7] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
-
+        
         sdb[5] = 0;
-
+        
         sdb[6] = 0;
-
+        
         sdb[7] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
+    
     scalar_t d_a5 = 0;
     scalar_t a_5 = a[5];
-
+    
     scalar_t d_a6 = 0;
     scalar_t a_6 = a[6];
-
+    
     scalar_t d_a7 = 0;
     scalar_t a_7 = a[7];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
-
+    
     scalar_t d_b4 = 0;
     scalar_t b_4 = b[4];
-
+    
     scalar_t d_b5 = 0;
     scalar_t b_5 = b[5];
-
+    
     scalar_t d_b6 = 0;
     scalar_t b_6 = b[6];
-
+    
     scalar_t d_b7 = 0;
     scalar_t b_7 = b[7];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -7529,38 +7529,38 @@ __global__ void rational_cuda_backward_C_kernel_7_7(
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
-
+        
         + a_6*xp6
-
+        
         + a_7*xp7
                 ;
 
         scalar_t A = b_0
-
+        
         + b_1 * xp1
-
+        
         + b_2 * xp2
-
+        
         + b_3 * xp3
-
+        
         + b_4 * xp4
-
+        
         + b_5 * xp5
-
+        
         + b_6 * xp6
-
+        
         + b_7 * xp7
                 ;
 
@@ -7595,28 +7595,28 @@ __global__ void rational_cuda_backward_C_kernel_7_7(
         scalar_t d_i_b0 = mpq2 * copysign( scalar_t(1.0), A );
         d_b0 += d_i_b0 * grad_o;
 
-
+        
         scalar_t d_i_b1 = mpq2 * copysign( scalar_t(1.0), A ) * xp1;
         d_b1 += d_i_b1 * grad_o;
-
+        
         scalar_t d_i_b2 = mpq2 * copysign( scalar_t(1.0), A ) * xp2;
         d_b2 += d_i_b2 * grad_o;
-
+        
         scalar_t d_i_b3 = mpq2 * copysign( scalar_t(1.0), A ) * xp3;
         d_b3 += d_i_b3 * grad_o;
-
+        
         scalar_t d_i_b4 = mpq2 * copysign( scalar_t(1.0), A ) * xp4;
         d_b4 += d_i_b4 * grad_o;
-
+        
         scalar_t d_i_b5 = mpq2 * copysign( scalar_t(1.0), A ) * xp5;
         d_b5 += d_i_b5 * grad_o;
-
+        
         scalar_t d_i_b6 = mpq2 * copysign( scalar_t(1.0), A ) * xp6;
         d_b6 += d_i_b6 * grad_o;
-
+        
         scalar_t d_i_b7 = mpq2 * copysign( scalar_t(1.0), A ) * xp7;
         d_b7 += d_i_b7 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
@@ -7636,73 +7636,73 @@ __global__ void rational_cuda_backward_C_kernel_7_7(
         d_a7 += d_i_a7 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+    
     atomicAdd(&sda[6], d_a6);
-
+    
     atomicAdd(&sda[7], d_a7);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     atomicAdd(&sdb[5], d_b5);
-
+    
     atomicAdd(&sdb[6], d_b6);
-
+    
     atomicAdd(&sdb[7], d_b7);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+        
         atomicAdd(&d_a[6], sda[6]);
-
+        
         atomicAdd(&d_a[7], sda[7]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
-
+        
         atomicAdd(&d_b[5], sdb[5]);
-
+        
         atomicAdd(&d_b[6], sdb[6]);
-
+        
         atomicAdd(&d_b[7], sdb[7]);
             }
 }
@@ -7744,44 +7744,44 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_C_kernel_8_8( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
+    
     scalar_t a_5 = a[5];
-
+    
     scalar_t a_6 = a[6];
-
+    
     scalar_t a_7 = a[7];
-
+    
     scalar_t a_8 = a[8];
-
-
+    
+    
     scalar_t b_0 = b[0];
-
+    
     scalar_t b_1 = b[1];
-
+    
     scalar_t b_2 = b[2];
-
+    
     scalar_t b_3 = b[3];
-
+    
     scalar_t b_4 = b[4];
-
+    
     scalar_t b_5 = b[5];
-
+    
     scalar_t b_6 = b[6];
-
+    
     scalar_t b_7 = b[7];
-
+    
     scalar_t b_8 = b[8];
-
+    
     scalar_t eps = scalar_t(0.1);
 
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -7797,42 +7797,42 @@ __global__ void rational_cuda_forward_C_kernel_8_8( const scalar_t* __restrict__
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
                 scalar_t xp8 = xp7 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
-
+        
         + a_6 * xp6
-
+        
         + a_7 * xp7
-
+        
         + a_8 * xp8
                 ;
 
         scalar_t Q = eps + abs(b_0
-
+        
         + b_1 * xp1
-
+        
         + b_2 * xp2
-
+        
         + b_3 * xp3
-
+        
         + b_4 * xp4
-
+        
         + b_5 * xp5
-
+        
         + b_6 * xp6
-
+        
         + b_7 * xp7
-
+        
         + b_8 * xp8
                 );
 
@@ -7878,101 +7878,101 @@ __global__ void rational_cuda_backward_C_kernel_8_8(
     scalar_t eps = scalar_t(0.1);
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+        
         sda[6] = 0;
-
+        
         sda[7] = 0;
-
+        
         sda[8] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
-
+        
         sdb[5] = 0;
-
+        
         sdb[6] = 0;
-
+        
         sdb[7] = 0;
-
+        
         sdb[8] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
+    
     scalar_t d_a5 = 0;
     scalar_t a_5 = a[5];
-
+    
     scalar_t d_a6 = 0;
     scalar_t a_6 = a[6];
-
+    
     scalar_t d_a7 = 0;
     scalar_t a_7 = a[7];
-
+    
     scalar_t d_a8 = 0;
     scalar_t a_8 = a[8];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
-
+    
     scalar_t d_b4 = 0;
     scalar_t b_4 = b[4];
-
+    
     scalar_t d_b5 = 0;
     scalar_t b_5 = b[5];
-
+    
     scalar_t d_b6 = 0;
     scalar_t b_6 = b[6];
-
+    
     scalar_t d_b7 = 0;
     scalar_t b_7 = b[7];
-
+    
     scalar_t d_b8 = 0;
     scalar_t b_8 = b[8];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -7986,42 +7986,42 @@ __global__ void rational_cuda_backward_C_kernel_8_8(
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
                 scalar_t xp8 = xp7 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
-
+        
         + a_6*xp6
-
+        
         + a_7*xp7
-
+        
         + a_8*xp8
                 ;
 
         scalar_t A = b_0
-
+        
         + b_1 * xp1
-
+        
         + b_2 * xp2
-
+        
         + b_3 * xp3
-
+        
         + b_4 * xp4
-
+        
         + b_5 * xp5
-
+        
         + b_6 * xp6
-
+        
         + b_7 * xp7
-
+        
         + b_8 * xp8
                 ;
 
@@ -8058,31 +8058,31 @@ __global__ void rational_cuda_backward_C_kernel_8_8(
         scalar_t d_i_b0 = mpq2 * copysign( scalar_t(1.0), A );
         d_b0 += d_i_b0 * grad_o;
 
-
+        
         scalar_t d_i_b1 = mpq2 * copysign( scalar_t(1.0), A ) * xp1;
         d_b1 += d_i_b1 * grad_o;
-
+        
         scalar_t d_i_b2 = mpq2 * copysign( scalar_t(1.0), A ) * xp2;
         d_b2 += d_i_b2 * grad_o;
-
+        
         scalar_t d_i_b3 = mpq2 * copysign( scalar_t(1.0), A ) * xp3;
         d_b3 += d_i_b3 * grad_o;
-
+        
         scalar_t d_i_b4 = mpq2 * copysign( scalar_t(1.0), A ) * xp4;
         d_b4 += d_i_b4 * grad_o;
-
+        
         scalar_t d_i_b5 = mpq2 * copysign( scalar_t(1.0), A ) * xp5;
         d_b5 += d_i_b5 * grad_o;
-
+        
         scalar_t d_i_b6 = mpq2 * copysign( scalar_t(1.0), A ) * xp6;
         d_b6 += d_i_b6 * grad_o;
-
+        
         scalar_t d_i_b7 = mpq2 * copysign( scalar_t(1.0), A ) * xp7;
         d_b7 += d_i_b7 * grad_o;
-
+        
         scalar_t d_i_b8 = mpq2 * copysign( scalar_t(1.0), A ) * xp8;
         d_b8 += d_i_b8 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
@@ -8104,81 +8104,81 @@ __global__ void rational_cuda_backward_C_kernel_8_8(
         d_a8 += d_i_a8 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+    
     atomicAdd(&sda[6], d_a6);
-
+    
     atomicAdd(&sda[7], d_a7);
-
+    
     atomicAdd(&sda[8], d_a8);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     atomicAdd(&sdb[5], d_b5);
-
+    
     atomicAdd(&sdb[6], d_b6);
-
+    
     atomicAdd(&sdb[7], d_b7);
-
+    
     atomicAdd(&sdb[8], d_b8);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+        
         atomicAdd(&d_a[6], sda[6]);
-
+        
         atomicAdd(&d_a[7], sda[7]);
-
+        
         atomicAdd(&d_a[8], sda[8]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
-
+        
         atomicAdd(&d_b[5], sdb[5]);
-
+        
         atomicAdd(&d_b[6], sdb[6]);
-
+        
         atomicAdd(&d_b[7], sdb[7]);
-
+        
         atomicAdd(&d_b[8], sdb[8]);
             }
 }
@@ -8220,30 +8220,30 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_C_kernel_5_4( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
+    
     scalar_t a_5 = a[5];
-
-
+    
+    
     scalar_t b_0 = b[0];
-
+    
     scalar_t b_1 = b[1];
-
+    
     scalar_t b_2 = b[2];
-
+    
     scalar_t b_3 = b[3];
-
+    
     scalar_t b_4 = b[4];
-
+    
     scalar_t eps = scalar_t(0.1);
 
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -8256,28 +8256,28 @@ __global__ void rational_cuda_forward_C_kernel_5_4( const scalar_t* __restrict__
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
                 ;
 
         scalar_t Q = eps + abs(b_0
-
+        
         + b_1 * xp1
-
+        
         + b_2 * xp2
-
+        
         + b_3 * xp3
-
+        
         + b_4 * xp4
                 );
 
@@ -8323,66 +8323,66 @@ __global__ void rational_cuda_backward_C_kernel_5_4(
     scalar_t eps = scalar_t(0.1);
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
+    
     scalar_t d_a5 = 0;
     scalar_t a_5 = a[5];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
-
+    
     scalar_t d_b4 = 0;
     scalar_t b_4 = b[4];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -8393,28 +8393,28 @@ __global__ void rational_cuda_backward_C_kernel_5_4(
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
                 ;
 
         scalar_t A = b_0
-
+        
         + b_1 * xp1
-
+        
         + b_2 * xp2
-
+        
         + b_3 * xp3
-
+        
         + b_4 * xp4
                 ;
 
@@ -8444,19 +8444,19 @@ __global__ void rational_cuda_backward_C_kernel_5_4(
         scalar_t d_i_b0 = mpq2 * copysign( scalar_t(1.0), A );
         d_b0 += d_i_b0 * grad_o;
 
-
+        
         scalar_t d_i_b1 = mpq2 * copysign( scalar_t(1.0), A ) * xp1;
         d_b1 += d_i_b1 * grad_o;
-
+        
         scalar_t d_i_b2 = mpq2 * copysign( scalar_t(1.0), A ) * xp2;
         d_b2 += d_i_b2 * grad_o;
-
+        
         scalar_t d_i_b3 = mpq2 * copysign( scalar_t(1.0), A ) * xp3;
         d_b3 += d_i_b3 * grad_o;
-
+        
         scalar_t d_i_b4 = mpq2 * copysign( scalar_t(1.0), A ) * xp4;
         d_b4 += d_i_b4 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
@@ -8472,53 +8472,53 @@ __global__ void rational_cuda_backward_C_kernel_5_4(
         d_a5 += d_i_a5 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
             }
 }
@@ -8560,38 +8560,38 @@ template <typename scalar_t>
 __global__ void rational_cuda_forward_C_kernel_7_6( const scalar_t* __restrict__ x, const scalar_t* __restrict__ a,
     const scalar_t* __restrict__ b, scalar_t* __restrict__ result, size_t x_size) {
 
-
+    
     scalar_t a_0 = a[0];
-
+    
     scalar_t a_1 = a[1];
-
+    
     scalar_t a_2 = a[2];
-
+    
     scalar_t a_3 = a[3];
-
+    
     scalar_t a_4 = a[4];
-
+    
     scalar_t a_5 = a[5];
-
+    
     scalar_t a_6 = a[6];
-
+    
     scalar_t a_7 = a[7];
-
-
+    
+    
     scalar_t b_0 = b[0];
-
+    
     scalar_t b_1 = b[1];
-
+    
     scalar_t b_2 = b[2];
-
+    
     scalar_t b_3 = b[3];
-
+    
     scalar_t b_4 = b[4];
-
+    
     scalar_t b_5 = b[5];
-
+    
     scalar_t b_6 = b[6];
-
+    
     scalar_t eps = scalar_t(0.1);
 
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -8606,36 +8606,36 @@ __global__ void rational_cuda_forward_C_kernel_7_6( const scalar_t* __restrict__
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
-
+        
         + a_6 * xp6
-
+        
         + a_7 * xp7
                 ;
 
         scalar_t Q = eps + abs(b_0
-
+        
         + b_1 * xp1
-
+        
         + b_2 * xp2
-
+        
         + b_3 * xp3
-
+        
         + b_4 * xp4
-
+        
         + b_5 * xp5
-
+        
         + b_6 * xp6
                 );
 
@@ -8681,86 +8681,86 @@ __global__ void rational_cuda_backward_C_kernel_7_6(
     scalar_t eps = scalar_t(0.1);
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+        
         sda[6] = 0;
-
+        
         sda[7] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
-
+        
         sdb[5] = 0;
-
+        
         sdb[6] = 0;
             }
 
     __syncthreads();
-
+    
     scalar_t d_a0 = 0;
     scalar_t a_0 = a[0];
-
+    
     scalar_t d_a1 = 0;
     scalar_t a_1 = a[1];
-
+    
     scalar_t d_a2 = 0;
     scalar_t a_2 = a[2];
-
+    
     scalar_t d_a3 = 0;
     scalar_t a_3 = a[3];
-
+    
     scalar_t d_a4 = 0;
     scalar_t a_4 = a[4];
-
+    
     scalar_t d_a5 = 0;
     scalar_t a_5 = a[5];
-
+    
     scalar_t d_a6 = 0;
     scalar_t a_6 = a[6];
-
+    
     scalar_t d_a7 = 0;
     scalar_t a_7 = a[7];
-
-
+    
+    
     scalar_t d_b0 = 0;
     scalar_t b_0 = b[0];
-
+    
     scalar_t d_b1 = 0;
     scalar_t b_1 = b[1];
-
+    
     scalar_t d_b2 = 0;
     scalar_t b_2 = b[2];
-
+    
     scalar_t d_b3 = 0;
     scalar_t b_3 = b[3];
-
+    
     scalar_t d_b4 = 0;
     scalar_t b_4 = b[4];
-
+    
     scalar_t d_b5 = 0;
     scalar_t b_5 = b[5];
-
+    
     scalar_t d_b6 = 0;
     scalar_t b_6 = b[6];
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
@@ -8773,36 +8773,36 @@ __global__ void rational_cuda_backward_C_kernel_7_6(
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
-
+        
         + a_6*xp6
-
+        
         + a_7*xp7
                 ;
 
         scalar_t A = b_0
-
+        
         + b_1 * xp1
-
+        
         + b_2 * xp2
-
+        
         + b_3 * xp3
-
+        
         + b_4 * xp4
-
+        
         + b_5 * xp5
-
+        
         + b_6 * xp6
                 ;
 
@@ -8836,25 +8836,25 @@ __global__ void rational_cuda_backward_C_kernel_7_6(
         scalar_t d_i_b0 = mpq2 * copysign( scalar_t(1.0), A );
         d_b0 += d_i_b0 * grad_o;
 
-
+        
         scalar_t d_i_b1 = mpq2 * copysign( scalar_t(1.0), A ) * xp1;
         d_b1 += d_i_b1 * grad_o;
-
+        
         scalar_t d_i_b2 = mpq2 * copysign( scalar_t(1.0), A ) * xp2;
         d_b2 += d_i_b2 * grad_o;
-
+        
         scalar_t d_i_b3 = mpq2 * copysign( scalar_t(1.0), A ) * xp3;
         d_b3 += d_i_b3 * grad_o;
-
+        
         scalar_t d_i_b4 = mpq2 * copysign( scalar_t(1.0), A ) * xp4;
         d_b4 += d_i_b4 * grad_o;
-
+        
         scalar_t d_i_b5 = mpq2 * copysign( scalar_t(1.0), A ) * xp5;
         d_b5 += d_i_b5 * grad_o;
-
+        
         scalar_t d_i_b6 = mpq2 * copysign( scalar_t(1.0), A ) * xp6;
         d_b6 += d_i_b6 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
@@ -8874,69 +8874,69 @@ __global__ void rational_cuda_backward_C_kernel_7_6(
         d_a7 += d_i_a7 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+    
     atomicAdd(&sda[6], d_a6);
-
+    
     atomicAdd(&sda[7], d_a7);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     atomicAdd(&sdb[5], d_b5);
-
+    
     atomicAdd(&sdb[6], d_b6);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+        
         atomicAdd(&d_a[6], sda[6]);
-
+        
         atomicAdd(&d_a[7], sda[7]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
-
+        
         atomicAdd(&d_b[5], sdb[5]);
-
+        
         atomicAdd(&d_b[6], sdb[6]);
             }
 }
@@ -8985,52 +8985,52 @@ __global__ void rational_cuda_forward_D_kernel_3_3(const bool training, const un
         index < x_size;
         index += blockDim.x * gridDim.x){
 
-
+        
         scalar_t a_0 = a[0];
-
+        
         scalar_t a_1 = a[1];
-
+        
         scalar_t a_2 = a[2];
-
+        
         scalar_t a_3 = a[3];
-
-
+        
+        
         scalar_t b_0 = b[0];
-
+        
         scalar_t b_1 = b[1];
-
+        
         scalar_t b_2 = b[2];
-
+        
         if(training){
             curandStatePhilox4_32_10_t state;
             curand_init(17, index, iteration*7, &state);
 
-
+            
             lower = scalar_t(1.0-0.1)*a_0;
             upper = scalar_t(1.0+0.1)*a_0;
             a_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_1;
             upper = scalar_t(1.0+0.1)*a_1;
             a_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_2;
             upper = scalar_t(1.0+0.1)*a_2;
             a_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_3;
             upper = scalar_t(1.0+0.1)*a_3;
             a_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
-
+            
+            
             lower = scalar_t(1.0-0.1)*b_0;
             upper = scalar_t(1.0+0.1)*b_0;
             b_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_1;
             upper = scalar_t(1.0+0.1)*b_1;
             b_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_2;
             upper = scalar_t(1.0+0.1)*b_2;
             b_2 = curand_uniform4(&state).x * (upper-lower) + lower;
@@ -9040,13 +9040,13 @@ __global__ void rational_cuda_forward_D_kernel_3_3(const bool training, const un
 
                 scalar_t xp2 = xp1 * xp1;
                 scalar_t xp3 = xp2 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
                 ;
 
@@ -9114,89 +9114,89 @@ __global__ void rational_cuda_backward_D_kernel_3_3(
     scalar_t upper = 0;
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
             }
 
     __syncthreads();
-
+    
     double d_a0 = 0;
-
+    
     double d_a1 = 0;
-
+    
     double d_a2 = 0;
-
+    
     double d_a3 = 0;
-
+        
     double d_b0 = 0;
-
+    
     double d_b1 = 0;
-
+    
     double d_b2 = 0;
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
       {
 
-
+        
         scalar_t a_0 = a[0];
-
+        
         scalar_t a_1 = a[1];
-
+        
         scalar_t a_2 = a[2];
-
+        
         scalar_t a_3 = a[3];
-
-
+        
+        
         scalar_t b_0 = b[0];
-
+        
         scalar_t b_1 = b[1];
-
+        
         scalar_t b_2 = b[2];
-
+        
         if(training){
             curandStatePhilox4_32_10_t state;
             curand_init(17, index, iteration*7, &state);
 
-
+            
             lower = scalar_t(1.0-0.1)*a_0;
             upper = scalar_t(1.0+0.1)*a_0;
             a_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_1;
             upper = scalar_t(1.0+0.1)*a_1;
             a_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_2;
             upper = scalar_t(1.0+0.1)*a_2;
             a_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_3;
             upper = scalar_t(1.0+0.1)*a_3;
             a_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
-
+            
+            
             lower = scalar_t(1.0-0.1)*b_0;
             upper = scalar_t(1.0+0.1)*b_0;
             b_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_1;
             upper = scalar_t(1.0+0.1)*b_1;
             b_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_2;
             upper = scalar_t(1.0+0.1)*b_2;
             b_2 = curand_uniform4(&state).x * (upper-lower) + lower;
@@ -9206,13 +9206,13 @@ __global__ void rational_cuda_backward_D_kernel_3_3(
 
                 scalar_t xp2 = xp1 * xp1;
                 scalar_t xp3 = xp2 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
                 ;
 
@@ -9248,52 +9248,52 @@ __global__ void rational_cuda_backward_D_kernel_3_3(
         d_b1 += d_i_b1 * grad_o;
                 scalar_t d_i_b2 = mpq2 * copysign( scalar_t(1.0), A ) * xp3;
         d_b2 += d_i_b2 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
             }
 }
@@ -9344,64 +9344,64 @@ __global__ void rational_cuda_forward_D_kernel_4_4(const bool training, const un
         index < x_size;
         index += blockDim.x * gridDim.x){
 
-
+        
         scalar_t a_0 = a[0];
-
+        
         scalar_t a_1 = a[1];
-
+        
         scalar_t a_2 = a[2];
-
+        
         scalar_t a_3 = a[3];
-
+        
         scalar_t a_4 = a[4];
-
-
+        
+        
         scalar_t b_0 = b[0];
-
+        
         scalar_t b_1 = b[1];
-
+        
         scalar_t b_2 = b[2];
-
+        
         scalar_t b_3 = b[3];
-
+        
         if(training){
             curandStatePhilox4_32_10_t state;
             curand_init(17, index, iteration*9, &state);
 
-
+            
             lower = scalar_t(1.0-0.1)*a_0;
             upper = scalar_t(1.0+0.1)*a_0;
             a_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_1;
             upper = scalar_t(1.0+0.1)*a_1;
             a_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_2;
             upper = scalar_t(1.0+0.1)*a_2;
             a_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_3;
             upper = scalar_t(1.0+0.1)*a_3;
             a_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_4;
             upper = scalar_t(1.0+0.1)*a_4;
             a_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
-
+            
+            
             lower = scalar_t(1.0-0.1)*b_0;
             upper = scalar_t(1.0+0.1)*b_0;
             b_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_1;
             upper = scalar_t(1.0+0.1)*b_1;
             b_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_2;
             upper = scalar_t(1.0+0.1)*b_2;
             b_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_3;
             upper = scalar_t(1.0+0.1)*b_3;
             b_3 = curand_uniform4(&state).x * (upper-lower) + lower;
@@ -9412,15 +9412,15 @@ __global__ void rational_cuda_forward_D_kernel_4_4(const bool training, const un
                 scalar_t xp2 = xp1 * xp1;
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
                 ;
 
@@ -9489,109 +9489,109 @@ __global__ void rational_cuda_backward_D_kernel_4_4(
     scalar_t upper = 0;
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
             }
 
     __syncthreads();
-
+    
     double d_a0 = 0;
-
+    
     double d_a1 = 0;
-
+    
     double d_a2 = 0;
-
+    
     double d_a3 = 0;
-
+    
     double d_a4 = 0;
-
+        
     double d_b0 = 0;
-
+    
     double d_b1 = 0;
-
+    
     double d_b2 = 0;
-
+    
     double d_b3 = 0;
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
       {
 
-
+        
         scalar_t a_0 = a[0];
-
+        
         scalar_t a_1 = a[1];
-
+        
         scalar_t a_2 = a[2];
-
+        
         scalar_t a_3 = a[3];
-
+        
         scalar_t a_4 = a[4];
-
-
+        
+        
         scalar_t b_0 = b[0];
-
+        
         scalar_t b_1 = b[1];
-
+        
         scalar_t b_2 = b[2];
-
+        
         scalar_t b_3 = b[3];
-
+        
         if(training){
             curandStatePhilox4_32_10_t state;
             curand_init(17, index, iteration*9, &state);
 
-
+            
             lower = scalar_t(1.0-0.1)*a_0;
             upper = scalar_t(1.0+0.1)*a_0;
             a_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_1;
             upper = scalar_t(1.0+0.1)*a_1;
             a_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_2;
             upper = scalar_t(1.0+0.1)*a_2;
             a_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_3;
             upper = scalar_t(1.0+0.1)*a_3;
             a_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_4;
             upper = scalar_t(1.0+0.1)*a_4;
             a_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
-
+            
+            
             lower = scalar_t(1.0-0.1)*b_0;
             upper = scalar_t(1.0+0.1)*b_0;
             b_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_1;
             upper = scalar_t(1.0+0.1)*b_1;
             b_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_2;
             upper = scalar_t(1.0+0.1)*b_2;
             b_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_3;
             upper = scalar_t(1.0+0.1)*b_3;
             b_3 = curand_uniform4(&state).x * (upper-lower) + lower;
@@ -9602,15 +9602,15 @@ __global__ void rational_cuda_backward_D_kernel_4_4(
                 scalar_t xp2 = xp1 * xp1;
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
                 ;
 
@@ -9651,63 +9651,63 @@ __global__ void rational_cuda_backward_D_kernel_4_4(
         d_b2 += d_i_b2 * grad_o;
                 scalar_t d_i_b3 = mpq2 * copysign( scalar_t(1.0), A ) * xp4;
         d_b3 += d_i_b3 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
             }
 }
@@ -9758,76 +9758,76 @@ __global__ void rational_cuda_forward_D_kernel_5_5(const bool training, const un
         index < x_size;
         index += blockDim.x * gridDim.x){
 
-
+        
         scalar_t a_0 = a[0];
-
+        
         scalar_t a_1 = a[1];
-
+        
         scalar_t a_2 = a[2];
-
+        
         scalar_t a_3 = a[3];
-
+        
         scalar_t a_4 = a[4];
-
+        
         scalar_t a_5 = a[5];
-
-
+        
+        
         scalar_t b_0 = b[0];
-
+        
         scalar_t b_1 = b[1];
-
+        
         scalar_t b_2 = b[2];
-
+        
         scalar_t b_3 = b[3];
-
+        
         scalar_t b_4 = b[4];
-
+        
         if(training){
             curandStatePhilox4_32_10_t state;
             curand_init(17, index, iteration*11, &state);
 
-
+            
             lower = scalar_t(1.0-0.1)*a_0;
             upper = scalar_t(1.0+0.1)*a_0;
             a_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_1;
             upper = scalar_t(1.0+0.1)*a_1;
             a_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_2;
             upper = scalar_t(1.0+0.1)*a_2;
             a_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_3;
             upper = scalar_t(1.0+0.1)*a_3;
             a_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_4;
             upper = scalar_t(1.0+0.1)*a_4;
             a_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_5;
             upper = scalar_t(1.0+0.1)*a_5;
             a_5 = curand_uniform4(&state).x * (upper-lower) + lower;
-
-
+            
+            
             lower = scalar_t(1.0-0.1)*b_0;
             upper = scalar_t(1.0+0.1)*b_0;
             b_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_1;
             upper = scalar_t(1.0+0.1)*b_1;
             b_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_2;
             upper = scalar_t(1.0+0.1)*b_2;
             b_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_3;
             upper = scalar_t(1.0+0.1)*b_3;
             b_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_4;
             upper = scalar_t(1.0+0.1)*b_4;
             b_4 = curand_uniform4(&state).x * (upper-lower) + lower;
@@ -9839,17 +9839,17 @@ __global__ void rational_cuda_forward_D_kernel_5_5(const bool training, const un
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
                 ;
 
@@ -9919,129 +9919,129 @@ __global__ void rational_cuda_backward_D_kernel_5_5(
     scalar_t upper = 0;
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
             }
 
     __syncthreads();
-
+    
     double d_a0 = 0;
-
+    
     double d_a1 = 0;
-
+    
     double d_a2 = 0;
-
+    
     double d_a3 = 0;
-
+    
     double d_a4 = 0;
-
+    
     double d_a5 = 0;
-
+        
     double d_b0 = 0;
-
+    
     double d_b1 = 0;
-
+    
     double d_b2 = 0;
-
+    
     double d_b3 = 0;
-
+    
     double d_b4 = 0;
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
       {
 
-
+        
         scalar_t a_0 = a[0];
-
+        
         scalar_t a_1 = a[1];
-
+        
         scalar_t a_2 = a[2];
-
+        
         scalar_t a_3 = a[3];
-
+        
         scalar_t a_4 = a[4];
-
+        
         scalar_t a_5 = a[5];
-
-
+        
+        
         scalar_t b_0 = b[0];
-
+        
         scalar_t b_1 = b[1];
-
+        
         scalar_t b_2 = b[2];
-
+        
         scalar_t b_3 = b[3];
-
+        
         scalar_t b_4 = b[4];
-
+        
         if(training){
             curandStatePhilox4_32_10_t state;
             curand_init(17, index, iteration*11, &state);
 
-
+            
             lower = scalar_t(1.0-0.1)*a_0;
             upper = scalar_t(1.0+0.1)*a_0;
             a_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_1;
             upper = scalar_t(1.0+0.1)*a_1;
             a_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_2;
             upper = scalar_t(1.0+0.1)*a_2;
             a_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_3;
             upper = scalar_t(1.0+0.1)*a_3;
             a_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_4;
             upper = scalar_t(1.0+0.1)*a_4;
             a_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_5;
             upper = scalar_t(1.0+0.1)*a_5;
             a_5 = curand_uniform4(&state).x * (upper-lower) + lower;
-
-
+            
+            
             lower = scalar_t(1.0-0.1)*b_0;
             upper = scalar_t(1.0+0.1)*b_0;
             b_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_1;
             upper = scalar_t(1.0+0.1)*b_1;
             b_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_2;
             upper = scalar_t(1.0+0.1)*b_2;
             b_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_3;
             upper = scalar_t(1.0+0.1)*b_3;
             b_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_4;
             upper = scalar_t(1.0+0.1)*b_4;
             b_4 = curand_uniform4(&state).x * (upper-lower) + lower;
@@ -10053,17 +10053,17 @@ __global__ void rational_cuda_backward_D_kernel_5_5(
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
                 ;
 
@@ -10109,74 +10109,74 @@ __global__ void rational_cuda_backward_D_kernel_5_5(
         d_b3 += d_i_b3 * grad_o;
                 scalar_t d_i_b4 = mpq2 * copysign( scalar_t(1.0), A ) * xp5;
         d_b4 += d_i_b4 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
-
+        
         scalar_t d_i_a5  = xp5/Q;
         d_a5 += d_i_a5 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
             }
 }
@@ -10227,88 +10227,88 @@ __global__ void rational_cuda_forward_D_kernel_6_6(const bool training, const un
         index < x_size;
         index += blockDim.x * gridDim.x){
 
-
+        
         scalar_t a_0 = a[0];
-
+        
         scalar_t a_1 = a[1];
-
+        
         scalar_t a_2 = a[2];
-
+        
         scalar_t a_3 = a[3];
-
+        
         scalar_t a_4 = a[4];
-
+        
         scalar_t a_5 = a[5];
-
+        
         scalar_t a_6 = a[6];
-
-
+        
+        
         scalar_t b_0 = b[0];
-
+        
         scalar_t b_1 = b[1];
-
+        
         scalar_t b_2 = b[2];
-
+        
         scalar_t b_3 = b[3];
-
+        
         scalar_t b_4 = b[4];
-
+        
         scalar_t b_5 = b[5];
-
+        
         if(training){
             curandStatePhilox4_32_10_t state;
             curand_init(17, index, iteration*13, &state);
 
-
+            
             lower = scalar_t(1.0-0.1)*a_0;
             upper = scalar_t(1.0+0.1)*a_0;
             a_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_1;
             upper = scalar_t(1.0+0.1)*a_1;
             a_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_2;
             upper = scalar_t(1.0+0.1)*a_2;
             a_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_3;
             upper = scalar_t(1.0+0.1)*a_3;
             a_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_4;
             upper = scalar_t(1.0+0.1)*a_4;
             a_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_5;
             upper = scalar_t(1.0+0.1)*a_5;
             a_5 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_6;
             upper = scalar_t(1.0+0.1)*a_6;
             a_6 = curand_uniform4(&state).x * (upper-lower) + lower;
-
-
+            
+            
             lower = scalar_t(1.0-0.1)*b_0;
             upper = scalar_t(1.0+0.1)*b_0;
             b_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_1;
             upper = scalar_t(1.0+0.1)*b_1;
             b_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_2;
             upper = scalar_t(1.0+0.1)*b_2;
             b_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_3;
             upper = scalar_t(1.0+0.1)*b_3;
             b_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_4;
             upper = scalar_t(1.0+0.1)*b_4;
             b_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_5;
             upper = scalar_t(1.0+0.1)*b_5;
             b_5 = curand_uniform4(&state).x * (upper-lower) + lower;
@@ -10321,19 +10321,19 @@ __global__ void rational_cuda_forward_D_kernel_6_6(const bool training, const un
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
-
+        
         + a_6 * xp6
                 ;
 
@@ -10404,149 +10404,149 @@ __global__ void rational_cuda_backward_D_kernel_6_6(
     scalar_t upper = 0;
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+        
         sda[6] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
-
+        
         sdb[5] = 0;
             }
 
     __syncthreads();
-
+    
     double d_a0 = 0;
-
+    
     double d_a1 = 0;
-
+    
     double d_a2 = 0;
-
+    
     double d_a3 = 0;
-
+    
     double d_a4 = 0;
-
+    
     double d_a5 = 0;
-
+    
     double d_a6 = 0;
-
+        
     double d_b0 = 0;
-
+    
     double d_b1 = 0;
-
+    
     double d_b2 = 0;
-
+    
     double d_b3 = 0;
-
+    
     double d_b4 = 0;
-
+    
     double d_b5 = 0;
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
       {
 
-
+        
         scalar_t a_0 = a[0];
-
+        
         scalar_t a_1 = a[1];
-
+        
         scalar_t a_2 = a[2];
-
+        
         scalar_t a_3 = a[3];
-
+        
         scalar_t a_4 = a[4];
-
+        
         scalar_t a_5 = a[5];
-
+        
         scalar_t a_6 = a[6];
-
-
+        
+        
         scalar_t b_0 = b[0];
-
+        
         scalar_t b_1 = b[1];
-
+        
         scalar_t b_2 = b[2];
-
+        
         scalar_t b_3 = b[3];
-
+        
         scalar_t b_4 = b[4];
-
+        
         scalar_t b_5 = b[5];
-
+        
         if(training){
             curandStatePhilox4_32_10_t state;
             curand_init(17, index, iteration*13, &state);
 
-
+            
             lower = scalar_t(1.0-0.1)*a_0;
             upper = scalar_t(1.0+0.1)*a_0;
             a_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_1;
             upper = scalar_t(1.0+0.1)*a_1;
             a_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_2;
             upper = scalar_t(1.0+0.1)*a_2;
             a_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_3;
             upper = scalar_t(1.0+0.1)*a_3;
             a_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_4;
             upper = scalar_t(1.0+0.1)*a_4;
             a_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_5;
             upper = scalar_t(1.0+0.1)*a_5;
             a_5 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_6;
             upper = scalar_t(1.0+0.1)*a_6;
             a_6 = curand_uniform4(&state).x * (upper-lower) + lower;
-
-
+            
+            
             lower = scalar_t(1.0-0.1)*b_0;
             upper = scalar_t(1.0+0.1)*b_0;
             b_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_1;
             upper = scalar_t(1.0+0.1)*b_1;
             b_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_2;
             upper = scalar_t(1.0+0.1)*b_2;
             b_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_3;
             upper = scalar_t(1.0+0.1)*b_3;
             b_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_4;
             upper = scalar_t(1.0+0.1)*b_4;
             b_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_5;
             upper = scalar_t(1.0+0.1)*b_5;
             b_5 = curand_uniform4(&state).x * (upper-lower) + lower;
@@ -10559,19 +10559,19 @@ __global__ void rational_cuda_backward_D_kernel_6_6(
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
-
+        
         + a_6*xp6
                 ;
 
@@ -10622,85 +10622,85 @@ __global__ void rational_cuda_backward_D_kernel_6_6(
         d_b4 += d_i_b4 * grad_o;
                 scalar_t d_i_b5 = mpq2 * copysign( scalar_t(1.0), A ) * xp6;
         d_b5 += d_i_b5 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
-
+        
         scalar_t d_i_a5  = xp5/Q;
         d_a5 += d_i_a5 * grad_o;
-
+        
         scalar_t d_i_a6  = xp6/Q;
         d_a6 += d_i_a6 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+    
     atomicAdd(&sda[6], d_a6);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     atomicAdd(&sdb[5], d_b5);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+        
         atomicAdd(&d_a[6], sda[6]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
-
+        
         atomicAdd(&d_b[5], sdb[5]);
             }
 }
@@ -10751,100 +10751,100 @@ __global__ void rational_cuda_forward_D_kernel_7_7(const bool training, const un
         index < x_size;
         index += blockDim.x * gridDim.x){
 
-
+        
         scalar_t a_0 = a[0];
-
+        
         scalar_t a_1 = a[1];
-
+        
         scalar_t a_2 = a[2];
-
+        
         scalar_t a_3 = a[3];
-
+        
         scalar_t a_4 = a[4];
-
+        
         scalar_t a_5 = a[5];
-
+        
         scalar_t a_6 = a[6];
-
+        
         scalar_t a_7 = a[7];
-
-
+        
+        
         scalar_t b_0 = b[0];
-
+        
         scalar_t b_1 = b[1];
-
+        
         scalar_t b_2 = b[2];
-
+        
         scalar_t b_3 = b[3];
-
+        
         scalar_t b_4 = b[4];
-
+        
         scalar_t b_5 = b[5];
-
+        
         scalar_t b_6 = b[6];
-
+        
         if(training){
             curandStatePhilox4_32_10_t state;
             curand_init(17, index, iteration*15, &state);
 
-
+            
             lower = scalar_t(1.0-0.1)*a_0;
             upper = scalar_t(1.0+0.1)*a_0;
             a_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_1;
             upper = scalar_t(1.0+0.1)*a_1;
             a_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_2;
             upper = scalar_t(1.0+0.1)*a_2;
             a_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_3;
             upper = scalar_t(1.0+0.1)*a_3;
             a_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_4;
             upper = scalar_t(1.0+0.1)*a_4;
             a_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_5;
             upper = scalar_t(1.0+0.1)*a_5;
             a_5 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_6;
             upper = scalar_t(1.0+0.1)*a_6;
             a_6 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_7;
             upper = scalar_t(1.0+0.1)*a_7;
             a_7 = curand_uniform4(&state).x * (upper-lower) + lower;
-
-
+            
+            
             lower = scalar_t(1.0-0.1)*b_0;
             upper = scalar_t(1.0+0.1)*b_0;
             b_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_1;
             upper = scalar_t(1.0+0.1)*b_1;
             b_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_2;
             upper = scalar_t(1.0+0.1)*b_2;
             b_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_3;
             upper = scalar_t(1.0+0.1)*b_3;
             b_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_4;
             upper = scalar_t(1.0+0.1)*b_4;
             b_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_5;
             upper = scalar_t(1.0+0.1)*b_5;
             b_5 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_6;
             upper = scalar_t(1.0+0.1)*b_6;
             b_6 = curand_uniform4(&state).x * (upper-lower) + lower;
@@ -10858,21 +10858,21 @@ __global__ void rational_cuda_forward_D_kernel_7_7(const bool training, const un
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
-
+        
         + a_6 * xp6
-
+        
         + a_7 * xp7
                 ;
 
@@ -10944,169 +10944,169 @@ __global__ void rational_cuda_backward_D_kernel_7_7(
     scalar_t upper = 0;
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+        
         sda[6] = 0;
-
+        
         sda[7] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
-
+        
         sdb[5] = 0;
-
+        
         sdb[6] = 0;
             }
 
     __syncthreads();
-
+    
     double d_a0 = 0;
-
+    
     double d_a1 = 0;
-
+    
     double d_a2 = 0;
-
+    
     double d_a3 = 0;
-
+    
     double d_a4 = 0;
-
+    
     double d_a5 = 0;
-
+    
     double d_a6 = 0;
-
+    
     double d_a7 = 0;
-
+        
     double d_b0 = 0;
-
+    
     double d_b1 = 0;
-
+    
     double d_b2 = 0;
-
+    
     double d_b3 = 0;
-
+    
     double d_b4 = 0;
-
+    
     double d_b5 = 0;
-
+    
     double d_b6 = 0;
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
       {
 
-
+        
         scalar_t a_0 = a[0];
-
+        
         scalar_t a_1 = a[1];
-
+        
         scalar_t a_2 = a[2];
-
+        
         scalar_t a_3 = a[3];
-
+        
         scalar_t a_4 = a[4];
-
+        
         scalar_t a_5 = a[5];
-
+        
         scalar_t a_6 = a[6];
-
+        
         scalar_t a_7 = a[7];
-
-
+        
+        
         scalar_t b_0 = b[0];
-
+        
         scalar_t b_1 = b[1];
-
+        
         scalar_t b_2 = b[2];
-
+        
         scalar_t b_3 = b[3];
-
+        
         scalar_t b_4 = b[4];
-
+        
         scalar_t b_5 = b[5];
-
+        
         scalar_t b_6 = b[6];
-
+        
         if(training){
             curandStatePhilox4_32_10_t state;
             curand_init(17, index, iteration*15, &state);
 
-
+            
             lower = scalar_t(1.0-0.1)*a_0;
             upper = scalar_t(1.0+0.1)*a_0;
             a_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_1;
             upper = scalar_t(1.0+0.1)*a_1;
             a_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_2;
             upper = scalar_t(1.0+0.1)*a_2;
             a_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_3;
             upper = scalar_t(1.0+0.1)*a_3;
             a_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_4;
             upper = scalar_t(1.0+0.1)*a_4;
             a_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_5;
             upper = scalar_t(1.0+0.1)*a_5;
             a_5 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_6;
             upper = scalar_t(1.0+0.1)*a_6;
             a_6 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_7;
             upper = scalar_t(1.0+0.1)*a_7;
             a_7 = curand_uniform4(&state).x * (upper-lower) + lower;
-
-
+            
+            
             lower = scalar_t(1.0-0.1)*b_0;
             upper = scalar_t(1.0+0.1)*b_0;
             b_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_1;
             upper = scalar_t(1.0+0.1)*b_1;
             b_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_2;
             upper = scalar_t(1.0+0.1)*b_2;
             b_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_3;
             upper = scalar_t(1.0+0.1)*b_3;
             b_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_4;
             upper = scalar_t(1.0+0.1)*b_4;
             b_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_5;
             upper = scalar_t(1.0+0.1)*b_5;
             b_5 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_6;
             upper = scalar_t(1.0+0.1)*b_6;
             b_6 = curand_uniform4(&state).x * (upper-lower) + lower;
@@ -11120,21 +11120,21 @@ __global__ void rational_cuda_backward_D_kernel_7_7(
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
-
+        
         + a_6*xp6
-
+        
         + a_7*xp7
                 ;
 
@@ -11190,96 +11190,96 @@ __global__ void rational_cuda_backward_D_kernel_7_7(
         d_b5 += d_i_b5 * grad_o;
                 scalar_t d_i_b6 = mpq2 * copysign( scalar_t(1.0), A ) * xp7;
         d_b6 += d_i_b6 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
-
+        
         scalar_t d_i_a5  = xp5/Q;
         d_a5 += d_i_a5 * grad_o;
-
+        
         scalar_t d_i_a6  = xp6/Q;
         d_a6 += d_i_a6 * grad_o;
-
+        
         scalar_t d_i_a7  = xp7/Q;
         d_a7 += d_i_a7 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+    
     atomicAdd(&sda[6], d_a6);
-
+    
     atomicAdd(&sda[7], d_a7);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     atomicAdd(&sdb[5], d_b5);
-
+    
     atomicAdd(&sdb[6], d_b6);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+        
         atomicAdd(&d_a[6], sda[6]);
-
+        
         atomicAdd(&d_a[7], sda[7]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
-
+        
         atomicAdd(&d_b[5], sdb[5]);
-
+        
         atomicAdd(&d_b[6], sdb[6]);
             }
 }
@@ -11330,112 +11330,112 @@ __global__ void rational_cuda_forward_D_kernel_8_8(const bool training, const un
         index < x_size;
         index += blockDim.x * gridDim.x){
 
-
+        
         scalar_t a_0 = a[0];
-
+        
         scalar_t a_1 = a[1];
-
+        
         scalar_t a_2 = a[2];
-
+        
         scalar_t a_3 = a[3];
-
+        
         scalar_t a_4 = a[4];
-
+        
         scalar_t a_5 = a[5];
-
+        
         scalar_t a_6 = a[6];
-
+        
         scalar_t a_7 = a[7];
-
+        
         scalar_t a_8 = a[8];
-
-
+        
+        
         scalar_t b_0 = b[0];
-
+        
         scalar_t b_1 = b[1];
-
+        
         scalar_t b_2 = b[2];
-
+        
         scalar_t b_3 = b[3];
-
+        
         scalar_t b_4 = b[4];
-
+        
         scalar_t b_5 = b[5];
-
+        
         scalar_t b_6 = b[6];
-
+        
         scalar_t b_7 = b[7];
-
+        
         if(training){
             curandStatePhilox4_32_10_t state;
             curand_init(17, index, iteration*17, &state);
 
-
+            
             lower = scalar_t(1.0-0.1)*a_0;
             upper = scalar_t(1.0+0.1)*a_0;
             a_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_1;
             upper = scalar_t(1.0+0.1)*a_1;
             a_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_2;
             upper = scalar_t(1.0+0.1)*a_2;
             a_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_3;
             upper = scalar_t(1.0+0.1)*a_3;
             a_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_4;
             upper = scalar_t(1.0+0.1)*a_4;
             a_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_5;
             upper = scalar_t(1.0+0.1)*a_5;
             a_5 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_6;
             upper = scalar_t(1.0+0.1)*a_6;
             a_6 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_7;
             upper = scalar_t(1.0+0.1)*a_7;
             a_7 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_8;
             upper = scalar_t(1.0+0.1)*a_8;
             a_8 = curand_uniform4(&state).x * (upper-lower) + lower;
-
-
+            
+            
             lower = scalar_t(1.0-0.1)*b_0;
             upper = scalar_t(1.0+0.1)*b_0;
             b_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_1;
             upper = scalar_t(1.0+0.1)*b_1;
             b_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_2;
             upper = scalar_t(1.0+0.1)*b_2;
             b_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_3;
             upper = scalar_t(1.0+0.1)*b_3;
             b_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_4;
             upper = scalar_t(1.0+0.1)*b_4;
             b_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_5;
             upper = scalar_t(1.0+0.1)*b_5;
             b_5 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_6;
             upper = scalar_t(1.0+0.1)*b_6;
             b_6 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_7;
             upper = scalar_t(1.0+0.1)*b_7;
             b_7 = curand_uniform4(&state).x * (upper-lower) + lower;
@@ -11450,23 +11450,23 @@ __global__ void rational_cuda_forward_D_kernel_8_8(const bool training, const un
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
                 scalar_t xp8 = xp7 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
-
+        
         + a_6 * xp6
-
+        
         + a_7 * xp7
-
+        
         + a_8 * xp8
                 ;
 
@@ -11539,189 +11539,189 @@ __global__ void rational_cuda_backward_D_kernel_8_8(
     scalar_t upper = 0;
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+        
         sda[6] = 0;
-
+        
         sda[7] = 0;
-
+        
         sda[8] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
-
+        
         sdb[5] = 0;
-
+        
         sdb[6] = 0;
-
+        
         sdb[7] = 0;
             }
 
     __syncthreads();
-
+    
     double d_a0 = 0;
-
+    
     double d_a1 = 0;
-
+    
     double d_a2 = 0;
-
+    
     double d_a3 = 0;
-
+    
     double d_a4 = 0;
-
+    
     double d_a5 = 0;
-
+    
     double d_a6 = 0;
-
+    
     double d_a7 = 0;
-
+    
     double d_a8 = 0;
-
+        
     double d_b0 = 0;
-
+    
     double d_b1 = 0;
-
+    
     double d_b2 = 0;
-
+    
     double d_b3 = 0;
-
+    
     double d_b4 = 0;
-
+    
     double d_b5 = 0;
-
+    
     double d_b6 = 0;
-
+    
     double d_b7 = 0;
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
       {
 
-
+        
         scalar_t a_0 = a[0];
-
+        
         scalar_t a_1 = a[1];
-
+        
         scalar_t a_2 = a[2];
-
+        
         scalar_t a_3 = a[3];
-
+        
         scalar_t a_4 = a[4];
-
+        
         scalar_t a_5 = a[5];
-
+        
         scalar_t a_6 = a[6];
-
+        
         scalar_t a_7 = a[7];
-
+        
         scalar_t a_8 = a[8];
-
-
+        
+        
         scalar_t b_0 = b[0];
-
+        
         scalar_t b_1 = b[1];
-
+        
         scalar_t b_2 = b[2];
-
+        
         scalar_t b_3 = b[3];
-
+        
         scalar_t b_4 = b[4];
-
+        
         scalar_t b_5 = b[5];
-
+        
         scalar_t b_6 = b[6];
-
+        
         scalar_t b_7 = b[7];
-
+        
         if(training){
             curandStatePhilox4_32_10_t state;
             curand_init(17, index, iteration*17, &state);
 
-
+            
             lower = scalar_t(1.0-0.1)*a_0;
             upper = scalar_t(1.0+0.1)*a_0;
             a_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_1;
             upper = scalar_t(1.0+0.1)*a_1;
             a_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_2;
             upper = scalar_t(1.0+0.1)*a_2;
             a_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_3;
             upper = scalar_t(1.0+0.1)*a_3;
             a_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_4;
             upper = scalar_t(1.0+0.1)*a_4;
             a_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_5;
             upper = scalar_t(1.0+0.1)*a_5;
             a_5 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_6;
             upper = scalar_t(1.0+0.1)*a_6;
             a_6 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_7;
             upper = scalar_t(1.0+0.1)*a_7;
             a_7 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_8;
             upper = scalar_t(1.0+0.1)*a_8;
             a_8 = curand_uniform4(&state).x * (upper-lower) + lower;
-
-
+            
+            
             lower = scalar_t(1.0-0.1)*b_0;
             upper = scalar_t(1.0+0.1)*b_0;
             b_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_1;
             upper = scalar_t(1.0+0.1)*b_1;
             b_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_2;
             upper = scalar_t(1.0+0.1)*b_2;
             b_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_3;
             upper = scalar_t(1.0+0.1)*b_3;
             b_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_4;
             upper = scalar_t(1.0+0.1)*b_4;
             b_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_5;
             upper = scalar_t(1.0+0.1)*b_5;
             b_5 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_6;
             upper = scalar_t(1.0+0.1)*b_6;
             b_6 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_7;
             upper = scalar_t(1.0+0.1)*b_7;
             b_7 = curand_uniform4(&state).x * (upper-lower) + lower;
@@ -11736,23 +11736,23 @@ __global__ void rational_cuda_backward_D_kernel_8_8(
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
                 scalar_t xp8 = xp7 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
-
+        
         + a_6*xp6
-
+        
         + a_7*xp7
-
+        
         + a_8*xp8
                 ;
 
@@ -11813,107 +11813,107 @@ __global__ void rational_cuda_backward_D_kernel_8_8(
         d_b6 += d_i_b6 * grad_o;
                 scalar_t d_i_b7 = mpq2 * copysign( scalar_t(1.0), A ) * xp8;
         d_b7 += d_i_b7 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
-
+        
         scalar_t d_i_a5  = xp5/Q;
         d_a5 += d_i_a5 * grad_o;
-
+        
         scalar_t d_i_a6  = xp6/Q;
         d_a6 += d_i_a6 * grad_o;
-
+        
         scalar_t d_i_a7  = xp7/Q;
         d_a7 += d_i_a7 * grad_o;
-
+        
         scalar_t d_i_a8  = xp8/Q;
         d_a8 += d_i_a8 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+    
     atomicAdd(&sda[6], d_a6);
-
+    
     atomicAdd(&sda[7], d_a7);
-
+    
     atomicAdd(&sda[8], d_a8);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     atomicAdd(&sdb[5], d_b5);
-
+    
     atomicAdd(&sdb[6], d_b6);
-
+    
     atomicAdd(&sdb[7], d_b7);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+        
         atomicAdd(&d_a[6], sda[6]);
-
+        
         atomicAdd(&d_a[7], sda[7]);
-
+        
         atomicAdd(&d_a[8], sda[8]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
-
+        
         atomicAdd(&d_b[5], sdb[5]);
-
+        
         atomicAdd(&d_b[6], sdb[6]);
-
+        
         atomicAdd(&d_b[7], sdb[7]);
             }
 }
@@ -11964,70 +11964,70 @@ __global__ void rational_cuda_forward_D_kernel_5_4(const bool training, const un
         index < x_size;
         index += blockDim.x * gridDim.x){
 
-
+        
         scalar_t a_0 = a[0];
-
+        
         scalar_t a_1 = a[1];
-
+        
         scalar_t a_2 = a[2];
-
+        
         scalar_t a_3 = a[3];
-
+        
         scalar_t a_4 = a[4];
-
+        
         scalar_t a_5 = a[5];
-
-
+        
+        
         scalar_t b_0 = b[0];
-
+        
         scalar_t b_1 = b[1];
-
+        
         scalar_t b_2 = b[2];
-
+        
         scalar_t b_3 = b[3];
-
+        
         if(training){
             curandStatePhilox4_32_10_t state;
             curand_init(17, index, iteration*10, &state);
 
-
+            
             lower = scalar_t(1.0-0.1)*a_0;
             upper = scalar_t(1.0+0.1)*a_0;
             a_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_1;
             upper = scalar_t(1.0+0.1)*a_1;
             a_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_2;
             upper = scalar_t(1.0+0.1)*a_2;
             a_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_3;
             upper = scalar_t(1.0+0.1)*a_3;
             a_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_4;
             upper = scalar_t(1.0+0.1)*a_4;
             a_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_5;
             upper = scalar_t(1.0+0.1)*a_5;
             a_5 = curand_uniform4(&state).x * (upper-lower) + lower;
-
-
+            
+            
             lower = scalar_t(1.0-0.1)*b_0;
             upper = scalar_t(1.0+0.1)*b_0;
             b_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_1;
             upper = scalar_t(1.0+0.1)*b_1;
             b_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_2;
             upper = scalar_t(1.0+0.1)*b_2;
             b_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_3;
             upper = scalar_t(1.0+0.1)*b_3;
             b_3 = curand_uniform4(&state).x * (upper-lower) + lower;
@@ -12039,17 +12039,17 @@ __global__ void rational_cuda_forward_D_kernel_5_4(const bool training, const un
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
                 ;
 
@@ -12118,119 +12118,119 @@ __global__ void rational_cuda_backward_D_kernel_5_4(
     scalar_t upper = 0;
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
             }
 
     __syncthreads();
-
+    
     double d_a0 = 0;
-
+    
     double d_a1 = 0;
-
+    
     double d_a2 = 0;
-
+    
     double d_a3 = 0;
-
+    
     double d_a4 = 0;
-
+    
     double d_a5 = 0;
-
+        
     double d_b0 = 0;
-
+    
     double d_b1 = 0;
-
+    
     double d_b2 = 0;
-
+    
     double d_b3 = 0;
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
       {
 
-
+        
         scalar_t a_0 = a[0];
-
+        
         scalar_t a_1 = a[1];
-
+        
         scalar_t a_2 = a[2];
-
+        
         scalar_t a_3 = a[3];
-
+        
         scalar_t a_4 = a[4];
-
+        
         scalar_t a_5 = a[5];
-
-
+        
+        
         scalar_t b_0 = b[0];
-
+        
         scalar_t b_1 = b[1];
-
+        
         scalar_t b_2 = b[2];
-
+        
         scalar_t b_3 = b[3];
-
+        
         if(training){
             curandStatePhilox4_32_10_t state;
             curand_init(17, index, iteration*10, &state);
 
-
+            
             lower = scalar_t(1.0-0.1)*a_0;
             upper = scalar_t(1.0+0.1)*a_0;
             a_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_1;
             upper = scalar_t(1.0+0.1)*a_1;
             a_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_2;
             upper = scalar_t(1.0+0.1)*a_2;
             a_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_3;
             upper = scalar_t(1.0+0.1)*a_3;
             a_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_4;
             upper = scalar_t(1.0+0.1)*a_4;
             a_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_5;
             upper = scalar_t(1.0+0.1)*a_5;
             a_5 = curand_uniform4(&state).x * (upper-lower) + lower;
-
-
+            
+            
             lower = scalar_t(1.0-0.1)*b_0;
             upper = scalar_t(1.0+0.1)*b_0;
             b_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_1;
             upper = scalar_t(1.0+0.1)*b_1;
             b_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_2;
             upper = scalar_t(1.0+0.1)*b_2;
             b_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_3;
             upper = scalar_t(1.0+0.1)*b_3;
             b_3 = curand_uniform4(&state).x * (upper-lower) + lower;
@@ -12242,17 +12242,17 @@ __global__ void rational_cuda_backward_D_kernel_5_4(
                 scalar_t xp3 = xp2 * xp1;
                 scalar_t xp4 = xp3 * xp1;
                 scalar_t xp5 = xp4 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
                 ;
 
@@ -12294,70 +12294,70 @@ __global__ void rational_cuda_backward_D_kernel_5_4(
         d_b2 += d_i_b2 * grad_o;
                 scalar_t d_i_b3 = mpq2 * copysign( scalar_t(1.0), A ) * xp4;
         d_b3 += d_i_b3 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
-
+        
         scalar_t d_i_a5  = xp5/Q;
         d_a5 += d_i_a5 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
             }
 }
@@ -12408,94 +12408,94 @@ __global__ void rational_cuda_forward_D_kernel_7_6(const bool training, const un
         index < x_size;
         index += blockDim.x * gridDim.x){
 
-
+        
         scalar_t a_0 = a[0];
-
+        
         scalar_t a_1 = a[1];
-
+        
         scalar_t a_2 = a[2];
-
+        
         scalar_t a_3 = a[3];
-
+        
         scalar_t a_4 = a[4];
-
+        
         scalar_t a_5 = a[5];
-
+        
         scalar_t a_6 = a[6];
-
+        
         scalar_t a_7 = a[7];
-
-
+        
+        
         scalar_t b_0 = b[0];
-
+        
         scalar_t b_1 = b[1];
-
+        
         scalar_t b_2 = b[2];
-
+        
         scalar_t b_3 = b[3];
-
+        
         scalar_t b_4 = b[4];
-
+        
         scalar_t b_5 = b[5];
-
+        
         if(training){
             curandStatePhilox4_32_10_t state;
             curand_init(17, index, iteration*14, &state);
 
-
+            
             lower = scalar_t(1.0-0.1)*a_0;
             upper = scalar_t(1.0+0.1)*a_0;
             a_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_1;
             upper = scalar_t(1.0+0.1)*a_1;
             a_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_2;
             upper = scalar_t(1.0+0.1)*a_2;
             a_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_3;
             upper = scalar_t(1.0+0.1)*a_3;
             a_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_4;
             upper = scalar_t(1.0+0.1)*a_4;
             a_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_5;
             upper = scalar_t(1.0+0.1)*a_5;
             a_5 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_6;
             upper = scalar_t(1.0+0.1)*a_6;
             a_6 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_7;
             upper = scalar_t(1.0+0.1)*a_7;
             a_7 = curand_uniform4(&state).x * (upper-lower) + lower;
-
-
+            
+            
             lower = scalar_t(1.0-0.1)*b_0;
             upper = scalar_t(1.0+0.1)*b_0;
             b_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_1;
             upper = scalar_t(1.0+0.1)*b_1;
             b_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_2;
             upper = scalar_t(1.0+0.1)*b_2;
             b_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_3;
             upper = scalar_t(1.0+0.1)*b_3;
             b_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_4;
             upper = scalar_t(1.0+0.1)*b_4;
             b_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_5;
             upper = scalar_t(1.0+0.1)*b_5;
             b_5 = curand_uniform4(&state).x * (upper-lower) + lower;
@@ -12509,21 +12509,21 @@ __global__ void rational_cuda_forward_D_kernel_7_6(const bool training, const un
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1 * xp1
-
+        
         + a_2 * xp2
-
+        
         + a_3 * xp3
-
+        
         + a_4 * xp4
-
+        
         + a_5 * xp5
-
+        
         + a_6 * xp6
-
+        
         + a_7 * xp7
                 ;
 
@@ -12594,159 +12594,159 @@ __global__ void rational_cuda_backward_D_kernel_7_6(
     scalar_t upper = 0;
 
     if( threadIdx.x == 0){
-
+        
         sda[0] = 0;
-
+        
         sda[1] = 0;
-
+        
         sda[2] = 0;
-
+        
         sda[3] = 0;
-
+        
         sda[4] = 0;
-
+        
         sda[5] = 0;
-
+        
         sda[6] = 0;
-
+        
         sda[7] = 0;
-
+                
         sdb[0] = 0;
-
+        
         sdb[1] = 0;
-
+        
         sdb[2] = 0;
-
+        
         sdb[3] = 0;
-
+        
         sdb[4] = 0;
-
+        
         sdb[5] = 0;
             }
 
     __syncthreads();
-
+    
     double d_a0 = 0;
-
+    
     double d_a1 = 0;
-
+    
     double d_a2 = 0;
-
+    
     double d_a3 = 0;
-
+    
     double d_a4 = 0;
-
+    
     double d_a5 = 0;
-
+    
     double d_a6 = 0;
-
+    
     double d_a7 = 0;
-
+        
     double d_b0 = 0;
-
+    
     double d_b1 = 0;
-
+    
     double d_b2 = 0;
-
+    
     double d_b3 = 0;
-
+    
     double d_b4 = 0;
-
+    
     double d_b5 = 0;
-
+    
     for (int index = blockIdx.x * blockDim.x + threadIdx.x;
          index < x_size;
          index += blockDim.x * gridDim.x)
       {
 
-
+        
         scalar_t a_0 = a[0];
-
+        
         scalar_t a_1 = a[1];
-
+        
         scalar_t a_2 = a[2];
-
+        
         scalar_t a_3 = a[3];
-
+        
         scalar_t a_4 = a[4];
-
+        
         scalar_t a_5 = a[5];
-
+        
         scalar_t a_6 = a[6];
-
+        
         scalar_t a_7 = a[7];
-
-
+        
+        
         scalar_t b_0 = b[0];
-
+        
         scalar_t b_1 = b[1];
-
+        
         scalar_t b_2 = b[2];
-
+        
         scalar_t b_3 = b[3];
-
+        
         scalar_t b_4 = b[4];
-
+        
         scalar_t b_5 = b[5];
-
+        
         if(training){
             curandStatePhilox4_32_10_t state;
             curand_init(17, index, iteration*14, &state);
 
-
+            
             lower = scalar_t(1.0-0.1)*a_0;
             upper = scalar_t(1.0+0.1)*a_0;
             a_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_1;
             upper = scalar_t(1.0+0.1)*a_1;
             a_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_2;
             upper = scalar_t(1.0+0.1)*a_2;
             a_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_3;
             upper = scalar_t(1.0+0.1)*a_3;
             a_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_4;
             upper = scalar_t(1.0+0.1)*a_4;
             a_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_5;
             upper = scalar_t(1.0+0.1)*a_5;
             a_5 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_6;
             upper = scalar_t(1.0+0.1)*a_6;
             a_6 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*a_7;
             upper = scalar_t(1.0+0.1)*a_7;
             a_7 = curand_uniform4(&state).x * (upper-lower) + lower;
-
-
+            
+            
             lower = scalar_t(1.0-0.1)*b_0;
             upper = scalar_t(1.0+0.1)*b_0;
             b_0 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_1;
             upper = scalar_t(1.0+0.1)*b_1;
             b_1 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_2;
             upper = scalar_t(1.0+0.1)*b_2;
             b_2 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_3;
             upper = scalar_t(1.0+0.1)*b_3;
             b_3 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_4;
             upper = scalar_t(1.0+0.1)*b_4;
             b_4 = curand_uniform4(&state).x * (upper-lower) + lower;
-
+            
             lower = scalar_t(1.0-0.1)*b_5;
             upper = scalar_t(1.0+0.1)*b_5;
             b_5 = curand_uniform4(&state).x * (upper-lower) + lower;
@@ -12760,21 +12760,21 @@ __global__ void rational_cuda_backward_D_kernel_7_6(
                 scalar_t xp5 = xp4 * xp1;
                 scalar_t xp6 = xp5 * xp1;
                 scalar_t xp7 = xp6 * xp1;
-
+        
         scalar_t P = a_0
-
+        
         + a_1*xp1
-
+        
         + a_2*xp2
-
+        
         + a_3*xp3
-
+        
         + a_4*xp4
-
+        
         + a_5*xp5
-
+        
         + a_6*xp6
-
+        
         + a_7*xp7
                 ;
 
@@ -12826,92 +12826,92 @@ __global__ void rational_cuda_backward_D_kernel_7_6(
         d_b4 += d_i_b4 * grad_o;
                 scalar_t d_i_b5 = mpq2 * copysign( scalar_t(1.0), A ) * xp6;
         d_b5 += d_i_b5 * grad_o;
-
+        
         scalar_t d_i_a0 = scalar_t(1.0)/Q;
         d_a0 += d_i_a0 * grad_o;
 
-
+        
         scalar_t d_i_a1  = xp1/Q;
         d_a1 += d_i_a1 * grad_o;
-
+        
         scalar_t d_i_a2  = xp2/Q;
         d_a2 += d_i_a2 * grad_o;
-
+        
         scalar_t d_i_a3  = xp3/Q;
         d_a3 += d_i_a3 * grad_o;
-
+        
         scalar_t d_i_a4  = xp4/Q;
         d_a4 += d_i_a4 * grad_o;
-
+        
         scalar_t d_i_a5  = xp5/Q;
         d_a5 += d_i_a5 * grad_o;
-
+        
         scalar_t d_i_a6  = xp6/Q;
         d_a6 += d_i_a6 * grad_o;
-
+        
         scalar_t d_i_a7  = xp7/Q;
         d_a7 += d_i_a7 * grad_o;
             }
 
-
+    
     atomicAdd(&sda[0], d_a0);
-
+    
     atomicAdd(&sda[1], d_a1);
-
+    
     atomicAdd(&sda[2], d_a2);
-
+    
     atomicAdd(&sda[3], d_a3);
-
+    
     atomicAdd(&sda[4], d_a4);
-
+    
     atomicAdd(&sda[5], d_a5);
-
+    
     atomicAdd(&sda[6], d_a6);
-
+    
     atomicAdd(&sda[7], d_a7);
-
+        
     atomicAdd(&sdb[0], d_b0);
-
+    
     atomicAdd(&sdb[1], d_b1);
-
+    
     atomicAdd(&sdb[2], d_b2);
-
+    
     atomicAdd(&sdb[3], d_b3);
-
+    
     atomicAdd(&sdb[4], d_b4);
-
+    
     atomicAdd(&sdb[5], d_b5);
-
+    
     __syncthreads();
 
     if( threadIdx.x == 0){
-
+        
         atomicAdd(&d_a[0], sda[0]);
-
+        
         atomicAdd(&d_a[1], sda[1]);
-
+        
         atomicAdd(&d_a[2], sda[2]);
-
+        
         atomicAdd(&d_a[3], sda[3]);
-
+        
         atomicAdd(&d_a[4], sda[4]);
-
+        
         atomicAdd(&d_a[5], sda[5]);
-
+        
         atomicAdd(&d_a[6], sda[6]);
-
+        
         atomicAdd(&d_a[7], sda[7]);
-
+                
         atomicAdd(&d_b[0], sdb[0]);
-
+        
         atomicAdd(&d_b[1], sdb[1]);
-
+        
         atomicAdd(&d_b[2], sdb[2]);
-
+        
         atomicAdd(&d_b[3], sdb[3]);
-
+        
         atomicAdd(&d_b[4], sdb[4]);
-
+        
         atomicAdd(&d_b[5], sdb[5]);
             }
 }
@@ -12943,3 +12943,5 @@ std::vector<torch::Tensor> rational_cuda_backward_D_7_6(const bool training, con
 
     return {d_x, d_n.toType(at::kFloat), d_d.toType(at::kFloat)};
 }
+
+

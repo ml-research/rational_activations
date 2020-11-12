@@ -1,6 +1,6 @@
-from pau_torch import PAU
+from rational_torch import Rational
 
-rational_function = PAU() # Initialized closed to Leaky ReLU
+rational_function = Rational() # Initialized closed to Leaky ReLU
 print(rational_function)
 #    Pade Activation Unit (version A) of degrees (5, 4) running on cuda:0
 # or Pade Activation Unit (version A) of degrees (5, 4) running on cpu
@@ -46,15 +46,15 @@ class RationalNetwork(nn.Module):
                                 gain=nn.init.calculate_gain('linear'))
 
         if recurrent:
-            self.act_func1 = PAU(cuda=cuda)
+            self.act_func1 = Rational(cuda=cuda)
             self.act_func2 = self.act_func1
             self.act_func3 = self.act_func1
             self.act_func4 = self.act_func1
         else:
-            self.act_func1 = PAU(cuda=cuda)
-            self.act_func2 = PAU(cuda=cuda)
-            self.act_func3 = PAU(cuda=cuda)
-            self.act_func4 = PAU(cuda=cuda)
+            self.act_func1 = Rational(cuda=cuda)
+            self.act_func2 = Rational(cuda=cuda)
+            self.act_func3 = Rational(cuda=cuda)
+            self.act_func4 = Rational(cuda=cuda)
 
         if cuda:
             self.cuda()

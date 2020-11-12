@@ -1,9 +1,8 @@
 import torch
+from rational_cuda import *
 
-from pau_cuda import *
 
-
-class PAU_CUDA_A_F(torch.autograd.Function):
+class Rational_CUDA_A_F(torch.autograd.Function):
     @staticmethod
     def forward(ctx, input, weight_numerator, weight_denominator, training):
         ctx.save_for_backward(input, weight_numerator, weight_denominator)
@@ -17,7 +16,7 @@ class PAU_CUDA_A_F(torch.autograd.Function):
         return d_x, d_weight_numerator, d_weight_denominator, None
 
 
-class PAU_CUDA_B_F(torch.autograd.Function):
+class Rational_CUDA_B_F(torch.autograd.Function):
     @staticmethod
     def forward(ctx, input, weight_numerator, weight_denominator, training):
         ctx.save_for_backward(input, weight_numerator, weight_denominator)
@@ -31,7 +30,7 @@ class PAU_CUDA_B_F(torch.autograd.Function):
         return d_x, d_weight_numerator, d_weight_denominator, None
 
 
-class PAU_CUDA_C_F(torch.autograd.Function):
+class Rational_CUDA_C_F(torch.autograd.Function):
     @staticmethod
     def forward(ctx, input, weight_numerator, weight_denominator, training):
         ctx.save_for_backward(input, weight_numerator, weight_denominator)
@@ -45,16 +44,16 @@ class PAU_CUDA_C_F(torch.autograd.Function):
         return d_x, d_weight_numerator, d_weight_denominator, None
 
 
-class PAU_CUDA_D_F(torch.autograd.Function):
+class Rational_CUDA_D_F(torch.autograd.Function):
     cnt = 0
 
     @staticmethod
     def forward(ctx, input, w_numerator, w_denominator, training):
-        local_cnt = PAU_CUDA_D_F.cnt
+        local_cnt = Rational_CUDA_D_F.cnt
 
         ctx.save_for_backward(input, w_numerator, w_denominator, torch.tensor(local_cnt, dtype=torch.long))
 
-        PAU_CUDA_D_F.cnt += 1
+        Rational_CUDA_D_F.cnt += 1
         x = forward_D_5_4(training, local_cnt, input, w_numerator, w_denominator)
         return x
 

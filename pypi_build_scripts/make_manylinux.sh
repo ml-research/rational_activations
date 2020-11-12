@@ -49,7 +49,7 @@ do
     exit 1
   fi
 done
-printf "All version correctly install with PAU's dependencies\n"
+printf "All version correctly install with Rational's dependencies\n"
 unset PYTHON_V TORCH_LIB
 
 

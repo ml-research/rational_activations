@@ -1,8 +1,8 @@
-Find weights for PAU approximating new functions
+Find weights for Rational approximating new functions
 ================================================
 
 If you want your function to approximate a function that is not already in
-`pau/paus_config.json`, you have to run a script that would automatically find
+`rational/rationals_config.json`, you have to run a script that would automatically find
 the coefficient of P and Q and add them to your the file.
 
 This script uses `numpy`, `scipy`, and `matplotlib` so be sure to have them installed.

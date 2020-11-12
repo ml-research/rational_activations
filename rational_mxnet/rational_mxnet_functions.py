@@ -10,7 +10,7 @@ def get_xps(weight_denominator, weight_numerator, z):
     return xps
 
 
-def PAU_MXNET_A_F(x, weight_numerator, weight_denominator, training):
+def Rational_MXNET_A_F(x, weight_numerator, weight_denominator, training):
     # P(X) / Q(X) = a_0 + a_1 * X + ... + a_n * X ^ n /
     #               1 + | b_0 * X | + | b_1 * X | ^ 2 + ... + | b_i * X | ^ {i + 1}
 
@@ -29,7 +29,7 @@ def PAU_MXNET_A_F(x, weight_numerator, weight_denominator, training):
     return nd.divide(numerator, denominator).reshape(x.shape)
 
 
-def PAU_MXNET_B_F(x, weight_numerator, weight_denominator, training):
+def Rational_MXNET_B_F(x, weight_numerator, weight_denominator, training):
     # P(X) / Q(X) = a_0 + a_1 * X + ... + a_n * X ^ n /
     #               1 + |b_0*X + b_1*X^2 + ... + b_{n-1}*X^n|
 
@@ -48,7 +48,7 @@ def PAU_MXNET_B_F(x, weight_numerator, weight_denominator, training):
     return nd.divide(numerator, (1.0 + nd.abs(denominator))).reshape(x.shape)
 
 
-def PAU_MXNET_C_F(x, weight_numerator, weight_denominator, training):
+def Rational_MXNET_C_F(x, weight_numerator, weight_denominator, training):
     # P(X) / Q(X) = a_0 + a_1 * X + ... + a_n * X ^ n /
     #               eps + |b_1*X + b_1*X^2 + ... + b_{n-1}*X^n|
 
@@ -67,14 +67,14 @@ def PAU_MXNET_C_F(x, weight_numerator, weight_denominator, training):
     return nd.divide(numerator, (0.1 + nd.abs(denominator))).reshape(x.shape)
 
 
-def PAU_MXNET_D_F(x, weight_numerator, weight_denominator, training, random_deviation=0.1):
+def Rational_MXNET_D_F(x, weight_numerator, weight_denominator, training, random_deviation=0.1):
     # P(X)/Q(X) = noised(a_0) + noised(a_1)*X +noised(a_2)*X^2 + ... + noised(a_n)*X^n /
     #                1 + |noised(b_0)*X + noised(b_1)*X^2 + ... + noised(b_{n-1})*X^n|
     # Noised parameters have uniform noise to be in range [(1-random_deviation)*parameter,(1+random_deviation)*parameter].
 
     if not training:
         # do not add noise
-        return PAU_MXNET_B_F(x, weight_numerator, weight_denominator, training)
+        return Rational_MXNET_B_F(x, weight_numerator, weight_denominator, training)
 
     z = nd.reshape(x, shape=(-1,))
     lower_bound = nd.array([1 - random_deviation])

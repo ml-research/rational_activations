@@ -30,15 +30,15 @@ function log () {
 
 
 printf "auditwheel repairing\n"
-auditwheel -v repair --plat manylinux2014_x86_64 dist/pau*$PY_V*linux_x86_64.whl
+auditwheel -v repair --plat manylinux2014_x86_64 dist/rational*$PY_V*linux_x86_64.whl
 cd wheelhouse/
-$PYTHON_V -m wheel unpack pau-*$PY_V*.whl
-cd pau-*/pau.libs/
+$PYTHON_V -m wheel unpack rational-*$PY_V*.whl
+cd rational-*/rational.libs/
 CORRUPTED_FILES_DIR='corrupted_files/'
 mkdir -p $CORRUPTED_FILES_DIR
 CORRUPTED_FILES=`find . -maxdepth 1 -type f | grep .so | sed 's/.\///g' `
 WRONG_FILENAMES=()
-REQUIREMENTS=`patchelf --print-needed ../pau_cuda.cpython-*$PY_V*-x86_64-linux-gnu.so`
+REQUIREMENTS=`patchelf --print-needed ../rational_cuda.cpython-*$PY_V*-x86_64-linux-gnu.so`
 printf "patching all files by hand\n"
 for CORRUPTED_F in $CORRUPTED_FILES
 do
@@ -51,9 +51,9 @@ do
       log "Found $ORI_FILENAME, avoiding replacement, just removing for model size..."
       # cp $TORCH_LIB/$ORI_FILENAME .
       mv $CORRUPTED_F $CORRUPTED_FILES_DIR
-      sed -i "/pau.libs\/$CORRUPTED_F/d" ../*.dist-info/RECORD
+      sed -i "/rational.libs\/$CORRUPTED_F/d" ../*.dist-info/RECORD
       if [[ "${REQUIREMENTS}" =~ "$CORRUPTED_F" ]]; then
-        patchelf --replace-needed $CORRUPTED_F $ORI_FILENAME ../pau_cuda.cpython-*$PY_V*-x86_64-linux-gnu.so
+        patchelf --replace-needed $CORRUPTED_F $ORI_FILENAME ../rational_cuda.cpython-*$PY_V*-x86_64-linux-gnu.so
       fi
       continue
     elif [[ `find $CUDA_LIB -name $ORI_FILENAME` ]]; then
@@ -74,23 +74,23 @@ do
       fi
     fi
     if [[ "${REQUIREMENTS}" =~ "$CORRUPTED_F" ]]; then
-      patchelf --replace-needed $CORRUPTED_F $ORI_FILENAME ../pau_cuda.cpython-*$PY_V*-x86_64-linux-gnu.so
+      patchelf --replace-needed $CORRUPTED_F $ORI_FILENAME ../rational_cuda.cpython-*$PY_V*-x86_64-linux-gnu.so
     fi
-    log "removing line \"pau.libs/$CORRUPTED_F ...\" from RECORD"
-    sed -i "/pau.libs\/$CORRUPTED_F/d" ../*.dist-info/RECORD
+    log "removing line \"rational.libs/$CORRUPTED_F ...\" from RECORD"
+    sed -i "/rational.libs\/$CORRUPTED_F/d" ../*.dist-info/RECORD
     export SHA256=($(sha256sum $ORI_FILENAME))
-    log "And adding line \"pau.libs/$ORI_FILENAME ...\" into it"
-    echo "pau.libs/$ORI_FILENAME,sha256=$SHA256,`stat --printf="%s" ../pau.libs/$ORI_FILENAME`" >> ../*.dist-info/RECORD
+    log "And adding line \"rational.libs/$ORI_FILENAME ...\" into it"
+    echo "rational.libs/$ORI_FILENAME,sha256=$SHA256,`stat --printf="%s" ../rational.libs/$ORI_FILENAME`" >> ../*.dist-info/RECORD
   fi
 done
 rm -rf $CORRUPTED_FILES_DIR
 cd ../../
-rm pau-*$PY_V*-manylinux2014_x86_64.whl
-PAU_WHEEL_DIR=`find . -maxdepth 1 -type d | grep pau`
-$PYTHON_V -m wheel pack $PAU_WHEEL_DIR  # creates the new wheel
-rm -R `ls -1 -d pau-*/`  # removes the pau directory only
+rm rational-*$PY_V*-manylinux2014_x86_64.whl
+Rational_WHEEL_DIR=`find . -maxdepth 1 -type d | grep rational`
+$PYTHON_V -m wheel pack $Rational_WHEEL_DIR  # creates the new wheel
+rm -R `ls -1 -d rational-*/`  # removes the rational directory only
 mkdir -p $CUDA_V
-mv pau-*$PY_V*-manylinux2014_x86_64.whl $CUDA_V
+mv rational-*$PY_V*-manylinux2014_x86_64.whl $CUDA_V
 cd $cwd
 
 unset TORCH_LIB CUDA_LIB PY_V  # To be sure they are reseted
