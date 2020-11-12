@@ -100,6 +100,11 @@ class PAU():
             plt.show()
         return (a, b, c, d), distance
 
+    def __repr__(self):
+        return (f"Rational Activation Function (PYTORCH version "
+               f"{self.version}) of degrees {self.degrees} running on "
+               f"{self.center.device}")
+
 
 def PAU_version_A(x, w_array, d_array):
     xi = np.ones_like(x)
