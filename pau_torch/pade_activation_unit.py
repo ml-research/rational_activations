@@ -9,9 +9,9 @@ Units - Learnabe Rational activation functions.
 import torch.nn as nn
 from torch.cuda import is_available as torch_cuda_available
 from pau.get_weights import get_parameters
-from .pade_cuda_functions import PAU_CUDA_A_F, PAU_CUDA_B_F, PAU_CUDA_C_F, \
+from pau_torch.pade_cuda_functions import PAU_CUDA_A_F, PAU_CUDA_B_F, PAU_CUDA_C_F, \
                                  PAU_CUDA_D_F
-from .pade_pytorch_functions import PAU_PYTORCH_A_F, PAU_PYTORCH_B_F, \
+from pau_torch.pade_pytorch_functions import PAU_PYTORCH_A_F, PAU_PYTORCH_B_F, \
                                     PAU_PYTORCH_C_F, PAU_PYTORCH_D_F
 
 
@@ -77,6 +77,7 @@ class PAU(nn.Module):
         self.degrees = degrees
         self.version = version
         self.training = trainable
+        self.device = device
 
         self.init_approximation = approx_func
 
@@ -127,6 +128,7 @@ class PAU(nn.Module):
         else:
             raise ValueError("version %s not implemented" % self.version)
         self.activation_function = pau_func
+        self.device = "cpu"
         return super().cpu()
 
     def cuda(self):
@@ -142,4 +144,51 @@ class PAU(nn.Module):
             raise ValueError("version %s not implemented" % self.version)
 
         self.activation_function = pau_func.apply
+        self.device = "cuda"
         return super().cuda()
+
+    def numpy(self):
+        """
+        Returns a numpy version of this activation function
+        """
+        from pau import PAU as PAU_numpy
+        pau_n = PAU_numpy(self.init_approximation, self.degrees, self.version)
+        pau_n.center = self.center.tolist()[0]
+        pau_n.numerator = self.numerator.tolist()
+        pau_n.denominator = self.denominator.tolist()
+        return pau_n
+
+    def fit(self, function, x=None, show=False):
+        """
+        Compute the parameters a, b, c, and d to have the neurally equivalent
+        function of the provided one as close as possible to this pau function.
+        Arguments:
+                function (callable):
+                    The function you want to fit to pau\n
+                x (array):
+                    The range on which the curves of the functions are fitted
+                    together
+                    Default ``True``
+                show (bool):
+                    If  ``True``, plots the final fitted function and pau.
+                    (using matplotlib)\n
+                    Default ``False``
+        Returns:
+            tuple: ((a, b, c, d), dist) with: \n
+            a, b, c, d: the parameters to adjust the function
+                (vertical and horizontal scales) \n
+            dist: The final distance between the rational function and the
+            fitted one
+        """
+        pau_numpy = self.numpy()
+        if x is not None:
+            pau_numpy.fit(function, x, show)
+        else:
+            pau_numpy.fit(function, show=show)
+
+
+
+if __name__ == '__main__':
+    import torch.nn.functional as F
+    pau_t = PAU()
+    pau_t.fit(F.tanh, show=True)

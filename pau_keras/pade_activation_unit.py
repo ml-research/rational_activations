@@ -1,13 +1,16 @@
 from tensorflow.python.keras.engine.base_layer import Layer
 
-from pau.Constants import *
+
+from pau.get_weights import get_parameters
 from pau_keras.pade_keras_functions import *
 
 
 class PAU(Layer):
-    def __init__(self, w_numerator=init_w_numerator, w_denominator=init_w_denominator, center=center, version="A",
-                 trainable=True, train_center=True, train_numerator=True, train_denominator=True):
+    def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=False,
+                 version="A", trainable=True, train_center=True,
+                 train_numerator=True, train_denominator=True):
         super(PAU, self).__init__()
+        center, w_numerator, w_denominator = get_parameters(version, degrees, approx_func)
         self.center = tf.Variable(initial_value=center, trainable=trainable and train_center)
         self.numerator = tf.Variable(initial_value=w_numerator, trainable=trainable and train_numerator)
         self.denominator = tf.Variable(initial_value=w_denominator, trainable=trainable and train_denominator)

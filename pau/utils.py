@@ -17,7 +17,7 @@ def _wrap_func(func, xdata, ydata, degrees):
 
 
 def _curve_fit(f, xdata, ydata, degrees, version, p0=None, absolute_sigma=False,
-              method=None, jac=None, **kwargs):
+               method=None, jac=None, **kwargs):
     bounds = (-np.inf, np.inf)
     lb, ub = prepare_bounds(bounds, np.sum(degrees))
     if p0 is None:
@@ -82,3 +82,17 @@ def fit_pau_to_base_function(pau_func, ref_func, x, degrees=(5, 4), version="A")
     final_params = _curve_fit(pau_func, x, y, degrees=degrees, version=version,
                               maxfev=10000000)[0]
     return np.array(final_params[:degrees[0]+1]), np.array(final_params[degrees[0]+1:])
+
+
+def find_closest_equivalent(pau_func, new_func, x):
+    initials = np.array([1., 0., 1., 0.]) # a, b, c, d
+    y = pau_func(x)
+    from scipy.optimize import curve_fit
+    import torch
+    def equivalent_func(x_array, a, b, c, d):
+        return a * new_func(c * torch.tensor(x_array) + d) + b
+    params = curve_fit(equivalent_func, x, y, initials, bounds=(x.min(), x.max()))
+    a, b, c, d = params[0]
+    final_func_output = np.array(equivalent_func(x, a, b, c, d))
+    final_distance = ((y - final_func_output)**2).sum()
+    return (a, b, c, d), final_distance

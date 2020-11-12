@@ -70,8 +70,6 @@ def typed_input(text, type, choice_list = None):
 FUNCTION = None
 
 def find_weights(function):
-
-
     # To be changed by the function you want to approximate
     approx_name = input("approximated function name: ")
     FUNCTION = function
