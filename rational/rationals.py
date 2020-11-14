@@ -46,16 +46,16 @@ class Rational():
         from rational_torch import Rational as Rational_torch
         import torch.nn as nn
         import torch
-        rational_torch = Rational_torch(self.init_approximation, self.degrees,
-                                        cuda, self.version, trainable,
-                                        train_numerator, train_denominator)
-        rational_torch.numerator = nn.Parameter(torch.FloatTensor(self.numerator)
-                                                .to(rational_torch.device),
-                                                requires_grad=trainable and train_numerator)
-        rational_torch.denominator = nn.Parameter(torch.FloatTensor(self.denominator)
-                                                  .to(rational_torch.device),
-                                                  requires_grad=trainable and train_denominator)
-        return rational_torch
+        rtorch = Rational_torch(self.init_approximation, self.degrees,
+                                cuda, self.version, trainable,
+                                train_numerator, train_denominator)
+        rtorch.numerator = nn.Parameter(torch.FloatTensor(self.numerator)
+                                        .to(rtorch.device),
+                                        requires_grad=trainable and train_numerator)
+        rtorch.denominator = nn.Parameter(torch.FloatTensor(self.denominator)
+                                          .to(rtorch.device),
+                                          requires_grad=trainable and train_denominator)
+        return rtorch
 
     def fit(self, function, x_range=np.arange(-3., 3., 0.1), show=False):
         """

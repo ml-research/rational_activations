@@ -26,7 +26,7 @@ You can download from the
 
 To use it:
 
-.. literalinclude:: tutorials/code/how_to_use_rational.py
+.. literalinclude:: tutorials/code/how_to_use_rationals.py
    :lines: 1-6
 
 .. toctree::

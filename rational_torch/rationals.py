@@ -9,10 +9,14 @@ import torch
 import torch.nn as nn
 from torch.cuda import is_available as torch_cuda_available
 from rational.get_weights import get_parameters
-from rational_torch.rational_cuda_functions import Rational_CUDA_A_F, Rational_CUDA_B_F, Rational_CUDA_C_F, \
-                                 Rational_CUDA_D_F
-from rational_torch.rational_pytorch_functions import Rational_PYTORCH_A_F, Rational_PYTORCH_B_F, \
-                                    Rational_PYTORCH_C_F, Rational_PYTORCH_D_F
+from rational_torch.rational_cuda_functions import Rational_CUDA_A_F, \
+                                                   Rational_CUDA_B_F, \
+                                                   Rational_CUDA_C_F, \
+                                                   Rational_CUDA_D_F
+from rational_torch.rational_pytorch_functions import Rational_PYTORCH_A_F, \
+                                                      Rational_PYTORCH_B_F, \
+                                                      Rational_PYTORCH_C_F, \
+                                                      Rational_PYTORCH_D_F
 
 
 if torch_cuda_available():
@@ -31,15 +35,15 @@ class Rational(nn.Module):
     Arguments:
             approx_func (str):
                 The name of the approximated function for initialisation. \
-                The different initialable functions are available in
+                The different initialable functions are available in \
                 `rational.rationals_config.json`. \n
                 Default ``leaky_relu``.
             degrees (tuple of int):
                 The degrees of the numerator (P) and denominator (Q).\n
                 Default ``(5, 4)``
             cuda (bool):
-                Use GPU CUDA version. If None, use cuda if available on the
-                machine\n
+                Use GPU CUDA version. \n
+                If ``None``, use cuda if available on the machine\n
                 Default ``None``
             version (str):
                 Version of Rational to use. Rational(x) = P(x)/Q(x)\n
@@ -49,7 +53,7 @@ class Rational(nn.Module):
                 `D`: like `B` with noise\n
                 Default ``A``
             trainable (bool):
-                If the weights are trainable, i.e, if they are updated during
+                If the weights are trainable, i.e, if they are updated during \
                 backward pass\n
                 Default ``True``
     Returns:
@@ -105,6 +109,8 @@ class Rational(nn.Module):
                 raise ValueError("version %s not implemented" % version)
 
             self.activation_function = rational_func
+        self._handle_retrieve_mode = None
+        self.distribution = None
 
     def forward(self, x):
         out = self.activation_function(x, self.numerator, self.denominator,
@@ -149,35 +155,37 @@ class Rational(nn.Module):
 
     def numpy(self):
         """
-        Returns a numpy version of this activation function
+        Returns a numpy version of this activation function.
         """
         from rational import Rational as Rational_numpy
         rational_n = Rational_numpy(self.init_approximation, self.degrees,
-                     self.version)
+                                    self.version)
         rational_n.numerator = self.numerator.tolist()
         rational_n.denominator = self.denominator.tolist()
         return rational_n
 
     def fit(self, function, x=None, show=False):
         """
-        Compute the parameters a, b, c, and d to have the neurally equivalent
-        function of the provided one as close as possible to this rational function.
+        Compute the parameters a, b, c, and d to have the neurally equivalent \
+        function of the provided one as close as possible to this rational \
+        function.
+
         Arguments:
                 function (callable):
-                    The function you want to fit to rational\n
+                    The function you want to fit to rational.\n
                 x (array):
                     The range on which the curves of the functions are fitted
-                    together
+                    together.\n
                     Default ``True``
                 show (bool):
-                    If  ``True``, plots the final fitted function and rational.
-                    (using matplotlib)\n
+                    If  ``True``, plots the final fitted function and \
+                    rational (using matplotlib).\n
                     Default ``False``
         Returns:
             tuple: ((a, b, c, d), dist) with: \n
-            a, b, c, d: the parameters to adjust the function
+            a, b, c, d: the parameters to adjust the function \
                 (vertical and horizontal scales and bias) \n
-            dist: The final distance between the rational function and the
+            dist: The final distance between the rational function and the \
             fitted one
         """
         rational_numpy = self.numpy()
@@ -191,23 +199,141 @@ class Rational(nn.Module):
         self.degrees = old_rational_func.degrees
         self.numerator = old_rational_func.numerator
         self.denominator = old_rational_func.denominator
+        if "center" in dir(old_rational_func) and old_rational_func.center != 0:
+            print("Found a non zero center, please adapt the bias of the",
+                  "previous layer to have an equivalent neural network")
         self.training = old_rational_func.training
+        self.device = self.numerator.device
         if "init_approximation" not in dir("init_approximation"):
             self.init_approximation = "leaky_relu"
         else:
             self.init_approximation = old_rational_func.init_approximation
-        self.activation_function = old_rational_func.activation_function
+        if "cuda" in str(self.device):
+            if self.version == "A":
+                rational_func = Rational_CUDA_A_F
+            elif self.version == "B":
+                self.rational_func = Rational_CUDA_B_F
+            elif self.version == "C":
+                rational_func = Rational_CUDA_C_F
+            elif self.version == "D":
+                rational_func = Rational_CUDA_D_F
+            else:
+                raise ValueError("version %s not implemented" % self.version)
 
+            self.activation_function = rational_func.apply
+        else:
+            if self.version == "A":
+                rational_func = Rational_PYTORCH_A_F
+            elif self.version == "B":
+                rational_func = Rational_PYTORCH_B_F
+            elif self.version == "C":
+                rational_func = Rational_PYTORCH_C_F
+            elif self.version == "D":
+                rational_func = Rational_PYTORCH_D_F
+            else:
+                raise ValueError("version %s not implemented" % self.version)
+            self.activation_function = rational_func
 
-    def retrieve_input(self):
-        self.histogram = []
-        self.buffer = torch.Tensor().cuda()
-        print("retrieving input from now on.")
-        self.register_forward_hook(_save_input)
+        self._handle_retrieve_mode = None
+        self.distribution = None
+
+    def input_retrieve_mode(self, auto_stop=True, max_saves=1000):
+        """
+        Will retrieve the distribution of the input in self.distribution. \n
+        This will slow down the function, as it has to retrieve the input \
+        dist.\n
+
+        Arguments:
+                auto_stop (bool):
+                    If True, the retrieving will stop after `max_saves` \
+                    calls to forward.\n
+                    Else, use :meth:`rational_torch.Rational.training_mode`.\n
+                    Default ``True``
+                max_saves (int):
+                    The range on which the curves of the functions are fitted \
+                    together.\n
+                    Default ``1000``
+        """
+        from physt import h1 as hist1
+        self.distribution = hist1(None, "fixed_width", bin_width=0.1,
+                                  adaptive=True)
+        print("Retrieving input from now on.")
+        if auto_stop:
+            self.inputs_saved = 0
+            self._handle_retrieve_mode = self.register_forward_hook(_save_input_auto_stop)
+            self._max_saves = max_saves
+        else:
+            self._handle_retrieve_mode = self.register_forward_hook(_save_input)
+
+    def training_mode(self):
+        """
+        Stops retrieving the distribution of the input in `self.distribution`.
+        """
+        print("Training mode, no longer retrieving the input.")
+        self._handle_retrieve_mode.remove()
+
+    def show(self, input_range=None, display=True):
+        """
+        Show the function using `matplotlib`.
+
+        Arguments:
+                input_range (range):
+                    The range to print the function on.\n
+                    Default ``None``
+                display (bool):
+                    If ``True``, displays the graph.
+                    Otherwise, returns it. \n
+                    Default ``True``
+        """
+        import matplotlib.pyplot as plt
+        try:
+            import seaborn as sns
+            sns.set_style("whitegrid")
+        except ImportError as e:
+            print("seaborn not found on computer, install it for better",
+                  "visualisation")
+        ax = plt.gca()
+        if input_range is None:
+            if self.distribution is None:
+                input_range = torch.arange(-3, 3, 0.01, device=self.device)
+            else:
+                freq, bins = _cleared_arrays(self.distribution)
+                ax2 = ax.twinx()
+                ax2.set_yticks([])
+                grey_color = (0.5, 0.5, 0.5, 0.6)
+                ax2.bar(bins, freq, width=bins[1] - bins[0],
+                        color=grey_color, edgecolor=grey_color)
+                input_range = torch.tensor(bins, device=self.device).float()
+        else:
+            input_range = torch.tensor(input_range, device=self.device).float()
+        outputs = self.activation_function(input_range, self.numerator,
+                                           self.denominator, False)
+        outputs_np = outputs.detach().cpu().numpy()
+        ax.plot(input_range.detach().cpu().numpy(),
+                outputs_np)
+        if display:
+            plt.show()
+        else:
+            return plt.gcf()
+
 
 def _save_input(self, input, output):
-    import ipdb; ipdb.set_trace()
-    self.buffer = torch.cat((self.buffer, input[0]), 0)
+    self.distribution.fill_n(input[0].detach().cpu().numpy())
+
+
+def _save_input_auto_stop(self, input, output):
+    self.inputs_saved += 1
+    self.distribution.fill_n(input[0].detach().cpu().numpy())
+    if self.inputs_saved > self._max_saves:
+        self.training_mode()
+
+
+def _cleared_arrays(hist, tolerance=0.001):
+    hist = hist.normalize()
+    freq, bins = hist.numpy_like
+    first = (freq > 0.001).argmax()
+    last = (freq > 0.001)[::-1].argmax()
+    return freq[first:-last], bins[first:-last-1]
 
 
 class AugmentedRational(nn.Module):

@@ -1,5 +1,5 @@
-# Rational - Padé Activation Units
-Padé Activation Units: End-to-end Learning of Activation Functions in Deep Neural Network
+# Rational Activations - Learnable Rational Activation Functions
+First introduce as : PAU in Padé Activation Units: End-to-end Learning of Activation Functions in Deep Neural Network
 
 Arxiv link: https://arxiv.org/abs/1907.06732
 
@@ -75,4 +75,4 @@ $ python experiments/main.py --dataset mnist --arch conv --optimizer adam --lr 2
 - [ ] Repair + enhance Automatic manylinux production script.
 - [ ] Add python3.9 support
 - [ ] Make an CUDA 11.0 compatible version
-- [ ] Repair the tox test and have them checking before commit 
+- [ ] Repair the tox test and have them checking before commit

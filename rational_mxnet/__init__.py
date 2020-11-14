@@ -1,1 +1,1 @@
-from .rational import Rational
+from .rationals import Rational

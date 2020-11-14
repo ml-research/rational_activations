@@ -1,5 +1,5 @@
 Find weights for Rational approximating new functions
-================================================
+=====================================================
 
 If you want your function to approximate a function that is not already in
 `rational/rationals_config.json`, you have to run a script that would automatically find
