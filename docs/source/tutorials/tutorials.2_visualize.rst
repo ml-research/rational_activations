@@ -1,5 +1,5 @@
-Make the rational Function
-==========================
+Vizualize the functions
+=======================
 
 In this tutorial, we are going to visualize the rational function.
 First let's create a ratioal functions
@@ -38,7 +38,7 @@ function with it.
 
 By default, it is only going to save for the next `1000` calls, because
 retrieving the input requires to detach the tensors and retrieve them in the
-memory, which slows down the coputation.
+memory, which slows down the computation.
 
 Let's display the function with its input distribution now.
 

@@ -22,7 +22,7 @@ You can download from the
 
 ::
 
-    pip3 install rational
+    pip3 install rational-activations
 
 To use it:
 

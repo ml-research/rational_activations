@@ -127,14 +127,14 @@ class clean_all(clean):
 
 
 setup(
-    name='rational',
+    name='rational-activations',
     version=__version__,
     author="Alejandro Molina, Quentin Delfosse, Patrick Schramowski",
     author_email="molina@cs.tu-darmstadt.de, quentin.delfosse@cs.tu-darmstadt.de",
     description="Pade Activation Unit",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/ml-research/rational",
+    url="https://github.com/ml-research/rational_activations",
     packages=find_packages(),
     package_data={'': ['*.json']},
     include_package_data=True,

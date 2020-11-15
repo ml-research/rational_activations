@@ -11,7 +11,7 @@ do
   esac
 done
 
-CUDA_V="cuda102"
+CUDA_V="cuda110"
 
 # docker run -ti --gpus all --name manyl_cuda101 -v `pwd`:/prauper_src soumith/manylinux-cuda101:latest bash
 # docker run -ti --gpus all --name manyl_cuda101 -v `pwd`:/prauper_src soumith/manylinux-cuda100:latest bash
@@ -64,5 +64,3 @@ do
   source pypi_build_scripts/complete_wheel_repair.sh
   $PYTHON_V setup.py clean
 done
-
-# use auditwheel to repair

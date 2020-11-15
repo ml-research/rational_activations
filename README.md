@@ -1,11 +1,11 @@
 # Rational Activations - Learnable Rational Activation Functions
-First introduce as : PAU in Padé Activation Units: End-to-end Learning of Activation Functions in Deep Neural Network
+First introduce as PAU in Padé Activation Units: End-to-end Learning of Activation Functions in Deep Neural Network
 
 Arxiv link: https://arxiv.org/abs/1907.06732
 
 ## 1. About Padé Activation Units
 
-Padé Activation Units (Rational) are a novel learnable activation function. Rationals encode activation functions as rational functions, trainable in an end-to-end fashion using backpropagation and can be seemingless integrated into any neural network in the same way as common activation functions (e.g. ReLU).
+Rational Activations are a novel learnable activation functions. Rationals encode activation functions as rational functions, trainable in an end-to-end fashion using backpropagation and can be seemingless integrated into any neural network in the same way as common activation functions (e.g. ReLU).
 
 <table border="0">
 <tr>
