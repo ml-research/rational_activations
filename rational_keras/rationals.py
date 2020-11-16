@@ -45,9 +45,9 @@ class Rational(Layer):
         w_numerator, w_denominator = get_parameters(version, degrees, approx_func)
         
         self.numerator = self.add_weight(shape=(len(w_numerator),), name='w_numerator', trainable=trainable and train_numerator,
-                                         initializer=lambda shape, dtype: tf.constant(w_numerator))
+                                         initializer=tf.keras.initializers.Constant(w_numerator))
         self.denominator = self.add_weight(shape=(len(w_denominator),), name='w_denominator', trainable=trainable and train_numerator,
-                                         initializer=lambda shape, dtype: tf.constant(w_denominator))
+                                         initializer=tf.keras.initializers.Constant(w_denominator))
         
         if version == "A":
             rational_func = Rational_KERAS_A_F
