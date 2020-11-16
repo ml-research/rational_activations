@@ -13,3 +13,4 @@ src/dist
 *build
 dist
 .tox
+.ipynb_checkpoints
