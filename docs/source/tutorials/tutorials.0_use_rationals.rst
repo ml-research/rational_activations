@@ -24,7 +24,7 @@ If you now want to create a Pytorch Rational Network class:
 .. literalinclude:: code/how_to_use_rationals.py
     :lines: 18-72
 
-Now we can instanciate a Rational Network and a Recurrent Rational Networl and
+Now we can instantiate a Rational Network and a Recurrent Rational Network and
 pass them inputs.
 
 .. literalinclude:: code/how_to_use_rationals.py
