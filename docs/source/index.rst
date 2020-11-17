@@ -29,13 +29,6 @@ To use it:
 .. literalinclude:: tutorials/code/how_to_use_rationals.py
    :lines: 1-6
 
-.. toctree::
-    :maxdepth: 2
-    :caption: Tutorials:
-    :glob:
-
-    tutorials/*
-
 
 .. toctree::
    :hidden:
@@ -44,6 +37,13 @@ To use it:
    :glob:
 
    *
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Tutorials:
+   :glob:
+
+   tutorials/*
 
 .. toctree::
    :maxdepth: 2
