@@ -25,12 +25,13 @@ And, therefore relieves the network designer of having to commit to a potentiall
 
 ## 3. Installation
 
-To install the rational_activations module, you can use pip, but
-```diff
--  you should be careful about the CUDA version running on your machine.
-```
+To install the rational_activations module, you can use pip, but:<br/>
+
+:bangbang:  You should be careful about the CUDA version running on your machine.
+
 
 To get your CUDA version:
+
     import torch
     torch.version.cuda
 
@@ -87,20 +88,8 @@ model = torch.nn.Sequential(
 )
 ~~~~
 
-## 5. Reproducing Results
 
-To reproduce the reported results of the paper execute:
-
-$ export PYTHONPATH="./"
-$ python experiments/main.py --dataset mnist --arch conv --optimizer adam --lr 2e-3
-
-    # DATASET: Name of the dataset, for MNIST use mnist and for Fashion-MNIST use fmnist
-    # ARCH: selected neural network architecture: vgg, lenet or conv
-    # OPTIMIZER: either adam or sgd
-    # LR: learning rate
-
-
-## 6. To be implemented
+## 5. To be implemented
 - [X] Make a documentation
 - [X] Create tutorial in the doc
 - [ ] Tensorflow working version
