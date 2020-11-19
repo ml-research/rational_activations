@@ -25,153 +25,49 @@ And, therefore relieves the network designer of having to commit to a potentiall
 
 ## 3. Installation
 
-To install the rational_activations module, you can use pip, but you should be careful about the CUDA version running on your machine.
+To install the rational_activations module, you can use pip, but
+```diff
+-  you should be careful about the CUDA version running on your machine.
+```
+
 To get your CUDA version:
     import torch
     torch.version.cuda
 
-    <style>
-    .tab {
-     overflow: hidden;
-     border: 1px solid #ccc;
-     background-color: #f1f1f1;
-    }
+For **your** corresponding version of CUDA, please use one of the following command blocks:
+### CUDA 10.2 (Pytorch >= 1.5.0)
 
-    .tab button {
-     background-color: inherit;
-     float: left;
-     border: none;
-     outline: none;
-     cursor: pointer;
-     padding: 14px 16px;
-     transition: 0.3s;
-    }
+     pip3 install -U pip wheel
+     pip3 install torch rational-activations
 
-    .tab button:hover {
-     background-color: #ddd;
-    }
+### CUDA 10.1 (Pytorch == 1.4.0)
+#### Python3.6
 
-    .tab button.active {
-     background-color: #ccc;
-    }
+       pip3 install -U pip wheel
+       pip3 install torch==1.4.0
+       pip3 install https://iron.aiml.informatik.tu-darmstadt.de/wheelhouse/cuda-10.1/rational_activations-0.0.18-cp36-cp36m-manylinux2014_x86_64.whl
 
-    .tabcontent {
-     display: none;
-     padding: 6px 12px;
-     border: 1px solid #ccc;
-     border-top: none;
-    }
+#### Python3.7
 
-    </style>
-    <script>
-    function openTab(evt, tabName) {
-      // Declare all variables
-      var i, tabcontent, tablinks;
+       pip3 install -U pip wheel
+       pip3 install torch==1.4.0
+       pip3 install https://iron.aiml.informatik.tu-darmstadt.de/wheelhouse/cuda-10.1/rational_activations-0.0.18-cp37-cp37m-manylinux2014_x86_64.whl
 
-      // Get all elements with class="tabcontent" and hide them
-      tabcontent = document.getElementsByClassName("tabcontent");
-      for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-      }
+#### Python3.8
 
-      // Get all elements with class="tablinks" and remove the class "active"
-      tablinks = document.getElementsByClassName("tablinks");
-      for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-      }
-
-      // Show the current tab, and add an "active" class to the button that opened the tab
-      document.getElementById(tabName).style.display = "block";
-      evt.currentTarget.className += " active";
-    }
+         pip3 install -U pip wheel
+         pip3 install torch==1.4.0
+         pip3 install https://iron.aiml.informatik.tu-darmstadt.de/wheelhouse/cuda-10.1/rational_activations-0.0.18-cp38-cp38-manylinux2014_x86_64.whl
 
 
-    function openSubTab(evt, subTabName) {
-      // Declare all variables
-      var i, subtabcontent, subtablinks;
+### Other CUDA/Pytorch</h3>
+For any other combinaison of python, please install from source:
 
-      // Get all elements with class="subtabcontent" and hide them
-      subtabcontent = document.getElementsByClassName("subtabcontent");
-      for (i = 0; i < subtabcontent.length; i++) {
-        subtabcontent[i].style.display = "none";
-      }
+     pip3 install airspeed
+     git clone https://github.com/ml-research/rational_activations.git
+     cd rational_activations
+     python3 setup.py install --user
 
-      // Get all elements with class="subtablinks" and remove the class "active"
-      subtablinks = document.getElementsByClassName("subtablinks");
-      for (i = 0; i < subtablinks.length; i++) {
-        subtablinks[i].className = subtablinks[i].className.replace(" active", "");
-      }
-
-      // Show the current tab, and add an "active" class to the button that opened the tab
-      document.getElementById(subTabName).style.display = "block";
-      evt.currentTarget.className += " active";
-    }
-    </script>
-
-
-    <div class="tab">
-     <button class="tablinks" onclick="openTab(event, '10.2')">10.2</button>
-     <button class="tablinks" onclick="openTab(event, '10.1')">10.1</button>
-     <button class="tablinks" onclick="openTab(event, 'other')">other</button>
-    </div>
-
-    <div id="10.2" class="tabcontent">
-     <h3>CUDA 10.2 (Pytorch >= 1.5.0)</h3>
-     <p>Please use the following commands.</p>
-     <code>
-       pip3 install -U pip wheel <br/>
-       pip3 install torch rational-activations
-     </code>
-    </div>
-
-    <div id="10.1" class="tabcontent">
-      <div class="tab">
-       <button class="subtablinks" onclick="openSubTab(event, 'Python3.6')">Python3.6</button>
-       <button class="subtablinks" onclick="openSubTab(event, 'Python3.7')">Python3.7</button>
-       <button class="subtablinks" onclick="openSubTab(event, 'Python3.8')">Python3.8</button>
-      </div>
-      <div id="Python3.6" class="subtabcontent">
-         <h3>CUDA 10.1 (Pytorch == 1.4.0)</h3>
-         <h4>Python3.6</h4>
-         <p>Please use the following commands:</p>
-         <code>
-           pip3 install -U pip wheel <br/>
-           pip3 install torch==1.4.0 <br/>
-           pip3 install https://iron.aiml.informatik.tu-darmstadt.de/wheelhouse/cuda-10.1/rational_activations-0.0.18-cp36-cp36m-manylinux2014_x86_64.whl
-         </code>
-      </div>
-      <div id="Python3.7" class="subtabcontent" style="display:none">
-         <h3>CUDA 10.1 (Pytorch == 1.4.0)</h3>
-         <h4>Python3.7</h4>
-         <p>Please use the following commands:</p>
-         <code>
-           pip3 install -U pip wheel <br/>
-           pip3 install torch==1.4.0 <br/>
-           pip3 install https://iron.aiml.informatik.tu-darmstadt.de/wheelhouse/cuda-10.1/rational_activations-0.0.18-cp37-cp37m-manylinux2014_x86_64.whl
-         </code>
-      </div>
-      <div id="Python3.8" class="subtabcontent" style="display:none">
-         <h3>CUDA 10.1 (Pytorch == 1.4.0)</h3>
-         <h4>Python3.8</h4>
-         <p>Please use the following commands:</p>
-         <code>
-           pip3 install -U pip wheel <br/>
-           pip3 install torch==1.4.0 <br/>
-           pip3 install https://iron.aiml.informatik.tu-darmstadt.de/wheelhouse/cuda-10.1/rational_activations-0.0.18-cp38-cp38-manylinux2014_x86_64.whl
-         </code>
-      </div>
-    </div>
-
-    <div id="other" class="tabcontent">
-     <h3>Other CUDA/Pytorch</h3>
-     <p>For any other combinaison of python, please install from source</p>
-     <code>
-       pip3 install airspeed <br/>
-       git clone https://github.com/ml-research/rational_activations.git <br/>
-       cd rational_activations<br/>
-       python3 setup.py install --user
-     </code>
-    </div>
 
 
 If you encounter any trouble installing rational, please contact [this person](quentin.delfosse@cs.tu-darmstadt.de).
