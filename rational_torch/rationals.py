@@ -10,14 +10,13 @@ import torch.nn as nn
 from torch.cuda import is_available as torch_cuda_available
 from rational.get_weights import get_parameters
 from rational_torch.rational_cuda_functions import Rational_CUDA_A_F, \
-                                                   Rational_CUDA_B_F, \
-                                                   Rational_CUDA_C_F, \
-                                                   Rational_CUDA_D_F
+    Rational_CUDA_B_F, \
+    Rational_CUDA_C_F, \
+    Rational_CUDA_D_F
 from rational_torch.rational_pytorch_functions import Rational_PYTORCH_A_F, \
-                                                      Rational_PYTORCH_B_F, \
-                                                      Rational_PYTORCH_C_F, \
-                                                      Rational_PYTORCH_D_F
-
+    Rational_PYTORCH_B_F, \
+    Rational_PYTORCH_C_F, \
+    Rational_PYTORCH_D_F
 
 if torch_cuda_available():
     try:
@@ -26,6 +25,119 @@ if torch_cuda_available():
         print('error importing rational_cuda, is cuda not avialable?')
 
 from rational_torch.rational_pytorch_functions import *
+
+
+class RecurrentRational():
+    """
+        Recurrent rational activation function - wrapper for Rational
+
+        Arguments:
+                approx_func (str):
+                    The name of the approximated function for initialisation. \
+                    The different initialable functions are available in \
+                    `rational.rationals_config.json`. \n
+                    Default ``leaky_relu``.
+                degrees (tuple of int):
+                    The degrees of the numerator (P) and denominator (Q).\n
+                    Default ``(5, 4)``
+                cuda (bool):
+                    Use GPU CUDA version. \n
+                    If ``None``, use cuda if available on the machine\n
+                    Default ``None``
+                version (str):
+                    Version of Rational to use. Rational(x) = P(x)/Q(x)\n
+                    `A`: Q(x) = 1 + \|b_1.x\| + \|b_2.x\| + ... + \|b_n.x\|\n
+                    `B`: Q(x) = 1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
+                    `C`: Q(x) = 0.1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
+                    `D`: like `B` with noise\n
+                    Default ``A``
+                trainable (bool):
+                    If the weights are trainable, i.e, if they are updated during \
+                    backward pass\n
+                    Default ``True``
+        Returns:
+            Module: Rational module
+        """
+
+    def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=None,
+                 version="A", trainable=True, train_numerator=True,
+                 train_denominator=True):
+        self.rational = Rational(approx_func=approx_func,
+                                 degrees=degrees,
+                                 cuda=cuda,
+                                 version=version,
+                                 trainable=trainable,
+                                 train_numerator=train_numerator,
+                                 train_denominator=train_denominator)
+
+    def __call__(self, *args, **kwargs):
+        return _RecurrentRational(self.rational)
+
+
+class _RecurrentRational(nn.Module):
+    def __init__(self, rational):
+        super(_RecurrentRational, self).__init__()
+        self.rational = rational
+        self._handle_retrieve_mode = None
+        self.distribution = None
+
+    def forward(self, x):
+        return self.rational(x)
+
+    def __repr__(self):
+        return (f"Recurrent Rational Activation Function (PYTORCH version "
+                f"{self.rational.version}) of degrees {self.rational.degrees} running on "
+                f"{self.rational.device}")
+
+    def cpu(self):
+        return self.rational.cpu()
+
+    def cuda(self):
+        return self.rational.cuda()
+
+    def numpy(self):
+        return self.rational.numpy()
+
+    def fit(self, function, x=None, show=False):
+        return self.rational.fit(function=function, x=x, show=show)
+
+    def input_retrieve_mode(self, auto_stop=True, max_saves=1000):
+        """
+                Will retrieve the distribution of the input in self.distribution. \n
+                This will slow down the function, as it has to retrieve the input \
+                dist.\n
+
+                Arguments:
+                        auto_stop (bool):
+                            If True, the retrieving will stop after `max_saves` \
+                            calls to forward.\n
+                            Else, use :meth:`rational_torch.Rational.training_mode`.\n
+                            Default ``True``
+                        max_saves (int):
+                            The range on which the curves of the functions are fitted \
+                            together.\n
+                            Default ``1000``
+                """
+        from physt import h1 as hist1
+        self.distribution = hist1(None, "fixed_width", bin_width=0.1,
+                                  adaptive=True)
+        print("Retrieving input from now on.")
+        if auto_stop:
+            self.inputs_saved = 0
+            self._handle_retrieve_mode = self.register_forward_hook(_save_input_auto_stop)
+            self._max_saves = max_saves
+        else:
+            self._handle_retrieve_mode = self.register_forward_hook(_save_input)
+
+    def training_mode(self):
+        """
+                Stops retrieving the distribution of the input in `self.distribution`.
+                """
+        print("Training mode, no longer retrieving the input.")
+        self._handle_retrieve_mode.remove()
+
+    def show(self, input_range=None, display=True):
+        self.rational.show(input_range=input_range, display=display, distribution=self.distribution)
 
 
 class Rational(nn.Module):
@@ -272,7 +384,7 @@ class Rational(nn.Module):
         print("Training mode, no longer retrieving the input.")
         self._handle_retrieve_mode.remove()
 
-    def show(self, input_range=None, display=True):
+    def show(self, input_range=None, display=True, distribution=None):
         """
         Show the function using `matplotlib`.
 
@@ -294,10 +406,12 @@ class Rational(nn.Module):
                   "visualisation")
         ax = plt.gca()
         if input_range is None:
-            if self.distribution is None:
+            if distribution is None:
+                distribution = self.distribution
+            if distribution is None:
                 input_range = torch.arange(-3, 3, 0.01, device=self.device)
             else:
-                freq, bins = _cleared_arrays(self.distribution)
+                freq, bins = _cleared_arrays(distribution)
                 ax2 = ax.twinx()
                 ax2.set_yticks([])
                 grey_color = (0.5, 0.5, 0.5, 0.6)
@@ -333,7 +447,7 @@ def _cleared_arrays(hist, tolerance=0.001):
     freq, bins = hist.numpy_like
     first = (freq > 0.001).argmax()
     last = (freq > 0.001)[::-1].argmax()
-    return freq[first:-last], bins[first:-last-1]
+    return freq[first:-last], bins[first:-last - 1]
 
 
 class AugmentedRational(nn.Module):
