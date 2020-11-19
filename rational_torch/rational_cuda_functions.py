@@ -1,6 +1,14 @@
 import torch
-from rational_cuda import *
-
+try:
+    from rational_cuda import *
+except ImportError:
+    import os
+    smi_head = os.popen("nvidia-smi | grep 'CUDA Version'").read()
+    CUDA_version = float(smi_head.split("CUDA Version:")[1][:6])
+    print(f"Your CUDA Version is {CUDA_version} which might not be compatible",
+    "with this rational_activations version.\n",
+    "Please look at the README to see how to install a compatible version.")
+    exit()
 
 class Rational_CUDA_A_F(torch.autograd.Function):
     @staticmethod

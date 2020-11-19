@@ -22,8 +22,8 @@ esac
 
 
 function log () {
-  if [[ $_V -eq 1 ]]; then
-    # if [[ 1 ]]; then
+  # if [[ $_V -eq 1 ]]; then
+    if [[ 1 ]]; then
         echo "$@"
     fi
 }

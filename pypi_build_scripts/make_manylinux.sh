@@ -11,7 +11,7 @@ do
   esac
 done
 
-CUDA_V="cuda110"
+CUDA_V="cuda-10.2"
 
 # docker run -ti --gpus all --name manyl_cuda101 -v `pwd`:/prauper_src soumith/manylinux-cuda101:latest bash
 # docker run -ti --gpus all --name manyl_cuda101 -v `pwd`:/prauper_src soumith/manylinux-cuda100:latest bash
@@ -26,8 +26,8 @@ torch_lib_list=(
   "/usr/local/lib64/python3.6/site-packages/torch/lib/"
   "/usr/local/lib/python3.7/site-packages/torch/lib/"
   "/usr/local/lib/python3.8/site-packages/torch/lib/")
-CUDA_LIB="/usr/local/cuda/lib64/"
-
+CUDA_LIB="/usr/local/$CUDA_V/lib64/"
+export CUDA_HOME="/usr/local/$CUDA_V"
 
 printf "Checking if python versions are correctly accessible and path to torch lib packages\n"
 for i in 0 1 2
@@ -44,8 +44,8 @@ do
 
   if [ -z "$CUDA_LIB" ] || [ ! -d "$CUDA_LIB" ]
   then
-    printf "Please provide a valid cyda torch lib path in \$CUDA_LIB\
-            \ne.g. /usr/local/cuda/lib64/\n"
+    printf "Please provide a valid cuda lib path in \$CUDA_LIB\
+            \ne.g. /usr/local/$CUDA_V/lib64/\n"
     exit 1
   fi
 done
@@ -58,7 +58,9 @@ for i in 2
 do
   PYTHON_V=${python_list[$i]}
   TORCH_LIB=${torch_lib_list[$i]}
-  export LD_LIBRARY_PATH=/usr/local/lib:$TORCH_LIB  # for it to be able to find the .so files
+  export LD_LIBRARY_PATH=/usr/local/lib:$TORCH_LIB:$CUDA_LIB  # for it to be able to find the .so files
+  rm -f /usr/local/cuda
+  ln -s /usr/local/$CUDA_LIB /usr/local/cuda
   $PYTHON_V setup.py bdist_wheel
   set -- "${@:2}"
   source pypi_build_scripts/complete_wheel_repair.sh

@@ -22,14 +22,17 @@ And, therefore relieves the network designer of having to commit to a potentiall
     PyTorch>=1.4.0
     CUDA>=10.1
 
+
 ## 3. Installation
 
-Rational is implemented as a pytorch extension using CUDA 10.2. So all that is needed is to install the extension.
+To install the rational_activations module, you can use pip, but you should be careful about the CUDA version running on your machine.
+To get your CUDA version:
+    import torch
+    torch.version.cuda
 
-    pip3 install --upgrade pip
-    pip3 install rational-activations
 
-If installation does not work, please run:
+<center><iframe src="tableau.html" width="800" height="320" seamless ></iframe ></center>
+
 
     pip3 install wheel
 
