@@ -3,54 +3,155 @@ import tensorflow as tf
 from rational_keras import Rational
 import numpy as np
 
-t = [[-6, -5, -4],
-     [-3, -2, -1],
-     [-0.5, 0, 0.5],
-     [1, 2, 3],
-     [4, 5, 6]]
 
-inp = tf.reshape(t, [-1])
-
-# computed by hand
-expected_res = np.array(
-    [-0.13355141377739513, -0.0619413757811037, -0.03646978148253958, -0.032655850878918466, -0.01944828952873663,
-     -0.010106687605756857, -0.02000806000270244, 0.09163206842254161, 0.48498930771604903, 0.9998907488864881,
-     2.0005508674368584, 2.997343831178446, 4.0035305482127255, 4.98806094915683, 5.926454739793884])
-print('Pade A pass test: ', np.all(np.isclose(Rational(version='A')(inp).numpy(), expected_res)))
-
-expected_res = np.array(
-    [-0.1335534260726669, -0.061942266528118566, -0.036470252999078044, -0.03265619211367341, -0.019448420790274566,
-     -0.010106709442643294, -0.020008068455664735, 0.09163206842254161, 0.48498968020087785, 0.9998917307389753,
-     2.0005524015430365, 2.9973454127699837, 4.003532018471603, 4.988062253138456, 5.926455867099212])
-print('Pade B pass test: ', np.all(np.isclose(Rational(version='B')(inp).numpy(), expected_res)))
-
-expected_res = np.array(
-    [-0.13560896177554654, -0.0635304197793349, -0.03814467483896467, -0.03565460387705061, -0.02381404596768598,
-     -0.019051035688668942, -0.07533562984157928, 0.916320684225416, 1.8261152003712784, 1.8847829043648106,
-     2.4496170351652955, 3.2725513632211634, 4.187339719909377, 5.115950575831143, 6.017669233625428])
-print('Pade C pass test: ', np.all(np.isclose(Rational(version='C')(inp).numpy(), expected_res)))
+### MODIFY EVERY THING SUCH THAT IT TEST ON RATIONALS OF KERAS
 
 
-# computed by hand
-expected_res = np.array(
-    [2.6874302592714145, 2.1099724083563265, 1.5423625873064075, 0.993025283347864, 0.4838709677419355,
-     0.08571428571428572, -0.045454545454545456, -1.0, -0.45454545454545453, -0.6, -1.1505376344086022,
-     -1.7480383609415868, -2.3495293045854844, -2.951123374063855, -3.552412208729898])
-print('Pade A pass test: ', np.all(np.isclose(
-    Rational(version='A', w_numerator=[-1.0, -2.0, -3.0, -4.0, -5.0, -6.0], w_denominator=[-7.0, -8.0, -9.0, -10.0])(inp).numpy(), expected_res)))
+t = [-2., -1, 0., 1., 2.]
+expected_res = np.array([-0.02, -0.01, 0, 1, 2])
+inp = torch.from_numpy(np.array(t)).reshape(-1)
+cuda_inp = torch.tensor(np.array(t), dtype=torch.float, device="cuda").reshape(-1)
 
-expected_res = np.array(
-    [3.6351771286513364, 3.035154035154035, 2.435971223021583, 1.8400646203554119, 1.2616822429906542, 1.0, -0.125,
-     -1.0, -0.45454545454545453, -0.6, -1.1505376344086022, -1.7480383609415868, -2.3495293045854844,
-     -2.951123374063855, -3.552412208729898])
-print('Pade B pass test: ', np.all(np.isclose(
-    Rational(version='B', w_numerator=[-1.0, -2.0, -3.0, -4.0, -5.0, -6.0], w_denominator=[-7.0, -8.0, -9.0, -10.0])(
-        inp).numpy(), expected_res)))
 
-expected_res = np.array(
-    [3.63546763037089, 3.0356704032059882, 2.4370231754714267, 1.8427438925740172, 1.2723845428840717,
-     1.4285714285714286, -0.17857142857142858, -10.0, -0.5102040816326531, -0.6158357771260997, -1.1542610571736784,
-     -1.749411046156531, -2.350171622976216, -2.9514723853825835, -3.552622078101102])
-print('Pade C pass test: ', np.all(np.isclose(
-    Rational(version='C', w_numerator=[-1.0, -2.0, -3.0, -4.0, -5.0, -6.0], w_denominator=[-7.0, -8.0, -9.0, -10.0])(
-        inp).numpy(), expected_res)))
+rationalA_lrelu_cpu = Rational(version='A', cuda=False)(inp).detach().numpy()
+rationalB_lrelu_cpu = Rational(version='B', cuda=False)(inp).detach().numpy()
+rationalC_lrelu_cpu = Rational(version='C', cuda=False)(inp).detach().numpy()
+rationalD_lrelu_cpu = Rational(version='D', cuda=False, trainable=False)(inp).detach().numpy()
+
+rationalA_lrelu_gpu = Rational(version='A', cuda=True)(cuda_inp).clone().detach().cpu().numpy()
+rationalB_lrelu_gpu = Rational(version='B', cuda=True)(cuda_inp).clone().detach().cpu().numpy()
+rationalC_lrelu_gpu = Rational(version='C', cuda=True)(cuda_inp).clone().detach().cpu().numpy()
+rationalD_lrelu_gpu = Rational(version='D', cuda=True, trainable=False)(cuda_inp).clone().detach().cpu().numpy()
+
+
+#  Tests on cpu
+def test_rationalA_cpu_lrelu():
+    assert np.all(np.isclose(rationalA_lrelu_cpu, expected_res, atol=5e-02))
+
+
+def test_rationalB_cpu_lrelu():
+    assert np.all(np.isclose(rationalB_lrelu_cpu, expected_res, atol=5e-02))
+
+
+def test_rationalC_cpu_lrelu():
+    assert np.all(np.isclose(rationalC_lrelu_cpu, expected_res, atol=5e-02))
+
+
+def test_rationalD_cpu_lrelu():
+    assert np.all(np.isclose(rationalD_lrelu_cpu, expected_res, atol=5e-02))
+    # print(rationalD_lrelu_cpu)
+
+
+# Tests on GPU
+def test_rationalA_gpu_lrelu():
+    assert np.all(np.isclose(rationalA_lrelu_gpu, expected_res, atol=5e-02))
+
+
+def test_rationalB_gpu_lrelu():
+    assert np.all(np.isclose(rationalB_lrelu_gpu, expected_res, atol=5e-02))
+
+
+def test_rationalC_gpu_lrelu():
+    assert np.all(np.isclose(rationalC_lrelu_gpu, expected_res, atol=5e-02))
+
+
+def test_rationalD_gpu_lrelu():
+    assert np.all(np.isclose(rationalD_lrelu_gpu, expected_res, atol=5e-02))
+
+
+# GPU and CPU consistent results
+def test_cpu_equal_gpu_A():
+    assert np.all(np.isclose(rationalA_lrelu_cpu, rationalA_lrelu_gpu, atol=1e-06))
+
+
+def test_cpu_equal_gpu_B():
+    assert np.all(np.isclose(rationalB_lrelu_cpu, rationalB_lrelu_gpu, atol=1e-06))
+
+
+def test_cpu_equal_gpu_C():
+    assert np.all(np.isclose(rationalC_lrelu_cpu, rationalC_lrelu_gpu, atol=1e-06))
+
+def test_cpu_equal_gpu_D():
+    assert np.all(np.isclose(rationalD_lrelu_cpu, rationalD_lrelu_gpu, atol=1e-06))
+
+
+# Tests conversion GPU -> CPU
+def test_conversion_gpu_to_cpuA():
+    rational = Rational(version='A', cuda=True)
+    rational.cpu()
+    params = np.all([str(para.device) == 'cpu' for para in rational.parameters()])
+    cpu_f = "PYTORCH_A" in rational.activation_function.__qualname__
+    new_res = rational(inp).detach().numpy()
+    coherent_compute = np.all(np.isclose(new_res, expected_res, atol=5e-02))
+    assert params and cpu_f and coherent_compute
+
+
+def test_conversion_gpu_to_cpuB():
+    rational = Rational(version='B', cuda=True)
+    rational.cpu()
+    params = np.all([str(para.device) == 'cpu' for para in rational.parameters()])
+    cpu_f = "PYTORCH_B" in rational.activation_function.__qualname__
+    new_res = rational(inp).detach().numpy()
+    coherent_compute = np.all(np.isclose(new_res, expected_res, atol=5e-02))
+    assert params and cpu_f and coherent_compute
+
+
+def test_conversion_gpu_to_cpuC():
+    rational = Rational(version='C', cuda=True)
+    rational.cpu()
+    params = np.all([str(para.device) == 'cpu' for para in rational.parameters()])
+    cpu_f = "PYTORCH_C" in rational.activation_function.__qualname__
+    new_res = rational(inp).detach().numpy()
+    coherent_compute = np.all(np.isclose(new_res, expected_res, atol=5e-02))
+    assert params and cpu_f and coherent_compute
+
+
+def test_conversion_gpu_to_cpuD():
+    rational = Rational(version='D', cuda=True, trainable=False)
+    rational.cpu()
+    params = np.all([str(para.device) == 'cpu' for para in rational.parameters()])
+    cpu_f = "PYTORCH_D" in rational.activation_function.__qualname__
+    new_res = rational(inp).detach().numpy()
+    coherent_compute = np.all(np.isclose(new_res, expected_res, atol=5e-02))
+    assert params and cpu_f and coherent_compute
+
+
+# Tests conversion CPU -> GPU
+def test_conversion_cpu_to_gpuA():
+    rational = Rational(version='A', cuda=False)
+    rational.cuda()
+    params = np.all(['cuda' in str(para.device) for para in rational.parameters()])
+    cpu_f = "CUDA_A" in rational.activation_function.__qualname__
+    new_res = rational(cuda_inp).clone().detach().cpu().numpy()
+    coherent_compute = np.all(np.isclose(new_res, expected_res, atol=5e-02))
+    assert params and cpu_f and coherent_compute
+
+
+def test_conversion_cpu_to_gpuB():
+    rational = Rational(version='B', cuda=False)
+    rational.cuda()
+    params = np.all(['cuda' in str(para.device) for para in rational.parameters()])
+    cpu_f = "CUDA_B" in rational.activation_function.__qualname__
+    new_res = rational(cuda_inp).clone().detach().cpu().numpy()
+    coherent_compute = np.all(np.isclose(new_res, expected_res, atol=5e-02))
+    assert params and cpu_f and coherent_compute
+
+
+def test_conversion_cpu_to_gpuC():
+    rational = Rational(version='C', cuda=False)
+    rational.cuda()
+    params = np.all(['cuda' in str(para.device) for para in rational.parameters()])
+    cpu_f = "CUDA_C" in rational.activation_function.__qualname__
+    new_res = rational(cuda_inp).clone().detach().cpu().numpy()
+    coherent_compute = np.all(np.isclose(new_res, expected_res, atol=5e-02))
+    assert params and cpu_f and coherent_compute
+
+
+def test_conversion_cpu_to_gpuD():
+    rational = Rational(version='D', cuda=False, trainable=False)
+    rational.cuda()
+    params = np.all(['cuda' in str(para.device) for para in rational.parameters()])
+    cpu_f = "CUDA_D" in rational.activation_function.__qualname__
+    new_res = rational(cuda_inp).clone().detach().cpu().numpy()
+    coherent_compute = np.all(np.isclose(new_res, expected_res, atol=5e-02))
+    assert params and cpu_f and coherent_compute
