@@ -1,6 +1,6 @@
 import torch
 
-from rational_torch import Rational
+from rational.torch import Rational
 import numpy as np
 
 t = [-2., -1, 0., 1., 2.]

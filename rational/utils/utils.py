@@ -89,6 +89,7 @@ def find_closest_equivalent(rational_func, new_func, x):
     y = rational_func(x)
     from scipy.optimize import curve_fit
     import torch
+
     def equivalent_func(x_array, a, b, c, d):
         return a * new_func(c * torch.tensor(x_array) + d) + b
     params = curve_fit(equivalent_func, x, y, initials, bounds=(x.min(), x.max()))

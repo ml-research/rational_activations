@@ -1,5 +1,5 @@
 import numpy as np
-from rational.get_weights import get_parameters
+from rational.utils.get_weights import get_parameters
 
 
 class Rational():
@@ -43,7 +43,7 @@ class Rational():
         Returns:
             function: Rational torch function
         """
-        from rational_torch import Rational as Rational_torch
+        from rational.torch import Rational as Rational_torch
         import torch.nn as nn
         import torch
         rtorch = Rational_torch(self.init_approximation, self.degrees,

@@ -5,26 +5,17 @@ Padé Activation Units - Rational Activation Functions for pytorch
 This module allows you to create Rational Neural Networks using Padé Activation
 Units - Learnabe Rational activation functions.
 """
-import torch
 import torch.nn as nn
 from torch.cuda import is_available as torch_cuda_available
-from rational.get_weights import get_parameters
-from rational_torch.rational_cuda_functions import Rational_CUDA_A_F, \
-    Rational_CUDA_B_F, \
-    Rational_CUDA_C_F, \
-    Rational_CUDA_D_F
-from rational_torch.rational_pytorch_functions import Rational_PYTORCH_A_F, \
-    Rational_PYTORCH_B_F, \
-    Rational_PYTORCH_C_F, \
-    Rational_PYTORCH_D_F
+from rational.utils.get_weights import get_parameters
 
 if torch_cuda_available():
     try:
-        from rational_torch.rational_cuda_functions import *
+        from rational.torch.rational_cuda_functions import *
     except:
         print('error importing rational_cuda, is cuda not avialable?')
 
-from rational_torch.rational_pytorch_functions import *
+from rational.torch.rational_pytorch_functions import *
 
 
 class RecurrentRational():
@@ -111,7 +102,7 @@ class _RecurrentRational(nn.Module):
                         auto_stop (bool):
                             If True, the retrieving will stop after `max_saves` \
                             calls to forward.\n
-                            Else, use :meth:`rational_torch.Rational.training_mode`.\n
+                            Else, use :meth:`torch.Rational.training_mode`.\n
                             Default ``True``
                         max_saves (int):
                             The range on which the curves of the functions are fitted \
@@ -359,7 +350,7 @@ class Rational(nn.Module):
                 auto_stop (bool):
                     If True, the retrieving will stop after `max_saves` \
                     calls to forward.\n
-                    Else, use :meth:`rational_torch.Rational.training_mode`.\n
+                    Else, use :meth:`torch.Rational.training_mode`.\n
                     Default ``True``
                 max_saves (int):
                     The range on which the curves of the functions are fitted \

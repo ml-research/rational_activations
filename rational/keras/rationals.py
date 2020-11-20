@@ -2,8 +2,7 @@ from tensorflow.python.keras.engine.base_layer import Layer
 import tensorflow as tf
 
 
-from rational.get_weights import get_parameters
-from rational_keras.rational_keras_functions import *
+from rational.utils.get_weights import get_parameters
 
 
 class Rational(Layer):

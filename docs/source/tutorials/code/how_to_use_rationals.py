@@ -1,4 +1,4 @@
-from rational_torch import Rational
+from rational.torch import Rational
 
 rational_function = Rational() # Initialized closed to Leaky ReLU
 print(rational_function)
