@@ -73,3 +73,8 @@ class Rational(HybridBlock):
         out = self.activation_function(x, self.numerator.data(self.device),
                                        self.denominator.data(self.device), self.training)
         return out
+    
+    def __repr__(self):
+        return (f"Rational Activation Function (MXNET version "
+            f"{self.version}) of degrees {self.degrees} running on "
+            f"{self.device}")
