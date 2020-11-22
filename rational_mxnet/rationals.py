@@ -35,12 +35,15 @@ class Rational(HybridBlock):
     Returns:
         Module: Rational module
     """
-    def __init__(self, approx_func='leaky_relu', degrees=(5, 4), cuda=False,
+    def __init__(self, approx_func='leaky_relu', degrees=(5, 4), device=None,
                  version="A", trainable=True, train_numerator=True,
                  train_denominator=True):
         super(Rational, self).__init__()
         w_numerator, w_denominator = get_parameters(version, degrees, approx_func)
-        self.device = gpu() if cuda else cpu()
+        if device is None:
+            self.device = gpu()
+        else:
+            self.device = device
 
         with self.name_scope():
             self.numerator = self.params.get(name='w_numerator', shape=(len(w_numerator),),

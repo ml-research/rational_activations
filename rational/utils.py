@@ -123,21 +123,21 @@ def _convert_pytorch_layer(name, layer, version, cuda):
     return name, layer
         
     
-def convert_mxnet_model_to_rational(model, rational_version='A', rational_cuda=False):
+def convert_mxnet_model_to_rational(model, rational_version='A', rational_device=None):
     converted = HybridSequential()
     for name, layer in model._children.items():
         childs = layer._children.items()
         if len(list(childs)) > 0:
             seq = HybridSequential()
             for n, l in layer._children.items():
-                seq.add(_convert_mxnet_layer(layer, rational_version, rational_cuda))
+                seq.add(_convert_mxnet_layer(layer, rational_version, rational_device))
             converted.add(seq)
         else:
-            converted.add(_convert_mxnet_layer(layer, rational_version, rational_cuda))
+            converted.add(_convert_mxnet_layer(layer, rational_version, rational_device))
     return converted
 
 
-def _convert_mxnet_layer(layer, version, cuda):
+def _convert_mxnet_layer(layer, version, device):
     if isinstance(layer, Activation):
-        return RationalMxNet(version=version, approx_func='relu', cuda=cuda)
+        return RationalMxNet(version=version, approx_func='relu', device=device)
     return layer
