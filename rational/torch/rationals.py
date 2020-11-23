@@ -62,12 +62,12 @@ class RecurrentRational():
                                  train_denominator=train_denominator)
 
     def __call__(self, *args, **kwargs):
-        return _RecurrentRational(self.rational)
+        return RecurrentRationalModule(self.rational)
 
 
-class _RecurrentRational(nn.Module):
+class RecurrentRationalModule(nn.Module):
     def __init__(self, rational):
-        super(_RecurrentRational, self).__init__()
+        super(RecurrentRationalModule, self).__init__()
         self.rational = rational
         self._handle_retrieve_mode = None
         self.distribution = None
@@ -431,7 +431,6 @@ def _save_input_auto_stop(self, input, output):
     self.distribution.fill_n(input[0].detach().cpu().numpy())
     if self.inputs_saved > self._max_saves:
         self.training_mode()
-
 
 def _cleared_arrays(hist, tolerance=0.001):
     hist = hist.normalize()

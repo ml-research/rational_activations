@@ -1,1 +1,1 @@
-from .rationals import Rational, RecurrentRational
+from .rationals import Rational, RecurrentRational, RecurrentRationalModule
