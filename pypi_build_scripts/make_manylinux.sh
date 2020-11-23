@@ -54,7 +54,7 @@ unset PYTHON_V TORCH_LIB
 
 
 # generate the wheels
-for i in 0
+for i in 2
 do
   PYTHON_V=${python_list[$i]}
   TORCH_LIB=${torch_lib_list[$i]}

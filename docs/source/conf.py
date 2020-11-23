@@ -12,9 +12,11 @@
 #
 import os
 import sys
+import rational
 sys.path.insert(0, os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath('../..'))
-from rational import __version__
+sys.path.insert(0, os.path.abspath(rational.__file__))
+
 
 # -- Project information -----------------------------------------------------
 
@@ -23,7 +25,7 @@ copyright = '2020, Quentin Delfosse, Alejandro Molina, Patrick Schramowski'
 author = 'Quentin Delfosse, Alejandro Molina, Patrick Schramowski'
 
 # The full version, including alpha/beta/rc tags
-release = __version__
+release = rational.__version__
 
 
 # -- General configuration ---------------------------------------------------
