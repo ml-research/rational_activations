@@ -1,4 +1,4 @@
-from rational_torch import Rational
+from rational.torch import Rational
 rational_function = Rational("tanh") # Initialized closed to tanh
 
 rational_function.show()

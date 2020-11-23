@@ -6,7 +6,7 @@ from pathlib import Path
 def get_parameters(rational_version, degrees, approx_func):
     nd, dd = degrees
     rational_full_name = f"Rational_version_{rational_version}{nd}/{dd}"
-    config_file = 'rationals_config.json'
+    config_file = '../rationals_config.json'
     config_file_dir = str(Path(os.path.abspath(__file__)).parent)
     with open(os.path.join(config_file_dir, config_file)) as json_file:
         rationals_dict = json.load(json_file)

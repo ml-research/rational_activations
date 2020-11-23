@@ -1,5 +1,5 @@
-rational_mxnet
+rational.mxnet
 ==============
 
-.. automodule:: rational_mxnet
+.. automodule:: rational.mxnet
     :members: Rational
