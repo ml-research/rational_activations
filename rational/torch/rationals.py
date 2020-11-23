@@ -342,7 +342,7 @@ class Rational(nn.Module):
         self._handle_retrieve_mode = None
         self.distribution = None
 
-    def input_retrieve_mode(self, auto_stop=True, max_saves=1000):
+    def input_retrieve_mode(self, auto_stop=True, max_saves=1000, bin_width=0.1):
         """
         Will retrieve the distribution of the input in self.distribution. \n
         This will slow down the function, as it has to retrieve the input \
@@ -360,7 +360,7 @@ class Rational(nn.Module):
                     Default ``1000``
         """
         from physt import h1 as hist1
-        self.distribution = hist1(None, "fixed_width", bin_width=0.1,
+        self.distribution = hist1(None, "fixed_width", bin_width=bin_width,
                                   adaptive=True)
         print("Retrieving input from now on.")
         if auto_stop:
@@ -405,12 +405,16 @@ class Rational(nn.Module):
                 input_range = torch.arange(-3, 3, 0.01, device=self.device)
             else:
                 freq, bins = _cleared_arrays(distribution)
-                ax2 = ax.twinx()
-                ax2.set_yticks([])
-                grey_color = (0.5, 0.5, 0.5, 0.6)
-                ax2.bar(bins, freq, width=bins[1] - bins[0],
-                        color=grey_color, edgecolor=grey_color)
-                input_range = torch.tensor(bins, device=self.device).float()
+                if freq is None:
+                    input_range = torch.arange(-3, 3, 0.01, device=self.device)
+                else:
+                    ax2 = ax.twinx()
+                    ax2.set_yticks([])
+                    grey_color = (0.5, 0.5, 0.5, 0.6)
+
+                    ax2.bar(bins, freq, width=bins[1] - bins[0],
+                            color=grey_color, edgecolor=grey_color)
+                    input_range = torch.tensor(bins, device=self.device).float()
         else:
             input_range = torch.tensor(input_range, device=self.device).float()
         outputs = self.activation_function(input_range, self.numerator,
@@ -437,9 +441,12 @@ def _save_input_auto_stop(self, input, output):
 def _cleared_arrays(hist, tolerance=0.001):
     hist = hist.normalize()
     freq, bins = hist.numpy_like
-    first = (freq > 0.001).argmax()
-    last = (freq > 0.001)[::-1].argmax()
-    return freq[first:-last], bins[first:-last - 1]
+    min_len = 2
+    #if len(freq) <= min_len:
+    #    return None, None
+    first = (freq > 0.001).argmax() if len(freq) > min_len else 0
+    last = -((freq > 0.001)[::-1].argmax()) if len(freq) > min_len else min_len + 1
+    return freq[first:last], bins[first:last - 1]
 
 
 class AugmentedRational(nn.Module):
