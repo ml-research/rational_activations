@@ -11,7 +11,7 @@ do
   esac
 done
 
-CUDA_V="cuda-10.2"
+CUDA_V="cuda-10.1"
 
 # docker run -ti --gpus all --name manyl_cuda101 -v `pwd`:/prauper_src soumith/manylinux-cuda101:latest bash
 # docker run -ti --gpus all --name manyl_cuda101 -v `pwd`:/prauper_src soumith/manylinux-cuda100:latest bash
@@ -54,7 +54,7 @@ unset PYTHON_V TORCH_LIB
 
 
 # generate the wheels
-for i in 2
+for i in 0
 do
   PYTHON_V=${python_list[$i]}
   TORCH_LIB=${torch_lib_list[$i]}
