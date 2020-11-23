@@ -1,5 +1,5 @@
 import torch
-from rational_cuda import *
+from rational.cuda import *
 
 
 class Rational_CUDA_A_F(torch.autograd.Function):

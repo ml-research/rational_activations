@@ -10,6 +10,8 @@ from .utils import fit_rational_to_base_function
 import matplotlib.pyplot as plt
 import torch
 import os
+from rational.numpy.rationals import Rational_version_A, Rational_version_B, \
+    Rational_version_C
 
 
 def plot_result(x_array, rational_array, target_array,

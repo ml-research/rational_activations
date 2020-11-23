@@ -1,2 +1,1 @@
-__version__ = '0.0.17'
-from .rationals import Rational
+__version__ = '0.0.19'

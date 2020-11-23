@@ -91,7 +91,7 @@ print(output_rrn)
 
 import matplotlib.pyplot as plt
 
-input = torch.range(-2, 2, 0.1)
+input = torch.arange(-2, 2, 0.1)
 rational_function.cpu()
 lrelu = nn.LeakyReLU()
 
