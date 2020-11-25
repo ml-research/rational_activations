@@ -1,8 +1,9 @@
-from tensorflow.python.keras.engine.base_layer import Layer
+from tensorflow.keras.layers import Layer
 import tensorflow as tf
 
 
-from rational.utils.get_weights import get_parameters
+from rational.get_weights import get_parameters
+from rational_keras.rational_keras_functions import *
 
 
 class Rational(Layer):
@@ -42,24 +43,27 @@ class Rational(Layer):
         super(Rational, self).__init__()
 
         w_numerator, w_denominator = get_parameters(version, degrees, approx_func)
-        self.numerator = tf.Variable(initial_value=w_numerator, trainable=trainable and train_numerator)
-        self.denominator = tf.Variable(initial_value=w_denominator, trainable=trainable and train_denominator)
-
+        
+        self.numerator = self.add_weight(shape=(len(w_numerator),), name='w_numerator', trainable=trainable and train_numerator,
+                                         initializer=tf.keras.initializers.Constant(w_numerator))
+        self.denominator = self.add_weight(shape=(len(w_denominator),), name='w_denominator', trainable=trainable and train_numerator,
+                                         initializer=tf.keras.initializers.Constant(w_denominator))
+        
         if version == "A":
-            rational_func = Rational_PYTORCH_A_F
+            rational_func = Rational_KERAS_A_F
         elif version == "B":
-            rational_func = Rational_PYTORCH_B_F
+            rational_func = Rational_KERAS_B_F
         elif version == "C":
-            rational_func = Rational_PYTORCH_C_F
+            rational_func = Rational_KERAS_C_F
         elif version == "D":
-            rational_func = Rational_PYTORCH_D_F
+            rational_func = Rational_KERAS_D_F
         else:
             raise ValueError("version %s not implemented" % version)
 
         self.rational_func = rational_func
-
+        
     def build(self, input_shape):
-        pass
+        super(Rational, self).build(input_shape)
 
     def call(self, inputs, training=True):
         return self.rational_func(inputs, self.numerator, self.denominator, training)

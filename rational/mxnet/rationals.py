@@ -1,7 +1,7 @@
-from rational.utils.get_weights import get_parameters
+from rational.get_weights import get_parameters
 from mxnet.gluon.block import HybridBlock
 from mxnet import initializer, cpu, gpu
-from rational.mxnet.rational_mxnet_functions import Rational_MXNET_A_F, Rational_MXNET_B_F, Rational_MXNET_C_F, Rational_MXNET_D_F
+from rational_mxnet.rational_mxnet_functions import Rational_MXNET_A_F, Rational_MXNET_B_F, Rational_MXNET_C_F, Rational_MXNET_D_F
 
 
 class Rational(HybridBlock):
@@ -35,12 +35,15 @@ class Rational(HybridBlock):
     Returns:
         Module: Rational module
     """
-    def __init__(self, approx_func='leaky_relu', degrees=(5, 4), cuda=False,
+    def __init__(self, approx_func='leaky_relu', degrees=(5, 4), device=None,
                  version="A", trainable=True, train_numerator=True,
                  train_denominator=True):
         super(Rational, self).__init__()
         w_numerator, w_denominator = get_parameters(version, degrees, approx_func)
-        self.device = gpu() if cuda else cpu()
+        if device is None:
+            self.device = gpu()
+        else:
+            self.device = device
 
         with self.name_scope():
             self.numerator = self.params.get(name='w_numerator', shape=(len(w_numerator),),
@@ -73,3 +76,8 @@ class Rational(HybridBlock):
         out = self.activation_function(x, self.numerator.data(self.device),
                                        self.denominator.data(self.device), self.training)
         return out
+    
+    def __repr__(self):
+        return (f"Rational Activation Function (MXNET version "
+            f"{self.version}) of degrees {self.degrees} running on "
+            f"{self.device}")
