@@ -8,15 +8,38 @@ expected_res = np.array([-0.02, -0.01, 0, 1, 2])
 inp = nd.array(np.array(t)).reshape(-1)
 cuda_inp = nd.array(np.array(t), ctx=gpu()).reshape(-1)
 
-rationalA_lrelu_cpu = Rational(version='A', device=cpu())(inp).asnumpy()
-rationalB_lrelu_cpu = Rational(version='B', device=cpu())(inp).asnumpy()
-rationalC_lrelu_cpu = Rational(version='C', device=cpu())(inp).asnumpy()
-rationalD_lrelu_cpu = Rational(version='D', device=cpu(), trainable=False)(inp).asnumpy()
+rational_A = Rational(version='A', device=cpu())
+rational_A.initialize(ctx=cpu())
+rationalA_lrelu_cpu = rational_A(inp).asnumpy()
 
-rationalA_lrelu_gpu = Rational(version='A', device=gpu())(cuda_inp).clone().copyto(cpu()).asnumpy()
-rationalB_lrelu_gpu = Rational(version='B', device=gpu())(cuda_inp).clone().copyto(cpu()).asnumpy()
-rationalC_lrelu_gpu = Rational(version='C', device=gpu())(cuda_inp).clone().copyto(cpu()).asnumpy()
-rationalD_lrelu_gpu = Rational(version='D', device=gpu(), trainable=False)(cuda_inp).clone().copyto(cpu()).asnumpy()
+rational_B = Rational(version='B', device=cpu())
+rational_B.initialize(ctx=cpu())
+rationalB_lrelu_cpu = rational_B(inp).asnumpy()
+
+rational_C = Rational(version='C', device=cpu())
+rational_C.initialize(ctx=cpu())
+rationalC_lrelu_cpu = rational_C(inp).asnumpy()
+
+rational_D = Rational(version='D', device=cpu())
+rational_D.initialize(ctx=cpu())
+rationalD_lrelu_cpu = rational_D(inp).asnumpy()
+
+
+rational_A_gpu = Rational(version='A', device=gpu())
+rational_A_gpu.initialize(ctx=gpu())
+rationalA_lrelu_gpu = rational_A_gpu(cuda_inp).clone().copyto(cpu()).asnumpy()
+
+rational_B_gpu = Rational(version='B', device=gpu())
+rational_B_gpu.initialize(ctx=gpu())
+rationalB_lrelu_gpu = rational_B_gpu(cuda_inp).clone().copyto(cpu()).asnumpy()
+
+rational_C_gpu = Rational(version='C', device=gpu())
+rational_C_gpu.initialize(ctx=gpu())
+rationalC_lrelu_gpu = rational_C_gpu(cuda_inp).clone().copyto(cpu()).asnumpy()
+
+rational_D_gpu = Rational(version='D', device=gpu(), trainable=False)
+rational_D_gpu.initialize(ctx=gpu())
+rationalD_lrelu_gpu = rational_D_gpu(cuda_inp).clone().copyto(cpu()).asnumpy()
 
 
 #  Tests on cpu
