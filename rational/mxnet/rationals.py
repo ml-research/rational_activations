@@ -1,7 +1,7 @@
-from rational.get_weights import get_parameters
+from rational.utils.get_weights import get_parameters
 from mxnet.gluon.block import HybridBlock
 from mxnet import initializer, cpu, gpu
-from rational_mxnet.rational_mxnet_functions import Rational_MXNET_A_F, Rational_MXNET_B_F, Rational_MXNET_C_F, Rational_MXNET_D_F
+from rational.mxnet.rational_mxnet_functions import Rational_MXNET_A_F, Rational_MXNET_B_F, Rational_MXNET_C_F, Rational_MXNET_D_F
 
 
 class Rational(HybridBlock):
