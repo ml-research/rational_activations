@@ -126,7 +126,9 @@ class clean_all(clean):
         import shutil
         import os
         shutil.rmtree('rational_activations.egg-info')
-        os.remove("rational/cuda.cpython-36m-x86_64-linux-gnu.so")
+        shutil.rmtree('dist')
+        if os.path.exists("rational/cuda.cpython-36m-x86_64-linux-gnu.so"):
+            os.remove("rational/cuda.cpython-36m-x86_64-linux-gnu.so")
         print("Cleaned everything")
 
 
