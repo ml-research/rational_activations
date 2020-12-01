@@ -2,10 +2,14 @@ from mxnet.gluon.nn import HybridSequential, Activation
 from rational.torch import Rational as RationalPyTorch
 from rational.mxnet import Rational as RationalMxNet
 import torch.nn as nn
+import copy
+
 
 activations = {nn.ReLU: 'relu', nn.LeakyReLU: 'leaky_relu', nn.Tanh: 'tanh', nn.Sigmoid: 'sigmoid', nn.GELU: 'gelu', nn.Hardswish: 'swish'}
 
+
 def convert_pytorch_model_to_rational(model, rational_version='A', rational_cuda=False):
+    model = copy.deepcopy(model)
     converted = nn.Sequential()
     for name, layer in model.named_children():
         childs = layer.children()
@@ -27,6 +31,7 @@ def _convert_pytorch_layer(name, layer, version, cuda):
         
     
 def convert_mxnet_model_to_rational(model, rational_version='A', rational_device=None):
+    model = copy.deepcopy(model)
     converted = HybridSequential()
     for name, layer in model._children.items():
         childs = layer._children.items()
