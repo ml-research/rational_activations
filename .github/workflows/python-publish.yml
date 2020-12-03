@@ -54,8 +54,8 @@ jobs:
       run: |
         python setup.py sdist bdist_wheel
         twine upload dist/*
-    '''    - name: Publish a Python distribution to PyPI
+    - name: Publish a Python distribution to PyPI
       uses: pypa/gh-action-pypi-publish@v1.4.1
       with:
         user: __token__
-        password: ${{ secrets.pypi_password }}  '''
+        password: ${{ secrets.pypi_password }}
