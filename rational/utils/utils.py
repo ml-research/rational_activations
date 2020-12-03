@@ -1,9 +1,6 @@
 import warnings
 import numpy as np
 from numpy import zeros, inf
-from scipy.optimize.optimize import OptimizeWarning
-from scipy.optimize._lsq.least_squares import prepare_bounds
-from scipy.optimize.minpack import leastsq, _wrap_jac
 
 # np.random.seed(0)
 
@@ -18,6 +15,9 @@ def _wrap_func(func, xdata, ydata, degrees):
 
 def _curve_fit(f, xdata, ydata, degrees, version, p0=None, absolute_sigma=False,
                method=None, jac=None, **kwargs):
+    from scipy.optimize.optimize import OptimizeWarning
+    from scipy.optimize._lsq.least_squares import prepare_bounds
+    from scipy.optimize.minpack import leastsq, _wrap_jac
     bounds = (-np.inf, np.inf)
     lb, ub = prepare_bounds(bounds, np.sum(degrees))
     if p0 is None:

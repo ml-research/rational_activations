@@ -342,6 +342,38 @@ class Rational(nn.Module):
         self._handle_retrieve_mode = None
         self.distribution = None
 
+    def change_version(self, version):
+        assert version in ["A", "B", "C", "D"]
+        if version == self.version:
+            print(f"This Rational function has already the correct type {self.version}")
+            return
+        if "cuda" in str(self.device):
+            if version == "A":
+                rational_func = Rational_CUDA_A_F
+            elif version == "B":
+                rational_func = Rational_CUDA_B_F
+            elif version == "C":
+                rational_func = Rational_CUDA_C_F
+            elif version == "D":
+                rational_func = Rational_CUDA_D_F
+            else:
+                raise ValueError("version %s not implemented" % version)
+            self.activation_function = rational_func.apply
+            self.version = version
+        else:
+            if version == "A":
+                rational_func = Rational_PYTORCH_A_F
+            elif version == "B":
+                rational_func = Rational_PYTORCH_B_F
+            elif version == "C":
+                rational_func = Rational_PYTORCH_C_F
+            elif version == "D":
+                rational_func = Rational_PYTORCH_D_F
+            else:
+                raise ValueError("version %s not implemented" % self.version)
+            self.activation_function = rational_func
+            self.version = version
+
     def input_retrieve_mode(self, auto_stop=True, max_saves=1000, bin_width=0.1):
         """
         Will retrieve the distribution of the input in self.distribution. \n

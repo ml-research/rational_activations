@@ -73,7 +73,7 @@ def typed_input(text, type, choice_list=None):
 FUNCTION = None
 
 
-def find_weights(function):
+def find_weights(function, version=None, degrees=None):
     # To be changed by the function you want to approximate
     approx_name = input("approximated function name: ")
     FUNCTION = function
@@ -83,15 +83,18 @@ def find_weights(function):
         x = torch.tensor(x)
         return FUNCTION(x)
 
-    nd = typed_input("degree of the numerator P: ", int)
-    dd = typed_input("degree of the denominator Q: ", int)
-    degrees = (nd, dd)
+    if degrees is None:
+        nd = typed_input("degree of the numerator P: ", int)
+        dd = typed_input("degree of the denominator Q: ", int)
+        degrees = (nd, dd)
 
+    print("On what range should the function be approximated ?")
     lb = typed_input("lower bound: ", float)
     ub = typed_input("upper bound: ", float)
     step = (ub - lb) / 100000
     x = np.arange(lb, ub, step)
-    version = typed_input("Rational Version: ", str, ["A", "B", "C", "D"])
+    if version is None:
+        version = typed_input("Rational Version: ", str, ["A", "B", "C", "D"])
     if version == 'A':
         rational = Rational_version_A
     elif version == 'B':
@@ -112,3 +115,4 @@ def find_weights(function):
     params = {"version": version, "name": approx_name, "ub": ub, "lb": lb,
               "nd": nd, "dd": dd}
     append_to_config_file(params, approx_name, w_params, d_params)
+    return w_params, d_params

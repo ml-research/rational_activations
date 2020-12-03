@@ -30,7 +30,7 @@ function log () {
 
 
 printf "auditwheel repairing\n"
-auditwheel -v repair --plat manylinux2014_x86_64 dist/rational_activations*$PY_V*linux_x86_64.whl
+auditwheel -v repair --plat manylinux2014_x86_64 dist/rational_activations*$PY_V*linux_x86_64.whl # Repairing the wheel and puting it inside wheelhouse
 cd wheelhouse/
 $PYTHON_V -m wheel unpack rational_activations-*$PY_V*.whl
 cd rational_activations-*/rational_activations.libs/
