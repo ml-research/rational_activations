@@ -5,13 +5,13 @@ on:
   #push:
     #branches:
     # - ci-cd
-    paths:
+  #  paths:
       - "src/**"
       - "tests/**"
       - ".github/**"
       - "templates/**"
   # pull_request:
-  repository_dispatch:
+  #repository_dispatch:
 
 
 jobs:
