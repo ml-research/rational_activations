@@ -3,8 +3,8 @@ name: Self-hosted runner (push)
 
 on:
   push:
-    branches:
-      - master
+    #branches:
+    # - ci-cd
     paths:
       - "src/**"
       - "tests/**"

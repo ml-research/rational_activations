@@ -1,6 +1,11 @@
 name: test
 
-on: [push, pull_request]
+on:
+  #push:
+   # branches: [ ci-cd ]
+  #pull_request:
+   # branches: [ ci-cd ]
+
 
 jobs:
   test:
