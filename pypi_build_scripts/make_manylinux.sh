@@ -11,7 +11,7 @@ do
   esac
 done
 
-CUDA_V="cuda-10.1"
+CUDA_V="cuda-10.2"
 
 ######### CHECKING ###############
 
