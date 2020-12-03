@@ -2,7 +2,7 @@
 name: Self-hosted runner (push)
 
 on:
-  push:
+  #push:
     #branches:
     # - ci-cd
     paths:

@@ -78,9 +78,9 @@ class RecurrentRationalModule(nn.Module):
         return self.rational(x)
 
     def __repr__(self):
-        return (f"Recurrent Rational Activation Function (PYTORCH version "
-                f"{self.rational.version}) of degrees {self.rational.degrees} running on "
-                f"{self.rational.device}")
+        return f"Recurrent Rational Activation Function (PYTORCH version " \
+               f"{self.rational.version}) of degrees {self.rational.degrees} running on " \
+               f"{self.rational.device}"
 
     def cpu(self):
         return self.rational.cpu()

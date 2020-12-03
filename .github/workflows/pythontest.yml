@@ -38,7 +38,6 @@ jobs:
         pip install -U pip
         pip install -r requirements.txt
         pip install airspeed
-#       pip install -q pytest-cov
         make dev
     - name: Build
       run: |
