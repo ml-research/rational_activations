@@ -46,19 +46,19 @@ For **your** corresponding version of CUDA, please use one of the following comm
 
        pip3 install -U pip wheel
        pip3 install torch==1.4.0
-       pip3 install https://iron.aiml.informatik.tu-darmstadt.de/wheelhouse/cuda-10.1/rational_activations-0.0.18-cp36-cp36m-manylinux2014_x86_64.whl
+       pip3 install https://iron.aiml.informatik.tu-darmstadt.de/wheelhouse/cuda-10.1/rational_activations-0.0.19-cp36-cp36m-manylinux2014_x86_64.whl
 
 #### Python3.7
 
        pip3 install -U pip wheel
        pip3 install torch==1.4.0
-       pip3 install https://iron.aiml.informatik.tu-darmstadt.de/wheelhouse/cuda-10.1/rational_activations-0.0.18-cp37-cp37m-manylinux2014_x86_64.whl
+       pip3 install https://iron.aiml.informatik.tu-darmstadt.de/wheelhouse/cuda-10.1/rational_activations-0.0.19-cp37-cp37m-manylinux2014_x86_64.whl
 
 #### Python3.8
 
          pip3 install -U pip wheel
          pip3 install torch==1.4.0
-         pip3 install https://iron.aiml.informatik.tu-darmstadt.de/wheelhouse/cuda-10.1/rational_activations-0.0.18-cp38-cp38-manylinux2014_x86_64.whl
+         pip3 install https://iron.aiml.informatik.tu-darmstadt.de/wheelhouse/cuda-10.1/rational_activations-0.0.19-cp38-cp38-manylinux2014_x86_64.whl
 
 
 ### Other CUDA/Pytorch</h3>

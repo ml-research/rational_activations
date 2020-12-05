@@ -103,13 +103,13 @@ constexpr uint32_t THREADS_PER_BLOCK = 512;
 if torch_cuda_available():
     version_names = []
     template_contents = ""
-    for template_fname in sorted(glob.glob("cuda/versions/*.cu")):
+    for template_fname in sorted(glob.glob("rational/_cuda/versions/*.cu")):
         version_names.append(Path(template_fname).stem)
         with open(template_fname) as infile:
             template_contents += infile.read()
 
-    generate_cpp_module(fname='cuda/rational_cuda.cpp', versions=version_names)
-    generate_cpp_kernels_module(fname='cuda/rational_cuda_kernels.cu', template_contents=template_contents)
+    generate_cpp_module(fname='rational/_cuda/rational_cuda.cpp', versions=version_names)
+    generate_cpp_kernels_module(fname='rational/_cuda/rational_cuda_kernels.cu', template_contents=template_contents)
 
 
 with open("README.md", "r") as fh:
@@ -123,6 +123,12 @@ class clean_all(clean):
     def run(self):
         self.all = True
         super().run()
+        import shutil
+        import os
+        shutil.rmtree('rational_activations.egg-info')
+        shutil.rmtree('dist')
+        if os.path.exists("rational/cuda.cpython-36m-x86_64-linux-gnu.so"):
+            os.remove("rational/cuda.cpython-36m-x86_64-linux-gnu.so")
         print("Cleaned everything")
 
 
@@ -147,9 +153,9 @@ setup(
     ],
     install_requires=requirements,
     ext_modules=[
-        CUDAExtension('rational_cuda', [
-            'cuda/rational_cuda.cpp',
-            'cuda/rational_cuda_kernels.cu',
+        CUDAExtension('rational.cuda', [
+            'rational/_cuda/rational_cuda.cpp',
+            'rational/_cuda/rational_cuda_kernels.cu',
         ],
         extra_compile_args={'cxx': [],
             'nvcc': ['-gencode=arch=compute_60,code="sm_60,compute_60"', '-lineinfo']

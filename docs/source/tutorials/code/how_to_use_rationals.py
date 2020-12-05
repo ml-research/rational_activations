@@ -1,4 +1,4 @@
-from rational_torch import Rational
+from rational.torch import Rational
 
 rational_function = Rational() # Initialized closed to Leaky ReLU
 print(rational_function)
@@ -91,7 +91,7 @@ print(output_rrn)
 
 import matplotlib.pyplot as plt
 
-input = torch.range(-2, 2, 0.1)
+input = torch.arange(-2, 2, 0.1)
 rational_function.cpu()
 lrelu = nn.LeakyReLU()
 

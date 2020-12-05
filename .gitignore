@@ -1,13 +1,13 @@
 # Project exclude paths
 /venv/
 *.pyx
-.idea 
+.idea
 #src/.tox
 src/build
 src/dist
 *__pycache__*
 *egg-info
-*rational_cuda*.so
+*cuda*.so
 #src/pypi_build_scripts
 #src/scripts
 *build

@@ -5,26 +5,19 @@ Padé Activation Units - Rational Activation Functions for pytorch
 This module allows you to create Rational Neural Networks using Padé Activation
 Units - Learnabe Rational activation functions.
 """
-import torch
 import torch.nn as nn
 from torch.cuda import is_available as torch_cuda_available
-from rational.get_weights import get_parameters
-from rational_torch.rational_cuda_functions import Rational_CUDA_A_F, \
-    Rational_CUDA_B_F, \
-    Rational_CUDA_C_F, \
-    Rational_CUDA_D_F
-from rational_torch.rational_pytorch_functions import Rational_PYTORCH_A_F, \
-    Rational_PYTORCH_B_F, \
-    Rational_PYTORCH_C_F, \
-    Rational_PYTORCH_D_F
+from rational.utils.get_weights import get_parameters
 
 if torch_cuda_available():
     try:
-        from rational_torch.rational_cuda_functions import *
-    except:
-        print('error importing rational_cuda, is cuda not avialable?')
+        from rational.torch.rational_cuda_functions import *
+    except ImportError as ImpErr:
+        print('\n\nError importing rational_cuda, is cuda not available?\n\n')
+        print(ImpErr)
+        exit(1)
 
-from rational_torch.rational_pytorch_functions import *
+from rational.torch.rational_pytorch_functions import *
 
 
 class RecurrentRational():
@@ -71,12 +64,12 @@ class RecurrentRational():
                                  train_denominator=train_denominator)
 
     def __call__(self, *args, **kwargs):
-        return _RecurrentRational(self.rational)
+        return RecurrentRationalModule(self.rational)
 
 
-class _RecurrentRational(nn.Module):
+class RecurrentRationalModule(nn.Module):
     def __init__(self, rational):
-        super(_RecurrentRational, self).__init__()
+        super(RecurrentRationalModule, self).__init__()
         self.rational = rational
         self._handle_retrieve_mode = None
         self.distribution = None
@@ -111,7 +104,7 @@ class _RecurrentRational(nn.Module):
                         auto_stop (bool):
                             If True, the retrieving will stop after `max_saves` \
                             calls to forward.\n
-                            Else, use :meth:`rational_torch.Rational.training_mode`.\n
+                            Else, use :meth:`torch.Rational.training_mode`.\n
                             Default ``True``
                         max_saves (int):
                             The range on which the curves of the functions are fitted \
@@ -349,7 +342,7 @@ class Rational(nn.Module):
         self._handle_retrieve_mode = None
         self.distribution = None
 
-    def input_retrieve_mode(self, auto_stop=True, max_saves=1000):
+    def input_retrieve_mode(self, auto_stop=True, max_saves=1000, bin_width=0.1):
         """
         Will retrieve the distribution of the input in self.distribution. \n
         This will slow down the function, as it has to retrieve the input \
@@ -359,7 +352,7 @@ class Rational(nn.Module):
                 auto_stop (bool):
                     If True, the retrieving will stop after `max_saves` \
                     calls to forward.\n
-                    Else, use :meth:`rational_torch.Rational.training_mode`.\n
+                    Else, use :meth:`torch.Rational.training_mode`.\n
                     Default ``True``
                 max_saves (int):
                     The range on which the curves of the functions are fitted \
@@ -367,7 +360,7 @@ class Rational(nn.Module):
                     Default ``1000``
         """
         from physt import h1 as hist1
-        self.distribution = hist1(None, "fixed_width", bin_width=0.1,
+        self.distribution = hist1(None, "fixed_width", bin_width=bin_width,
                                   adaptive=True)
         print("Retrieving input from now on.")
         if auto_stop:
@@ -412,12 +405,16 @@ class Rational(nn.Module):
                 input_range = torch.arange(-3, 3, 0.01, device=self.device)
             else:
                 freq, bins = _cleared_arrays(distribution)
-                ax2 = ax.twinx()
-                ax2.set_yticks([])
-                grey_color = (0.5, 0.5, 0.5, 0.6)
-                ax2.bar(bins, freq, width=bins[1] - bins[0],
-                        color=grey_color, edgecolor=grey_color)
-                input_range = torch.tensor(bins, device=self.device).float()
+                if freq is None:
+                    input_range = torch.arange(-3, 3, 0.01, device=self.device)
+                else:
+                    ax2 = ax.twinx()
+                    ax2.set_yticks([])
+                    grey_color = (0.5, 0.5, 0.5, 0.6)
+
+                    ax2.bar(bins, freq, width=bins[1] - bins[0],
+                            color=grey_color, edgecolor=grey_color)
+                    input_range = torch.tensor(bins, device=self.device).float()
         else:
             input_range = torch.tensor(input_range, device=self.device).float()
         outputs = self.activation_function(input_range, self.numerator,
@@ -441,13 +438,15 @@ def _save_input_auto_stop(self, input, output):
     if self.inputs_saved > self._max_saves:
         self.training_mode()
 
-
 def _cleared_arrays(hist, tolerance=0.001):
     hist = hist.normalize()
     freq, bins = hist.numpy_like
-    first = (freq > 0.001).argmax()
-    last = (freq > 0.001)[::-1].argmax()
-    return freq[first:-last], bins[first:-last - 1]
+    min_len = 2
+    #if len(freq) <= min_len:
+    #    return None, None
+    first = (freq > 0.001).argmax() if len(freq) > min_len else 0
+    last = -((freq > 0.001)[::-1].argmax()) if len(freq) > min_len else min_len + 1
+    return freq[first:last], bins[first:last - 1]
 
 
 class AugmentedRational(nn.Module):

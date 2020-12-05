@@ -38,7 +38,7 @@ CORRUPTED_FILES_DIR='corrupted_files/'
 mkdir -p $CORRUPTED_FILES_DIR
 CORRUPTED_FILES=`find . -maxdepth 1 -type f | grep .so | sed 's/.\///g' `
 WRONG_FILENAMES=()
-REQUIREMENTS=`patchelf --print-needed ../rational_cuda.cpython-*$PY_V*-x86_64-linux-gnu.so`
+REQUIREMENTS=`patchelf --print-needed ../rational/cuda.cpython-*$PY_V*-x86_64-linux-gnu.so`
 printf "patching all files by hand\n"
 for CORRUPTED_F in $CORRUPTED_FILES
 do
@@ -53,7 +53,7 @@ do
       mv $CORRUPTED_F $CORRUPTED_FILES_DIR
       sed -i "/rational.libs\/$CORRUPTED_F/d" ../*.dist-info/RECORD
       if [[ "${REQUIREMENTS}" =~ "$CORRUPTED_F" ]]; then
-        patchelf --replace-needed $CORRUPTED_F $ORI_FILENAME ../rational_cuda.cpython-*$PY_V*-x86_64-linux-gnu.so
+        patchelf --replace-needed $CORRUPTED_F $ORI_FILENAME ../rational/cuda.cpython-*$PY_V*-x86_64-linux-gnu.so
       fi
       continue
     elif [[ `find $CUDA_LIB -name $ORI_FILENAME` ]]; then
@@ -74,7 +74,7 @@ do
       fi
     fi
     if [[ "${REQUIREMENTS}" =~ "$CORRUPTED_F" ]]; then
-      patchelf --replace-needed $CORRUPTED_F $ORI_FILENAME ../rational_cuda.cpython-*$PY_V*-x86_64-linux-gnu.so
+      patchelf --replace-needed $CORRUPTED_F $ORI_FILENAME ../rational/cuda.cpython-*$PY_V*-x86_64-linux-gnu.so
     fi
     log "removing line \"rational.libs/$CORRUPTED_F ...\" from RECORD"
     sed -i "/rational.libs\/$CORRUPTED_F/d" ../*.dist-info/RECORD

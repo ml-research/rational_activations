@@ -1,4 +1,4 @@
-from rational.find_init_weights import find_weights
+from rational.utils.find_init_weights import find_weights
 import torch.nn.functional as F  # To get the tanh function
 
 find_weights(F.tanh)
@@ -20,7 +20,7 @@ find_weights(F.tanh)
 
 # Do you want to store them in the json file ? (y/n)y
 
-from rational_torch import Rational
+from rational.torch import Rational
 
 rational_tanh_B = Rational("tanh", version="B")
 print(rational_tanh_B.init_approximation)

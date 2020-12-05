@@ -1,5 +1,5 @@
-rational_torch
+rational.torch
 ==============
 
-.. automodule:: rational_torch
-    :members: Rational
+.. automodule:: rational.torch
+    :members: Rational, RecurrentRational
