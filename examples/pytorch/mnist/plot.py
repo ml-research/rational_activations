@@ -14,7 +14,7 @@ import os
 from rational.torch import Rational, RecurrentRational, RecurrentRationalModule
 from torchvision import datasets, transforms
 from torch.utils.tensorboard import SummaryWriter
-from examples.pytorch.mnist.mnist import VGG, LeNet5, actfvs
+from mnist import VGG, LeNet5, actfvs
 from matplotlib import pyplot as plt
 font = {'family': 'normal',
         'weight': 'bold',
@@ -138,6 +138,12 @@ def main():
 
             if len(paus) > 0:
                 os.makedirs(os.path.join(load_path, 'plots'), exist_ok=True)
+                print(model)
+                import ipdb; ipdb.set_trace()
+                # dict(model.named_parameters())["features.3.0.bias"][0]
+                # dict(model.named_parameters())["features.4.2.numerator"][0]
+                model.cpu()
+                print(model)
                 print("Starting model eval")
                 acc = test(args, model, device, test_loader, epoch)
                 print("Finished model eval -> Plot")

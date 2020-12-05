@@ -181,10 +181,12 @@ class Rational(nn.Module):
                                       requires_grad=trainable and train_numerator)
         self.denominator = nn.Parameter(torch.FloatTensor(w_denominator).to(device),
                                         requires_grad=trainable and train_denominator)
+        self.register_parameter("numerator", self.numerator)
+        self.register_parameter("denominator", self.denominator)
+        self.device = device
         self.degrees = degrees
         self.version = version
         self.training = trainable
-        self.device = device
 
         self.init_approximation = approx_func
 
@@ -240,7 +242,8 @@ class Rational(nn.Module):
             raise ValueError("version %s not implemented" % self.version)
         self.activation_function = rational_func
         self.device = "cpu"
-        return super().cpu()
+        self.numerator = nn.Parameter(self.numerator.cpu())
+        self.denominator = nn.Parameter(self.denominator.cpu())
 
     def cuda(self):
         if self.version == "A":
@@ -253,10 +256,24 @@ class Rational(nn.Module):
             rational_func = Rational_CUDA_D_F
         else:
             raise ValueError("version %s not implemented" % self.version)
-
-        self.activation_function = rational_func.apply
         self.device = "cuda"
-        return super().cuda()
+        self.activation_function = rational_func.apply
+        self.numerator = nn.Parameter(self.numerator.cuda())
+        self.denominator = nn.Parameter(self.denominator.cuda())
+
+    def to(self, device):
+        if "cpu" in str(device):
+            self.cpu()
+        elif "cuda" in str(device):
+            self.cuda()
+
+    def _apply(self, fn):
+        if "Module.cpu" in str(fn):
+            self.cpu()
+        elif "Module.cuda" in str(fn):
+            self.cuda()
+        else:
+            return super._apply(fn)
 
     def numpy(self):
         """
@@ -299,6 +316,7 @@ class Rational(nn.Module):
         else:
             rational_numpy.fit(function, show=show)
 
+
     def _from_old(self, old_rational_func):
         self.version = old_rational_func.version
         self.degrees = old_rational_func.degrees
@@ -308,7 +326,6 @@ class Rational(nn.Module):
             print("Found a non zero center, please adapt the bias of the",
                   "previous layer to have an equivalent neural network")
         self.training = old_rational_func.training
-        self.device = self.numerator.device
         if "init_approximation" not in dir("init_approximation"):
             self.init_approximation = "leaky_relu"
         else:
@@ -447,6 +464,7 @@ def _cleared_arrays(hist, tolerance=0.001):
     first = (freq > 0.001).argmax() if len(freq) > min_len else 0
     last = -((freq > 0.001)[::-1].argmax()) if len(freq) > min_len else min_len + 1
     return freq[first:last], bins[first:last - 1]
+
 
 
 class AugmentedRational(nn.Module):
