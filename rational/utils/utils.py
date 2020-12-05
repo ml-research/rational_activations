@@ -34,7 +34,6 @@ def _curve_fit(f, xdata, ydata, degrees, version, p0=None, absolute_sigma=False,
         # non-array_like `xdata`.
         xdata = np.asarray_chkfinite(xdata, float)
 
-    # func = _wrap_func(xdata, ydata, degrees)  # Modification here  !!!
     func = _wrap_func(f, xdata, ydata, degrees)  # Modification here  !!!
     if callable(jac):
         jac = _wrap_jac(jac, xdata, None)
