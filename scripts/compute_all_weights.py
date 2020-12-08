@@ -7,10 +7,7 @@ def swish(x):
 
 act_names = ["relu", "leaky_relu", "tanh", "gelu", "sigmoid", "swish"]
 act_func = [F.relu, F.leaky_relu, torch.tanh, F.gelu, torch.sigmoid, swish]
-# act_names = ["relu"]
-# act_func = [F.relu]
-# versions = ["A", "B", "C", "D"]
-versions = ["C"]
+versions = ["A", "B", "C", "D"]
 
 for act_n, act_f in zip(act_names, act_func):
     print("-" * 30)

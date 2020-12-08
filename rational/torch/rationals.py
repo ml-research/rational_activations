@@ -218,6 +218,8 @@ class Rational(nn.Module):
             self.activation_function = rational_func
         self._handle_retrieve_mode = None
         self.distribution = None
+        self.best_fitted_function = None
+        self.best_fitted_function_params = None
 
     def forward(self, x):
         out = self.activation_function(x, self.numerator, self.denominator,
@@ -312,9 +314,28 @@ class Rational(nn.Module):
         """
         rational_numpy = self.numpy()
         if x is not None:
-            rational_numpy.fit(function, x, show)
+            return rational_numpy.fit(function, x, show)
         else:
-            rational_numpy.fit(function, show=show)
+            return rational_numpy.fit(function, show=show)
+
+    def best_fit(self, functions_list, x=None):
+        if self.distribution is not None:
+            freq, bins = _cleared_arrays(self.distribution)
+            x = bins
+        (a, b, c, d), distance = self.fit(functions_list[0], x=x)
+        min_dist = distance
+        params = (a, b, c, d)
+        final_function = functions_list[0]
+        for func in functions_dict[1:]:
+            (a, b, c, d), distance = self.fit(functions_list[0], x=x)
+            print(f"{func}: {distance}")
+            if min_dist > distance:
+                min_dist = distance
+                params = (a, b, c, d)
+                final_func = func
+        self.best_fitted_function = final_func
+        self.best_fitted_function_params = params
+        return final_func, (a, b, c, d)
 
 
     def _from_old(self, old_rational_func):
@@ -426,7 +447,7 @@ class Rational(nn.Module):
         print("Training mode, no longer retrieving the input.")
         self._handle_retrieve_mode.remove()
 
-    def show(self, input_range=None, display=True, distribution=None):
+    def show(self, input_range=None, display=True):
         """
         Show the function using `matplotlib`.
 
@@ -439,42 +460,52 @@ class Rational(nn.Module):
                     Otherwise, returns it. \n
                     Default ``True``
         """
-        import matplotlib.pyplot as plt
-        try:
-            import seaborn as sns
-            sns.set_style("whitegrid")
-        except ImportError as e:
-            print("seaborn not found on computer, install it for better",
-                  "visualisation")
-        ax = plt.gca()
-        if input_range is None:
-            if distribution is None:
-                distribution = self.distribution
-            if distribution is None:
-                input_range = torch.arange(-3, 3, 0.01, device=self.device)
-            else:
-                freq, bins = _cleared_arrays(distribution)
-                if freq is None:
-                    input_range = torch.arange(-3, 3, 0.01, device=self.device)
-                else:
-                    ax2 = ax.twinx()
-                    ax2.set_yticks([])
-                    grey_color = (0.5, 0.5, 0.5, 0.6)
-
-                    ax2.bar(bins, freq, width=bins[1] - bins[0],
-                            color=grey_color, edgecolor=grey_color)
-                    input_range = torch.tensor(bins, device=self.device).float()
+        freq = None
+        if input_range is None and self.distribution is None:
+            input_range = torch.arange(-3, 3, 0.01, device=self.device)
+        elif self.distribution is not None:
+            freq, bins = _cleared_arrays(self.distribution)
+            if freq is not None:
+                input_range = torch.tensor(bins, device=self.device).float()
         else:
             input_range = torch.tensor(input_range, device=self.device).float()
         outputs = self.activation_function(input_range, self.numerator,
                                            self.denominator, False)
+        inputs_np = input_range.detach().cpu().numpy()
         outputs_np = outputs.detach().cpu().numpy()
-        ax.plot(input_range.detach().cpu().numpy(),
-                outputs_np)
         if display:
+            import matplotlib.pyplot as plt
+            try:
+                import seaborn as sns
+                sns.set_style("whitegrid")
+            except ImportError:
+                print("Seaborn not found on computer, install it for better",
+                      "visualisation")
+            ax = plt.gca()
+            if freq is not None:
+                ax2 = ax.twinx()
+                ax2.set_yticks([])
+                grey_color = (0.5, 0.5, 0.5, 0.6)
+                ax2.bar(bins, freq, width=bins[1] - bins[0],
+                        color=grey_color, edgecolor=grey_color)
+            ax.plot(inputs_np, outputs_np)
+            if self.best_fitted_function is not None:
+                if '__name__' in dir(self.best_fitted_function):
+                    func_label = self.best_fitted_function.__name__
+                else:
+                    func_label = str(self.best_fitted_function)
+                a, b, c, d = self.best_fitted_function_params
+                result = a * self.best_fitted_function(c * torch.tensor(inputs_np).to(self.device) + d) + b
+                plt.plot(inputs_np, result.detach().cpu().numpy(), label=f"Fitted {func_label}")
             plt.show()
         else:
-            return plt.gcf()
+            if freq is None:
+                hist_dict = None
+            else:
+                hist_dict = {"bins": bins, "freq": freq,
+                             "width": bins[1] - bins[0]}
+            return {"hist": hist_dict,
+                    "line": {"x": inputs_np, "y": outputs_np}}
 
 
 def _save_input(self, input, output):
