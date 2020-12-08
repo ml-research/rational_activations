@@ -6,17 +6,12 @@ def Rational_PYTORCH_A_F(x, weight_numerator, weight_denominator, training):
 
     z = x.view(-1)
     len_num, len_deno = len(weight_numerator), len(weight_denominator)
-    if len_num > len_deno:
-        xps = torch.vander(z, len_num, increasing=True)
-        numerator = xps.mul(weight_numerator).sum(1)
-
-        expanded_dw = torch.cat([torch.tensor([1.]), weight_denominator, \
-                                 torch.zeros(len_num - len_deno - 1)])
-        denominator = xps.mul(expanded_dw).abs().sum(1)
-        return numerator.div(denominator).view(x.shape)
-    else:
-        print("Not implemented yet")
-        exit(1)
+    xps = torch.vander(z, max(len_num, len_deno), increasing=True)
+    numerator = xps.mul(weight_numerator).sum(1)
+    expanded_dw = torch.cat([torch.tensor([1.]), weight_denominator, \
+                             torch.zeros(len_num - len_deno - 1)])
+    denominator = xps.mul(expanded_dw).abs().sum(1)
+    return numerator.div(denominator).view(x.shape)
 
 
 def Rational_PYTORCH_B_F(x, weight_numerator, weight_denominator, training):
@@ -24,14 +19,10 @@ def Rational_PYTORCH_B_F(x, weight_numerator, weight_denominator, training):
     #               1 + |b_1 * X + b_1 * X^2 + ... + b_m * X^m|
     z = x.view(-1)
     len_num, len_deno = len(weight_numerator), len(weight_denominator)
-    if len_num > len_deno:
-        xps = torch.vander(z, len_num, increasing=True)
-        numerator = xps.mul(weight_numerator).sum(1)
-        denominator = xps[:, 1:len_deno+1].mul(weight_denominator).sum(1).abs()
-        return numerator.div(1 + denominator).view(x.shape)
-    else:
-        print("Not implemented yet")
-        exit(1)
+    xps = torch.vander(z, max(len_num, len_deno), increasing=True)
+    numerator = xps.mul(weight_numerator).sum(1)
+    denominator = xps[:, 1:len_deno+1].mul(weight_denominator).sum(1).abs()
+    return numerator.div(1 + denominator).view(x.shape)
 
 
 def Rational_PYTORCH_C_F(x, weight_numerator, weight_denominator, training):
@@ -39,14 +30,10 @@ def Rational_PYTORCH_C_F(x, weight_numerator, weight_denominator, training):
     #               eps + |b_0 + b1 * X + b_2 * X^2 + ... + b_m*X^m|
     z = x.view(-1)
     len_num, len_deno = len(weight_numerator), len(weight_denominator)
-    if len_num > len_deno:
-        xps = torch.vander(z, len_num, increasing=True)
-        numerator = xps.mul(weight_numerator).sum(1)
-        denominator = xps[:, :len_deno].mul(weight_denominator).sum(1).abs()
-        return numerator.div(0.1 + denominator).view(x.shape)
-    else:
-        print("Not implemented yet")
-        exit(1)
+    xps = torch.vander(z, max(len_num, len_deno), increasing=True)
+    numerator = xps.mul(weight_numerator).sum(1)
+    denominator = xps[:, :len_deno].mul(weight_denominator).sum(1).abs()
+    return numerator.div(0.1 + denominator).view(x.shape)
 
 
 def Rational_PYTORCH_D_F(x, weight_numerator, weight_denominator, training, random_deviation=0.1):
@@ -58,14 +45,10 @@ def Rational_PYTORCH_D_F(x, weight_numerator, weight_denominator, training, rand
         return Rational_PYTORCH_B_F(x, weight_numerator, weight_denominator, training)
     z = x.view(-1)
     len_num, len_deno = len(weight_numerator), len(weight_denominator)
-    if len_num > len_deno:
-        xps = torch.vander(z, len_num, increasing=True)
-        numerator = xps.mul(weight_numerator.mul(
-            torch.FloatTensor(len_num).uniform_(1-random_deviation,
-                                                1+random_deviation))
-                           ).sum(1)
-        denominator = xps[:, 1:len_deno+1].mul(weight_denominator).sum(1).abs()
-        return numerator.div(1 + denominator).view(x.shape)
-    else:
-        print("Not implemented yet")
-        exit(1)
+    xps = torch.vander(z, max(len_num, len_deno), increasing=True)
+    numerator = xps.mul(weight_numerator.mul(
+        torch.FloatTensor(len_num).uniform_(1-random_deviation,
+                                            1+random_deviation))
+                       ).sum(1)
+    denominator = xps[:, 1:len_deno+1].mul(weight_denominator).sum(1).abs()
+    return numerator.div(1 + denominator).view(x.shape)
