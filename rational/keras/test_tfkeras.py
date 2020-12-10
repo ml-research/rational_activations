@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from rational.keras import Rational
+from rational_keras import Rational
 import numpy as np
 
 
@@ -9,19 +9,19 @@ import numpy as np
 
 t = [-2., -1, 0., 1., 2.]
 expected_res = np.array([-0.02, -0.01, 0, 1, 2])
-inp = torch.from_numpy(np.array(t)).reshape(-1)
-cuda_inp = torch.tensor(np.array(t), dtype=torch.float, device="cuda").reshape(-1)
+inp = tf.convert_to_tensor(np.array(t, np.float32), np.float32)
+cuda_inp = tf.convert_to_tensor(expected_res, np.float32)
 
 
-rationalA_lrelu_cpu = Rational(version='A', cuda=False)(inp).detach().numpy()
-rationalB_lrelu_cpu = Rational(version='B', cuda=False)(inp).detach().numpy()
-rationalC_lrelu_cpu = Rational(version='C', cuda=False)(inp).detach().numpy()
-rationalD_lrelu_cpu = Rational(version='D', cuda=False, trainable=False)(inp).detach().numpy()
+rationalA_lrelu_cpu = Rational(version='A', cuda=False)(inp).numpy()
+rationalB_lrelu_cpu = Rational(version='B', cuda=False)(inp).numpy()
+rationalC_lrelu_cpu = Rational(version='C', cuda=False)(inp).numpy()
+#rationalD_lrelu_cpu = Rational(version='D', cuda=False, trainable=False)(inp).numpy()
 
-rationalA_lrelu_gpu = Rational(version='A', cuda=True)(cuda_inp).clone().detach().cpu().numpy()
-rationalB_lrelu_gpu = Rational(version='B', cuda=True)(cuda_inp).clone().detach().cpu().numpy()
-rationalC_lrelu_gpu = Rational(version='C', cuda=True)(cuda_inp).clone().detach().cpu().numpy()
-rationalD_lrelu_gpu = Rational(version='D', cuda=True, trainable=False)(cuda_inp).clone().detach().cpu().numpy()
+#rationalA_lrelu_gpu = Rational(version='A', cuda=True)(cuda_inp).clone().detach().cpu().numpy()
+#rationalB_lrelu_gpu = Rational(version='B', cuda=True)(cuda_inp).clone().detach().cpu().numpy()
+#rationalC_lrelu_gpu = Rational(version='C', cuda=True)(cuda_inp).clone().detach().cpu().numpy()
+#rationalD_lrelu_gpu = Rational(version='D', cuda=True, trainable=False)(cuda_inp).clone().detach().cpu().numpy()
 
 
 #  Tests on cpu
