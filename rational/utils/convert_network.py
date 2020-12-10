@@ -9,27 +9,28 @@ import copy
 activations = {nn.ReLU: 'relu', nn.LeakyReLU: 'leaky_relu', nn.Tanh: 'tanh', nn.Sigmoid: 'sigmoid', nn.GELU: 'gelu', nn.Hardswish: 'swish'}
 
 
-def convert_pytorch_model_to_rational(model, rational_version='A', rational_cuda=True):
+def convert_pytorch_model_to_rational(model, rational_version='A', rational_cuda=False):
     m = copy.deepcopy(model)
-    _recursive_pytorch_conversion(m, rational_version, rational_cuda)
+    for n_l, l in m.named_children():
+        is_activation = _convert_pytorch_model_to_rational(l, rational_version, rational_cuda)
+        if is_activation:
+            m._modules[n_l] = _convert_pytorch_layer(l, version=rational_version, cuda=rational_cuda)
     return m
 
 
-def _recursive_pytorch_conversion(module, rational_version, rational_cuda):
-    for attr_str in dir(module):
-        _convert_pytorch_layer(module, attr_str, rational_version, rational_cuda)
-    
-    for child in module.children():
-        _recursive_pytorch_conversion(child, rational_version, rational_cuda)
-        
+def _convert_pytorch_model_to_rational(m, version, cuda):
+    for n_c, c in m.named_children():
+        is_activation = _convert_pytorch_model_to_rational(c, version, cuda)
+        if is_activation:
+            m._modules[n_c] = _convert_pytorch_layer(c, version=version, cuda=cuda)
+    return isinstance(m, tuple(activations.keys()))
 
-def _convert_pytorch_layer(module, attr_str, version, cuda):
-    at = getattr(module, attr_str)
+
+def _convert_pytorch_layer(layer, version, cuda):
     for activation in activations:
-        if isinstance(at, activation):
-            act = RationalPyTorch(version=version, approx_func=activations[activation], cuda=cuda)
-            setattr(module, attr_str, act)
-            break
+        if isinstance(layer, activation):
+            return RationalPyTorch(version=version, approx_func=activations[activation], cuda=cuda)
+    raise ValueError("activation function not supported")
         
     
 def convert_mxnet_model_to_rational(model, rational_version='A', rational_device=None):
