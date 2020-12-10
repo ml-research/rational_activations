@@ -29,7 +29,7 @@ def evaluate_pytorch(model, test_loader, loss_function, device):
     return correct_pred / total, valid_loss / len(test_loader)
 
 
-def train_pytorch_model(model, train_loader, test_loader, device=0, epochs=40, vis_mod=1):
+def train_pytorch_model(model, train_loader, test_loader, device=0, epochs=40, vis_mod=10):
     model.cuda(device)
     optimizer = optim.SGD(model.parameters(), lr=1e-2, momentum=0.5)
     loss_function = nn.CrossEntropyLoss()
@@ -71,7 +71,7 @@ def train_pytorch_model(model, train_loader, test_loader, device=0, epochs=40, v
                   f'train_loss: {running_loss / len(train_loader):6.3f}')
             print(f'[Epoch {epoch + 1:3d}] val_acc: {100 * valid_acc:5.2f}% - '\
                   f'val_loss: {valid_loss:6.3f}')
-        print(f'[Epoch {epoch + 1:3d}] Model runtime: {time.time() - start:6.3f}s')
+            print(f'[Epoch {epoch + 1:3d}] Model runtime: {time.time() - start:6.3f}s')
         
     return {'accuracy':train_acc, 'loss':train_loss,
             'val_accuracy':test_acc, 'val_loss':test_loss}

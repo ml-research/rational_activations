@@ -39,7 +39,7 @@ def evaluate_mxnet(model, test_data, loss_fn, device):
     return acc.get()[1], total_loss / len(test_data)
 
 
-def train_model_mxnet(model, train_data, test_data, device, epochs=40, vis_mod=1):
+def train_model_mxnet(model, train_data, test_data, device, epochs=40, vis_mod=10):
     loss_fn = gluon.loss.SoftmaxCrossEntropyLoss()
     optimizer = gluon.Trainer(model.collect_params(), 'sgd', {'learning_rate': 1e-2, 'momentum': 0.5, 'clip_gradient': 5.0})
     
@@ -75,7 +75,7 @@ def train_model_mxnet(model, train_data, test_data, device, epochs=40, vis_mod=1
             print(f'[Epoch {epoch + 1:3d}] val_acc: {100 * _test_acc:5.2f}% - '\
                   f'val_loss: {_test_loss:6.3f}')
 
-        print(f'Model runtime: {time.time() - start:6.3f}s')
+            print(f'Model runtime: {time.time() - start:6.3f}s')
     
     return {'accuracy':train_acc, 'loss':train_loss,
             'val_accuracy':test_acc, 'val_loss':test_loss}
