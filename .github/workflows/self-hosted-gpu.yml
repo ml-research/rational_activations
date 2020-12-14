@@ -2,9 +2,9 @@
 name: Self-hosted runner (push)
 
 on:
-  #push:
-    #branches:
-    # - ci-cd
+  push:
+    branches:
+     - ci-cdxx
   #  paths:
       - "src/**"
       - "tests/**"
@@ -16,7 +16,7 @@ on:
 
 jobs:
   run_tests_torch_gpu:
-    runs-on: [self-hosted, gpu, single-gpu]
+    runs-on: [self-hosted, gpu] #, single-gpu]
     steps:
       - uses: actions/checkout@v2
       - name: Python version

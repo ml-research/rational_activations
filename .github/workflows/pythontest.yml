@@ -1,8 +1,8 @@
 name: test
 
 on:
-  #push:
-   # branches: [ ci-cd ]
+  push:
+    branches: [ ci-cdxx ]
   #pull_request:
    # branches: [ ci-cd ]
 
@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: self-hosted  #[ubuntu-latest, macos-latest]
         python-version: [3.6, 3.7, 3.8]
     steps:
     - uses: actions/checkout@v2
