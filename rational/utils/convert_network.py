@@ -31,6 +31,23 @@ def _convert_pytorch_layer(layer, version, cuda):
         if isinstance(layer, activation):
             return RationalPyTorch(version=version, approx_func=activations[activation], cuda=cuda)
     raise ValueError("activation function not supported")
+
+
+def replace_pytorch_activation_functions(model, new_activation_layer):
+    m = copy.deepcopy(model)
+    for n_l, l in m.named_children():
+        is_activation = _replace_pytorch_activation_functions(l, new_activation_layer)
+        if is_activation:
+            m._modules[n_l] = new_activation_layer()
+    return m
+
+
+def _replace_pytorch_activation_functions(m, new_activation_layer):
+    for n_c, c in m.named_children():
+        is_activation = _replace_pytorch_activation_functions(c, new_activation_layer)
+        if is_activation:
+            m._modules[n_c] = new_activation_layer()
+    return isinstance(m, tuple(activations.keys()))
         
     
 def convert_mxnet_model_to_rational(model, rational_version='A', rational_device=None):

@@ -16,4 +16,5 @@ dist
 .ipynb_checkpoints
 /data/
 **/data/
-
+/models/
+**/models/

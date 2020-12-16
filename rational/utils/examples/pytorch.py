@@ -105,4 +105,10 @@ class Flatten(nn.Module):
     def forward(self, x):
         return x.reshape(x.shape[0], -1)
     
-    
+
+class Mish(nn.Module):
+    def __init__(self):
+        super(Mish, self).__init__()
+        
+    def forward(self, x):
+        return x * torch.tanh(F.softplus(x))
