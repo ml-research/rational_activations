@@ -1,6 +1,5 @@
 import tensorflow as tf
 
-from rational_keras import Rational
 import numpy as np
 
 

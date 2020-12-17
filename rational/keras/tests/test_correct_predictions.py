@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from rational_keras import Rational
+from rational.keras import Rational
 from tensorflow.nn import leaky_relu
 from tensorflow.math import tanh, sigmoid
 
