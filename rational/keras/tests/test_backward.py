@@ -1,10 +1,10 @@
 import tensorflow as tf
 
-from rational_keras import Rational
+from rational.keras import Rational
 import numpy as np
 
 
-### MODIFY EVERY THING SUCH THAT IT TEST ON RATIONALS OF KERAS
+# MODIFY EVERY THING SUCH THAT IT TEST ON RATIONALS OF KERAS
 
 
 t = [-2., -1, 0., 1., 2.]

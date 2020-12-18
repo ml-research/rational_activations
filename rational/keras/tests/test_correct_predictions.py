@@ -1,11 +1,9 @@
 import numpy as np
 import tensorflow as tf
 
-from rational_keras import Rational
+from rational.keras import Rational
 from tensorflow.nn import leaky_relu
 from tensorflow.math import tanh, sigmoid
-
-# MODIFY EVERY THING SUCH THAT IT TEST ON RATIONALS OF KERAS
 
 t = [-2., -1, 0., 1., 2.]
 expected_res_lrelu = np.array(leaky_relu(t, alpha=0.01))
@@ -37,9 +35,8 @@ rationalC_sigmoid_cpu = Rational(
 
 # tests on approximation of lrelu
 def test_rationalA_cpu_lrelu():
-    print("rational_lrelu result: ", rationalA_lrelu_cpu)
-    print("lrelu result: ", expected_res)
-    assert (rationalA_lrelu_cpu == expected_res_lrelu).all()
+    assert np.all(np.isclose(rationalA_lrelu_cpu,
+                             expected_res_lrelu, atol=5e-02))
 
 
 def test_rationalB_cpu_lrelu():
@@ -58,9 +55,8 @@ def test_rationalC_cpu_lrelu():
 
 # tests on approximation of tanh
 def test_rationalA_cpu_tanh():
-    print("rational_tanh result: ", rationalA_tanh_cpu)
-    print("lrelu result: ", expected_res_tanh)
-    assert (rationalA_tanh_cpu == expected_res_tanh).all()
+    assert np.all(np.isclose(rationalA_tanh_cpu,
+                             expected_res_tanh, atol=5e-02))
 
 
 def test_rationalB_cpu_tanh():
@@ -79,9 +75,8 @@ def test_rationalC_cpu_tanh():
 
 # tests on approximation of sigmoid
 def test_rationalA_cpu_sigmoid():
-    print("rational_sigmoid result: ", rationalA_sigmoid_cpu)
-    print("sigmoid result: ", expected_res_sigmoid)
-    assert (rationalA_sigmoid_cpu == expected_res_sigmoid).all()
+    assert np.all(np.isclose(rationalA_sigmoid_cpu,
+                             expected_res_sigmoid, atol=5e-02))
 
 
 def test_rationalB_cpu_sigmoid():

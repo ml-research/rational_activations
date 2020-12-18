@@ -1,10 +1,10 @@
 import tensorflow as tf
 
-from rational_keras import Rational
+from rational.keras import Rational
 import numpy as np
 
 
-### MODIFY EVERY THING SUCH THAT IT TEST ON RATIONALS OF KERAS
+# MODIFY EVERY THING SUCH THAT IT TEST ON RATIONALS OF KERAS
 
 
 t = [-2., -1, 0., 1., 2.]
@@ -18,6 +18,8 @@ cuda_inp = tf.convert_to_tensor(expected_res, np.float32)
 #rationalD_lrelu_gpu = Rational(version='D', cuda=True, trainable=False)(cuda_inp).clone().detach().cpu().numpy()
 
 # Tests on GPU
+
+
 def test_rationalA_gpu_lrelu():
     assert np.all(np.isclose(rationalA_lrelu_gpu, expected_res, atol=5e-02))
 
