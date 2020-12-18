@@ -42,13 +42,14 @@ class Rational(Layer):
         """
         super(Rational, self).__init__()
 
-        w_numerator, w_denominator = get_parameters(version, degrees, approx_func)
-        
+        w_numerator, w_denominator = get_parameters(
+            version, degrees, approx_func)
+
         self.numerator = self.add_weight(shape=(len(w_numerator),), name='w_numerator', trainable=trainable and train_numerator,
                                          initializer=tf.keras.initializers.Constant(w_numerator))
         self.denominator = self.add_weight(shape=(len(w_denominator),), name='w_denominator', trainable=trainable and train_numerator,
-                                         initializer=tf.keras.initializers.Constant(w_denominator))
-        
+                                           initializer=tf.keras.initializers.Constant(w_denominator))
+
         if version == "A":
             rational_func = Rational_KERAS_A_F
         elif version == "B":
@@ -61,7 +62,7 @@ class Rational(Layer):
             raise ValueError("version %s not implemented" % version)
 
         self.rational_func = rational_func
-        
+
     def build(self, input_shape):
         super(Rational, self).build(input_shape)
 

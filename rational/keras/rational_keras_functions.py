@@ -62,7 +62,7 @@ def Rational_KERAS_C_F(z, weight_numerator, weight_denominator, training):
     denominator = 0
     for j in range(weight_denominator.shape[0]):
         w_d = weight_denominator[j]
-        denominator = denominator + w_d * xps[j + 1]
+        denominator = denominator + w_d * xps[j]
 
     return numerator / (0.1 + tf.abs(denominator))
 

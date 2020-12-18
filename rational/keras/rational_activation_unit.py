@@ -1,7 +1,8 @@
 from tensorflow.python.keras.engine.base_layer import Layer
 import tensorflow as tf
 
-
+from rational.keras.rational_keras_functions import Rational_KERAS_A_F, Rational_KERAS_B_F, Rational_KERAS_C_F, \
+    Rational_KERAS_D_F
 from rational.utils.get_weights import get_parameters
 from rational.keras import *
 
@@ -11,9 +12,12 @@ class Rational(Layer):
                  version="A", trainable=True, train_numerator=True, train_denominator=True):
         super(Rational, self).__init__()
 
-        w_numerator, w_denominator = get_parameters(version, degrees, approx_func)
-        self.numerator = tf.Variable(initial_value=w_numerator, trainable=trainable and train_numerator)
-        self.denominator = tf.Variable(initial_value=w_denominator, trainable=trainable and train_denominator)
+        w_numerator, w_denominator = get_parameters(
+            version, degrees, approx_func)
+        self.numerator = tf.Variable(
+            initial_value=w_numerator, trainable=trainable and train_numerator)
+        self.denominator = tf.Variable(
+            initial_value=w_denominator, trainable=trainable and train_denominator)
 
         if version == "A":
             rational_func = Rational_PYTORCH_A_F

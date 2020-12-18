@@ -5,23 +5,26 @@ from rational.keras import Rational
 from tensorflow.nn import leaky_relu
 from tensorflow.math import tanh, sigmoid
 
+# initialization of arrays
 t = [-2., -1, 0., 1., 2.]
 expected_res_lrelu = np.array(leaky_relu(t, alpha=0.01))
 expected_res_tanh = np.array(tanh(t))
 expected_res_sigmoid = np.array(sigmoid(t))
 inp = tf.convert_to_tensor(np.array(t, np.float32), np.float32)
-#cuda_inp = tf.convert_to_tensor(expected_res, np.float32)
 
+# initialization of Rational LReLU in CPU
 rationalA_lrelu_cpu = Rational(version='A', cuda=False)(inp).numpy()
 rationalB_lrelu_cpu = Rational(version='B', cuda=False)(inp).numpy()
 rationalC_lrelu_cpu = Rational(version='C', cuda=False)(inp).numpy()
 #rationalD_lrelu_cpu = Rational(version='D', cuda=False)(inp).numpy()
 
+# initialization of Rational tanh in CPU
 rationalA_tanh_cpu = Rational('tanh', version='A', cuda=False)(inp).numpy()
 rationalB_tanh_cpu = Rational('tanh', version='B', cuda=False)(inp).numpy()
 rationalC_tanh_cpu = Rational('tanh', version='C', cuda=False)(inp).numpy()
 #rationalD_tanh_cpu = Rational('tanh', version='D', cuda=False)(inp).numpy()
 
+# initialization of Rational sigmoid in CPU
 rationalA_sigmoid_cpu = Rational(
     'sigmoid', version='A', cuda=False)(inp).numpy()
 rationalB_sigmoid_cpu = Rational(
@@ -29,8 +32,6 @@ rationalB_sigmoid_cpu = Rational(
 rationalC_sigmoid_cpu = Rational(
     'sigmoid', version='C', cuda=False)(inp).numpy()
 #rationalC_sigmoid_cpu = Rational('sigmoid', version='D', cuda=False)(inp).numpy()
-
-# todo: lrelu, tanh, sigmoid, ...)
 
 
 # tests on approximation of lrelu
