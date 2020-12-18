@@ -1,7 +1,8 @@
 from tensorflow.keras.layers import Layer
 import tensorflow as tf
 
-
+from rational.keras.rational_keras_functions import Rational_KERAS_A_F, Rational_KERAS_B_F, Rational_KERAS_C_F, \
+    Rational_KERAS_D_F
 from rational.utils.get_weights import get_parameters
 
 
