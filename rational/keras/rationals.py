@@ -46,13 +46,13 @@ class Rational(Layer):
         self.denominator = tf.Variable(initial_value=w_denominator, trainable=trainable and train_denominator)
 
         if version == "A":
-            rational_func = Rational_PYTORCH_A_F
+            rational_func = Rational_KERAS_A_F
         elif version == "B":
-            rational_func = Rational_PYTORCH_B_F
+            rational_func = Rational_KERAS_B_F
         elif version == "C":
-            rational_func = Rational_PYTORCH_C_F
+            rational_func = Rational_KERAS_C_F
         elif version == "D":
-            rational_func = Rational_PYTORCH_D_F
+            rational_func = Rational_KERAS_D_F
         else:
             raise ValueError("version %s not implemented" % version)
 

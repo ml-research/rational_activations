@@ -172,7 +172,12 @@ class Rational(nn.Module):
 
         if cuda is None:
             cuda = torch_cuda_available()
-        device = "cuda" if cuda else "cpu"
+        if cuda is True:
+            device = "cuda"
+        elif cuda is False:
+            device = "cpu"
+        else:
+            device = cuda
 
         w_numerator, w_denominator = get_parameters(version, degrees,
                                                     approx_func)
@@ -190,7 +195,7 @@ class Rational(nn.Module):
 
         self.init_approximation = approx_func
 
-        if cuda:
+        if "cuda" in device:
             if version == "A":
                 rational_func = Rational_CUDA_A_F
             elif version == "B":
@@ -247,7 +252,7 @@ class Rational(nn.Module):
         self.numerator = nn.Parameter(self.numerator.cpu())
         self.denominator = nn.Parameter(self.denominator.cpu())
 
-    def cuda(self):
+    def cuda(self, device="0"):
         if self.version == "A":
             rational_func = Rational_CUDA_A_F
         elif self.version == "B":
@@ -258,22 +263,29 @@ class Rational(nn.Module):
             rational_func = Rational_CUDA_D_F
         else:
             raise ValueError("version %s not implemented" % self.version)
-        self.device = "cuda"
+        if "cuda" in device:
+            self.device = f"device"
+        else:
+            self.device = f"cuda:{device}"
         self.activation_function = rational_func.apply
-        self.numerator = nn.Parameter(self.numerator.cuda())
-        self.denominator = nn.Parameter(self.denominator.cuda())
+        self.numerator = nn.Parameter(self.numerator.cuda(self.device))
+        self.denominator = nn.Parameter(self.denominator.cuda(self.device))
 
     def to(self, device):
         if "cpu" in str(device):
             self.cpu()
         elif "cuda" in str(device):
-            self.cuda()
+            self.cuda(device)
 
     def _apply(self, fn):
         if "Module.cpu" in str(fn):
             self.cpu()
         elif "Module.cuda" in str(fn):
             self.cuda()
+        elif "Module.to" in str(fn):
+            device = fn.__closure__[1].cell_contents
+            assert type(device) == torch.device  # otherwise loop on __closure__
+            self.to(device)
         else:
             return super._apply(fn)
 
@@ -281,7 +293,7 @@ class Rational(nn.Module):
         """
         Returns a numpy version of this activation function.
         """
-        from rational import Rational as Rational_numpy
+        from rational.numpy import Rational as Rational_numpy
         rational_n = Rational_numpy(self.init_approximation, self.degrees,
                                     self.version)
         rational_n.numerator = self.numerator.tolist()
@@ -312,27 +324,56 @@ class Rational(nn.Module):
             dist: The final distance between the rational function and the \
             fitted one
         """
+        used_dist = False
         rational_numpy = self.numpy()
         if x is not None:
-            return rational_numpy.fit(function, x, show)
+            (a, b, c, d), distance = rational_numpy.fit(function, x)
         else:
-            return rational_numpy.fit(function, show=show)
+            if self.distribution is not None:
+                freq, bins = _cleared_arrays(self.distribution)
+                x = bins
+                used_dist = True
+            else:
+                import numpy as np
+                x = np.arange(-3., 3., 0.1)
+            (a, b, c, d), distance = rational_numpy.fit(function, x)
+        if show:
+            import matplotlib.pyplot as plt
+            import torch
+            plt.plot(x, rational_numpy(x), label="Rational (self)")
+            if '__name__' in dir(function):
+                func_label = function.__name__
+            else:
+                func_label = str(function)
+            result = a * function(c * torch.tensor(x) + d) + b
+            plt.plot(x, result, label=f"Fitted {func_label}")
+            if used_dist:
+                ax = plt.gca()
+                ax2 = ax.twinx()
+                ax2.set_yticks([])
+                grey_color = (0.5, 0.5, 0.5, 0.6)
+                ax2.bar(bins, freq, width=bins[1] - bins[0],
+                        color=grey_color, edgecolor=grey_color)
+            plt.legend()
+            plt.show()
+        return (a, b, c, d), distance
 
-    def best_fit(self, functions_list, x=None):
+    def best_fit(self, functions_list, x=None, shows=False):
         if self.distribution is not None:
             freq, bins = _cleared_arrays(self.distribution)
             x = bins
-        (a, b, c, d), distance = self.fit(functions_list[0], x=x)
+        (a, b, c, d), distance = self.fit(functions_list[0], x=x, show=shows)
         min_dist = distance
         params = (a, b, c, d)
         final_function = functions_list[0]
-        for func in functions_dict[1:]:
-            (a, b, c, d), distance = self.fit(functions_list[0], x=x)
+        for func in functions_list[1:]:
+            (a, b, c, d), distance = self.fit(functions_list[0], x=x, show=shows)
             print(f"{func}: {distance}")
             if min_dist > distance:
                 min_dist = distance
                 params = (a, b, c, d)
                 final_func = func
+                print(f"{func} is the new best fitted function")
         self.best_fitted_function = final_func
         self.best_fitted_function_params = params
         return final_func, (a, b, c, d)
@@ -429,6 +470,9 @@ class Rational(nn.Module):
                     together.\n
                     Default ``1000``
         """
+        if self._handle_retrieve_mode is not None:
+            print("Already in retrieve mode")
+            return
         from physt import h1 as hist1
         self.distribution = hist1(None, "fixed_width", bin_width=bin_width,
                                   adaptive=True)
@@ -447,7 +491,7 @@ class Rational(nn.Module):
         print("Training mode, no longer retrieving the input.")
         self._handle_retrieve_mode.remove()
 
-    def show(self, input_range=None, display=True):
+    def show(self, input_range=None, fitted_function=True, display=True):
         """
         Show the function using `matplotlib`.
 
@@ -455,9 +499,13 @@ class Rational(nn.Module):
                 input_range (range):
                     The range to print the function on.\n
                     Default ``None``
+                fitted_function (bool):
+                    If ``True``, displays the best fitted function if searched.
+                    Otherwise, returns it. \n
+                    Default ``True``
                 display (bool):
                     If ``True``, displays the graph.
-                    Otherwise, returns it. \n
+                    Otherwise, returns a dictionary with functions informations. \n
                     Default ``True``
         """
         freq = None
@@ -504,8 +552,14 @@ class Rational(nn.Module):
             else:
                 hist_dict = {"bins": bins, "freq": freq,
                              "width": bins[1] - bins[0]}
+            if "best_fitted_function" not in vars(self) or self.best_fitted_function is None:
+                fitted_function = None
+            else:
+                fitted_function = {"function": self.best_fitted_function,
+                                   "params": (a, b, c, d)}
             return {"hist": hist_dict,
-                    "line": {"x": inputs_np, "y": outputs_np}}
+                    "line": {"x": inputs_np, "y": outputs_np},
+                    "fitted_function": fitted_function}
 
 
 def _save_input(self, input, output):
@@ -518,6 +572,7 @@ def _save_input_auto_stop(self, input, output):
     if self.inputs_saved > self._max_saves:
         self.training_mode()
 
+
 def _cleared_arrays(hist, tolerance=0.001):
     hist = hist.normalize()
     freq, bins = hist.numpy_like
@@ -527,7 +582,6 @@ def _cleared_arrays(hist, tolerance=0.001):
     first = (freq > 0.001).argmax() if len(freq) > min_len else 0
     last = -((freq > 0.001)[::-1].argmax()) if len(freq) > min_len else min_len + 1
     return freq[first:last], bins[first:last - 1]
-
 
 
 class AugmentedRational(nn.Module):

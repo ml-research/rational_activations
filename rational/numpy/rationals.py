@@ -81,7 +81,7 @@ class Rational():
                                           requires_grad=trainable and train_denominator)
         return rtorch
 
-    def fit(self, function, x_range=np.arange(-3., 3., 0.1), show=False):
+    def fit(self, function, x_range=np.arange(-3., 3., 0.1)):
         """
         Compute the parameters a, b, c, and d to have the neurally equivalent \
         function of the provided one as close as possible to this rational \
@@ -109,18 +109,6 @@ class Rational():
         from rational.utils import find_closest_equivalent
         (a, b, c, d), distance = find_closest_equivalent(self, function,
                                                          x_range)
-        if show:
-            import matplotlib.pyplot as plt
-            import torch
-            plt.plot(x_range, self(x_range), label="Rational (self)")
-            if '__name__' in dir(function):
-                func_label = function.__name__
-            else:
-                func_label = str(function)
-            result = a * function(c * torch.tensor(x_range) + d) + b
-            plt.plot(x_range, result, label=f"Fitted {func_label}")
-            plt.legend()
-            plt.show()
         return (a, b, c, d), distance
 
     def __repr__(self):

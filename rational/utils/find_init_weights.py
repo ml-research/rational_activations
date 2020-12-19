@@ -23,7 +23,7 @@ def plot_result(x_array, rational_array, target_array,
     plt.show()
 
 
-def append_to_config_file(params, approx_name, w_params, d_params, overright=None):
+def append_to_config_file(params, approx_name, w_params, d_params, overwrite=None):
     rational_full_name = f'Rational_version_{params["version"]}{params["nd"]}/{params["dd"]}'
     cfd = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     with open(f'{cfd}/rationals_config.json') as json_file:
@@ -31,10 +31,10 @@ def append_to_config_file(params, approx_name, w_params, d_params, overright=Non
     approx_name = approx_name.lower()
     if rational_full_name in rationals_dict:
         if approx_name in rationals_dict[rational_full_name]:
-            if overright is None:
-                overright = input(f'Rational_{params["version"]} approximation of {approx_name} already exist. \
+            if overwrite is None:
+                overwrite = input(f'Rational_{params["version"]} approximation of {approx_name} already exist. \
                                   \nDo you want to replace it ? (y/n)') in ["y", "yes"]
-            if not overright:
+            if not overwrite:
                 print("Parameters not stored")
                 return
         else:
@@ -79,7 +79,7 @@ FUNCTION = None
 
 
 def find_weights(function, function_name=None, degrees=None, bounds=None,
-                 version=None, plot=None, save=None, overright=None):
+                 version=None, plot=None, save=None, overwrite=None):
     # To be changed by the function you want to approximate
     if function_name is None:
         function_name = input("approximated function name: ")
@@ -130,7 +130,7 @@ def find_weights(function, function_name=None, degrees=None, bounds=None,
     if save is None:
         save = input("Do you want to store them in the json file ? (y/n)") in ["y", "yes"]
     if save:
-        append_to_config_file(params, function_name, w_params, d_params, overright)
+        append_to_config_file(params, function_name, w_params, d_params, overwrite)
     else:
         print("Parameters not stored")
         return w_params, d_params
