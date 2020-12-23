@@ -16,45 +16,31 @@ test_tensor = tf.convert_to_tensor(np.array([-2., -1, 0., 1., 2.], np.float32), 
 expected_result = np.array([-0.02, -0.01, 0, 1, 2])
 
 
-def test_a_on_cuda():
+def _test_on_cuda(version: str):
     """
     test rational activation function from keras package on test_tensor
-    - version: a
     - device: cuda
     - approximated to: default
+
+    :param version: which version of the function to test
     """
-    result = Rational(version='A', cuda=True)(test_tensor).clone().detach().cpu().numpy()
+    fut = Rational(version=version, cuda=True) if version != 'D' else Rational(version=version, cuda=True,
+                                                                               trainable=False)
+    result = fut(test_tensor).clone().detach().cpu().numpy()
     assert np.all(np.isclose(result, expected_result, atol=5e-02))
+
+
+def test_a_on_cuda():
+    _test_on_cuda('A')
 
 
 def test_b_on_cuda():
-    """
-       test rational activation function from keras package on test_tensor
-       - version: b
-       - device: cuda
-       - approximated to: default
-       """
-    result = Rational(version='B', cuda=True)(test_tensor).clone().detach().cpu().numpy()
-    assert np.all(np.isclose(result, expected_result, atol=5e-02))
+    _test_on_cuda('B')
 
 
 def test_c_on_cuda():
-    """
-       test rational activation function from keras package on test_tensor
-       - version: c
-       - device: cuda
-       - approximated to: default
-       """
-    result = Rational(version='C', cuda=True)(test_tensor).clone().detach().cpu().numpy()
-    assert np.all(np.isclose(result, expected_result, atol=5e-02))
+    _test_on_cuda('C')
 
 
 def test_d_on_cuda():
-    """
-       test rational activation function from keras package on test_tensor
-       - version: d
-       - device: cuda
-       - approximated to: default
-       """
-    result = Rational(version='D', cuda=True, trainable=False)(test_tensor).clone().detach().cpu().numpy()
-    assert np.all(np.isclose(result, expected_result, atol=5e-02))
+    _test_on_cuda('D')
