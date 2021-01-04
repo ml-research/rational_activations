@@ -23,7 +23,6 @@ font = {'family': 'normal',
 matplotlib.rc('font', **font)
 
 torch.set_anomaly_enabled(True)
-cnt = 0
 
 
 def test(args, model, device, test_loader, epoch):
@@ -71,25 +70,21 @@ def main():
     })
 
     network = networks[args.arch]
-    activation_function_keys = [x for x in list(actfvs.keys()) if 'pau' in x]
-
+    # activation_function_keys = [x for x in list(actfvs.keys()) if 'pau' in x]
+    # activation_function_keys = ['pau']
+    # activation_function_keys = ['recurrent_pau']
+    activation_function_keys = ['pau', 'recurrent_pau']
     optimizer = 'sgd'
-    epochs = [1,4,5,6,7,10,15,20,'final']
-    #epochs = ['final']
+    epochs = ['final']
     for activation_function_key in activation_function_keys:
         for epoch in epochs:
             print("---" * 42)
             print("Starting with dataset: {}, activation function: {}".format(args.dataset, activation_function_key))
             print("---" * 42)
-            load_path = 'examples/runs/mnist/paper_{}_{}_{}{}_seed{}/'.format(args.dataset,
-                                                                                                   args.arch,
-                                                                                                   optimizer,
-                                                                                                   "_init_{}".format(args.init) if args.init != "" else "",
+            load_path = 'examples/runs/mnist/paper_{}_{}_{}{}_seed{}/'.format(args.dataset, args.arch, optimizer,
+                                                                              "_init_{}".format(args.init) if args.init != "" else "",
                                                                  args.seed) + activation_function_key
             use_cuda = not args.no_cuda and torch.cuda.is_available()
-            #print(torch.cuda.is_available())
-            #exit()
-
             torch.manual_seed(args.seed)
             torch.backends.cudnn.deterministic = True
             torch.backends.cudnn.benchmark = False
@@ -115,18 +110,15 @@ def main():
                         transforms.ToTensor(),
                         transforms.Normalize((0.1307,), (0.3081,))
                     ])),
-                    batch_size=args.test_batch_size, shuffle=True, **kwargs)
+                    batch_size=args.batch_size, shuffle=True, **kwargs)
                 lr_scheduler_milestones = [40, 80]
             else:
                 raise ValueError('dataset error')
 
             model = network(activation_func=activation_function_key).to(device)
-            #model.apply(weights_init_he)
             model.load_state_dict(torch.load(os.path.join(load_path, 'model_{}.pt'.format(epoch))))
-
             paus = list()
 
-            cnt = 0
             for name, layer in model.named_modules():
                 if isinstance(layer, Rational):
                     layer.input_retrieve_mode(max_saves=10)
@@ -134,30 +126,21 @@ def main():
                 if isinstance(layer, RecurrentRationalModule):
                     layer.input_retrieve_mode(max_saves=10)
                     paus.append(('recurrent_rational', name, layer))
-                    cnt += 1
 
             if len(paus) > 0:
                 os.makedirs(os.path.join(load_path, 'plots'), exist_ok=True)
-                print(model)
-                import ipdb; ipdb.set_trace()
                 # dict(model.named_parameters())["features.3.0.bias"][0]
                 # dict(model.named_parameters())["features.4.2.numerator"][0]
-                model.cpu()
-                print(model)
                 print("Starting model eval")
                 acc = test(args, model, device, test_loader, epoch)
                 print("Finished model eval -> Plot")
-                fig = plt.figure(1, figsize=(6*len(paus),6))
+                # fig = plt.figure(1, figsize=(6*len(paus),6))
+                fig_dicts = []
                 for i, p in enumerate(paus):
-                    plt.subplot(1, len(paus), i+1)
-                    plt.title("{}_{}".format(p[0], p[1]))
-                    p[2].show(display=False)
-                pickle.dump(fig, open(os.path.join(load_path, 'plots',
-                                                           '{}_(acc{:.2f}%).fig_quention'.format(epoch, acc)), "wb"))
-                plt.savefig(os.path.join(load_path, 'plots/{}_(acc{:.2f}%).png'.format(epoch, acc)),
-                            bbox_inches='tight')
-                plt.close(fig)
-                #fig.clf()
+                    fig = p[2].show(display=False)
+                    print(fig)
+                    fig_dicts.append(fig)
+                pickle.dump(fig_dicts, open(f'{args.dataset}_{args.arch}_{activation_function_key}_(acc{acc}%).fig.pkl', "wb"))
             else:
                 print("No Rational Activations found. Exit without plotting")
 

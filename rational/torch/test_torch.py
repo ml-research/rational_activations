@@ -151,3 +151,27 @@ def test_conversion_cpu_to_gpuD():
     new_res = rational(cuda_inp).clone().detach().cpu().numpy()
     coherent_compute = np.all(np.isclose(new_res, expected_res, atol=5e-02))
     assert params and cpu_f and coherent_compute
+
+def test_show():
+    ratgpu = Rational(cuda=True)
+    # ratcpu = Rational(cuda=True)
+    dico = ratgpu.show(display=False)
+    assert dico["fitted_function"] is None
+    assert dico["hist"] is None
+    assert list(dico["line"].keys()) == ["x", "y"]
+    # Prepare histogram
+    assert ratgpu._handle_retrieve_mode is None
+    ratgpu.input_retrieve_mode()
+    assert ratgpu._handle_retrieve_mode is not None
+    ratgpu(cuda_inp)
+    dico = ratgpu.show(display=False)
+    assert len(dico["hist"]["bins"]) == len(dico["hist"]["freq"])
+    import matplotlib.pyplot as plt
+    ax = plt.gca()
+    hist, line = dico["hist"], dico["line"]
+    ax.plot(line['x'], line['y'])
+    ax2 = ax.twinx()
+    ax2.set_yticks([])
+    grey_color = (0.5, 0.5, 0.5, 0.6)
+    ax2.bar(hist["bins"], hist["freq"], width=hist["width"],
+            color=grey_color, edgecolor=grey_color)
