@@ -5,6 +5,7 @@ from rational.keras import Rational
 from tensorflow.nn import leaky_relu
 from tensorflow.math import tanh, sigmoid
 
+# initialization of input data
 t = [-2., -1, 0., 1., 2.]
 expected_res_lrelu = np.array(leaky_relu(t, alpha=0.01))
 expected_res_tanh = np.array(tanh(t))
@@ -12,6 +13,7 @@ expected_res_sigmoid = np.array(sigmoid(t))
 inp = tf.convert_to_tensor(np.array(t, np.float32), np.float32)
 #cuda_inp = tf.convert_to_tensor(expected_res, np.float32)
 
+# initialization of objects
 rationalA_lrelu_cpu = Rational(version='A', cuda=False)(inp).numpy()
 rationalB_lrelu_cpu = Rational(version='B', cuda=False)(inp).numpy()
 rationalC_lrelu_cpu = Rational(version='C', cuda=False)(inp).numpy()
