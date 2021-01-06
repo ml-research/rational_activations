@@ -36,16 +36,17 @@ jobs:
     - name: Install dependencies
       run: |
         source .env/bin/activate
-        python${{ matrix.python-version }} -m pip install --upgrade pip
-        python${{ matrix.python-version }} -m pip install flake8 pytest wheel airspeed
+        pip install --upgrade pip
+        pip install flake8 pytest wheel airspeed
         pip install .[torch]
-        python${{ matrix.python-version }} -m pip install -r requirements.txt
+        pip install -r requirements.txt
         alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
         export CUDA_HOME="/usr/local/cuda-10.2/"
     - name: Are GPUs recognized by our DL frameworks
       run: |
         python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
         python -c "import torch; print('Number of GPUs available:', torch.cuda.device_count(), 'CUDA version:', torch.version.cuda)"
+# conda install pytorch=1.7.0 torchvision torchaudio cudatoolkit=10.2 -c pytorch
 #    - name: Lint with flake8
 #      run: |
 #        # stop the build if there are Python syntax errors or undefined names
