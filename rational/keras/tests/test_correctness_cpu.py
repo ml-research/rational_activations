@@ -1,95 +1,89 @@
 import numpy as np
 import tensorflow as tf
-
 from rational.keras import Rational
 from tensorflow.nn import leaky_relu
 from tensorflow.math import tanh, sigmoid
 
 # initialization of input data
-t = [-2., -1, 0., 1., 2.]
-expected_res_lrelu = np.array(leaky_relu(t, alpha=0.01))
-expected_res_tanh = np.array(tanh(t))
-expected_res_sigmoid = np.array(sigmoid(t))
-inp = tf.convert_to_tensor(np.array(t, np.float32), np.float32)
-
-# initialization of objects
-rationalA_lrelu_cpu = Rational(version='A', cuda=False)(inp).numpy()
-rationalB_lrelu_cpu = Rational(version='B', cuda=False)(inp).numpy()
-rationalC_lrelu_cpu = Rational(version='C', cuda=False)(inp).numpy()
-# rationalD_lrelu_cpu = Rational(version='D', cuda=False)(inp).numpy()
-
-rationalA_tanh_cpu = Rational('tanh', version='A', cuda=False)(inp).numpy()
-rationalB_tanh_cpu = Rational('tanh', version='B', cuda=False)(inp).numpy()
-rationalC_tanh_cpu = Rational('tanh', version='C', cuda=False)(inp).numpy()
-# rationalD_tanh_cpu = Rational('tanh', version='D', cuda=False)(inp).numpy()
-
-rationalA_sigmoid_cpu = Rational(
-    'sigmoid', version='A', cuda=False)(inp).numpy()
-rationalB_sigmoid_cpu = Rational(
-    'sigmoid', version='B', cuda=False)(inp).numpy()
-rationalC_sigmoid_cpu = Rational(
-    'sigmoid', version='C', cuda=False)(inp).numpy()
+data = [-2., -1, 0., 1., 2.]
 
 
-# rationalC_sigmoid_cpu = Rational('sigmoid', version='D', cuda=False)(inp).numpy()
+def activation(func, data):
+    """
+    apply activation function to data
 
-# todo: lrelu, tanh, sigmoid, ...)
-
-
-# tests on approximation of lrelu
-def test_rationalA_cpu_lrelu():
-    assert np.all(np.isclose(rationalA_lrelu_cpu,
-                             expected_res_lrelu, atol=5e-02))
-
-
-def test_rationalB_cpu_lrelu():
-    assert np.all(np.isclose(rationalB_lrelu_cpu,
-                             expected_res_lrelu, atol=5e-02))
+    :param func: activaion function
+    :param data: data to be applied
+    """
+    if func == leaky_relu:
+        return np.array(func(data, alpha=0.01))
+    return np.array(func(data))
 
 
-def test_rationalC_cpu_lrelu():
-    assert np.all(np.isclose(rationalC_lrelu_cpu,
-                             expected_res_lrelu, atol=5e-02))
+def _test_on_cpu(version, data, func):
+    """
+    compare the result of Rational activation function with expected result
+
+    :param version: which version of Rational activation function to test
+    :param data: test tensor for testing Rational function
+    """
+
+    # instantiate tensor for testing purpose
+    test_tensor = tf.convert_to_tensor(np.array(data, np.float32), np.float32)
+
+    # instantiate expected results of activation function
+    expected_res = activation(func, data)
+
+    # instantiate Rational activation function with specific version
+    rational = Rational(func.__name__, version=version,
+                        cuda=False)(test_tensor).numpy()
+
+    assert np.all(np.isclose(rational, expected_res, atol=5e-02))
 
 
-# def test_rationalD_cpu_lrelu():
-# assert np.all(np.isclose(rationalD_lrelu_cpu, expected_res_lrelu, atol=5e-02))
+def test_A_on_cpu_lrelu():
+    _test_on_cpu(version='A', data=data, func=leaky_relu)
 
 
-# tests on approximation of tanh
-def test_rationalA_cpu_tanh():
-    assert np.all(np.isclose(rationalA_tanh_cpu,
-                             expected_res_tanh, atol=5e-02))
+def test_B_on_cpu_lrelu():
+    _test_on_cpu(version='B', data=data, func=leaky_relu)
 
 
-def test_rationalB_cpu_tanh():
-    assert np.all(np.isclose(rationalB_tanh_cpu,
-                             expected_res_tanh, atol=5e-02))
+def test_C_on_cpu_lrelu():
+    _test_on_cpu(version='C', data=data, func=leaky_relu)
 
 
-def test_rationalC_cpu_tanh():
-    assert np.all(np.isclose(rationalC_tanh_cpu,
-                             expected_res_tanh, atol=5e-02))
+# def test_D_on_cpu_lrelu():
+    #_test_on_cpu(version='D', data=data, func=leaky_relu)
 
 
-# def test_rationalD_cpu_tanh():
-# assert np.all(np.isclose(rationalD_tanh_cpu, expected_res_tanh, atol=5e-02))
+def test_A__on_cpu_tanh():
+    _test_on_cpu(version='A', data=data, func=tanh)
 
 
-# tests on approximation of sigmoid
-def test_rationalA_cpu_sigmoid():
-    assert np.all(np.isclose(rationalA_sigmoid_cpu,
-                             expected_res_sigmoid, atol=5e-02))
+def test_B__on_cpu_tanh():
+    _test_on_cpu(version='B', data=data, func=tanh)
 
 
-def test_rationalB_cpu_sigmoid():
-    assert np.all(np.isclose(rationalB_sigmoid_cpu,
-                             expected_res_sigmoid, atol=5e-02))
+def test_C__on_cpu_tanh():
+    _test_on_cpu(version='C', data=data, func=tanh)
 
 
-def test_rationalC_cpu_sigmoid():
-    assert np.all(np.isclose(rationalC_sigmoid_cpu,
-                             expected_res_sigmoid, atol=5e-02))
+# def test_D__on_cpu_tanh():
+    #_test_on_cpu(version='D', data=data, func=tanh)
 
-# def test_rationalD_cpu_sigmoid():
-# assert np.all(np.isclose(rationalD_tsigmoid_cpu, expected_res_sigmoid, atol=5e-02))
+
+def test_A__on_cpu_sigmoid():
+    _test_on_cpu(version='A', data=data, func=sigmoid)
+
+
+def test_B__on_cpu_sigmoid():
+    _test_on_cpu(version='B', data=data, func=sigmoid)
+
+
+def test_C__on_cpu_sigmoid():
+    _test_on_cpu(version='C', data=data, func=sigmoid)
+
+
+# def test_D__on_cpu_sigmoid():
+    #_test_on_cpu(version='D', data=data, func=sigmoid)
