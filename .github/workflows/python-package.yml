@@ -39,7 +39,7 @@ jobs:
         pip install --upgrade pip
         pip install flake8 pytest wheel airspeed
         pip install torch
-        python -c print("INSTALLING requirements.txt ...")
+        python -c "print('INSTALLING requirements.txt ...')"
         pip install -r requirements.txt
         alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
         export CUDA_HOME="/usr/local/cuda-10.2/"
