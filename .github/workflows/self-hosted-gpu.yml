@@ -6,10 +6,10 @@ on:
     branches:
      - ci-cdxx
   # paths:
-      - "src/**"
-      - "tests/**"
-      - ".github/**"
-      - "templates/**"
+  #    - "src/**"
+  #    - "tests/**"
+  #   - ".github/**"
+  #    - "templates/**"
   # pull_request:
   # repository_dispatch:
 
