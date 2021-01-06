@@ -25,21 +25,25 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        python -m pip install flake8 pytest wheel
-        pip install torch torchvision
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        pip install airspeed
+        python${{ matrix.python-version }} -m pip install --upgrade pip
+        python${{ matrix.python-version }} -m pip install flake8 pytest wheel airspeed
+        conda install pytorch=1.7.0 torchvision torchaudio cudatoolkit=10.2 -c pytorch
+        python${{ matrix.python-version }} -m pip install -r requirements.txt
+        alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
+        export CUDA_HOME="/usr/local/cuda-10.2/"
     - name: Are GPUs recognized by our DL frameworks
       run: |
         python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
-        python -c "import torch; print('Number of GPUs available:', torch.cuda.device_count())"
+        python -c "import torch; print('Number of GPUs available:', torch.cuda.device_count(), 'CUDA version:', torch.version.cuda)"
 #    - name: Lint with flake8
 #      run: |
 #        # stop the build if there are Python syntax errors or undefined names
 #        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 #        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
 #        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Install package
+      run: |
+        - python${{ matrix.python-version }} setup.py develop --user
     - name: Test with pytest
       run: |
-        pytest
+        python${{ matrix.python-version }} -m pytest
