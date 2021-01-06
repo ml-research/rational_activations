@@ -17,13 +17,16 @@ def _test_consistency(version: str):
 
     :param version: which version of the function to test
     """
+    # instantiate rational activation functions under test on cpu and cuda
     cpu_fut = Rational(version=version, cuda=False) if version != 'D' else Rational(version=version, cuda=False,
                                                                                     trainable=False)
     cuda_fut = Rational(version=version, cuda=True) if version != 'D' else Rational(version=version, cuda=True,
                                                                                     trainable=False)
-
+    # run the functions under test on our test tensor
     cpu_result = cpu_fut(test_tensor).numpy()
     cuda_result = cuda_fut(test_tensor).clone().detach().cpu().numpy()
+
+    # check that there is no significant difference between the results
     assert np.all(np.isclose(cpu_result, cuda_result, atol=1e-06))
 
 

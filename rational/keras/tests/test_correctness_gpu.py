@@ -24,9 +24,14 @@ def _test_on_cuda(version: str):
 
     :param version: which version of the function to test
     """
+    # instantiate a rational activation function under test
     fut = Rational(version=version, cuda=True) if version != 'D' else Rational(version=version, cuda=True,
                                                                                trainable=False)
+
+    # run the function under test on our test tensor
     result = fut(test_tensor).clone().detach().cpu().numpy()
+
+    # check that the result is correct (enough)
     assert np.all(np.isclose(result, expected_result, atol=5e-02))
 
 
