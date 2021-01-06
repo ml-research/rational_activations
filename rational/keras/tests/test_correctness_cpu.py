@@ -35,7 +35,7 @@ def _test_on_cpu(version, data, func):
     expected_res = activation(func, data)
 
     # instantiate Rational activation function with specific version
-    rational = Rational(func.__name__, version=version,
+    rational = Rational(approx_func=func.__name__, version=version,
                         cuda=False)(test_tensor).numpy()
 
     assert np.all(np.isclose(rational, expected_res, atol=5e-02))
