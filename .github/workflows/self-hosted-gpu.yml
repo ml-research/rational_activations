@@ -5,7 +5,7 @@ on:
   push:
     branches:
      - ci-cdxx
-  #  paths:
+  #paths:
       - "src/**"
       - "tests/**"
       - ".github/**"

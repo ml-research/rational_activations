@@ -23,11 +23,23 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Current dir
+      run: pwd
+    - run: nvidia-smi
+    - name: Create new python env (on self-hosted runners we have to handle isolation ourselves)
+      run: |
+        python -m venv .env
+        source .env/bin/activate
+        which python
+        python --version
+        pip --version
     - name: Install dependencies
       run: |
+        source .env/bin/activate
         python${{ matrix.python-version }} -m pip install --upgrade pip
         python${{ matrix.python-version }} -m pip install flake8 pytest wheel airspeed
-        conda install pytorch=1.7.0 torchvision torchaudio cudatoolkit=10.2 -c pytorch
+        pip install .[torch]
+      # conda install pytorch=1.7.0 torchvision torchaudio cudatoolkit=10.2 -c pytorch
         python${{ matrix.python-version }} -m pip install -r requirements.txt
         alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
         export CUDA_HOME="/usr/local/cuda-10.2/"
