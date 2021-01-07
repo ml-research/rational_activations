@@ -15,7 +15,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        python-version: ['3.7', '3.8'] #['3.5', '3.6', '3.7', '3.8']
+        python-version: ['3.7'] #['3.5', '3.6', '3.7', '3.8']
 
     steps:
     - uses: actions/checkout@v2
@@ -37,16 +37,17 @@ jobs:
       run: |
         source .env/bin/activate
         pip install --upgrade pip
-        pip install flake8 pytest wheel airspeed
         pip install torch
-        python -c "print('---------- INSTALLING requirements.txt ...')"
         pip install -r requirements.txt
+        pip install flake8 pytest wheel airspeed
+        python -c "print('---------- INSTALLING requirements.txt ...')"
         alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
         export CUDA_HOME="/usr/local/cuda-10.2/"
     - name: Are GPUs recognized by our DL frameworks
       run: |
         python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
         python -c "import torch; print('Number of GPUs available:', torch.cuda.device_count(), 'CUDA version:', torch.version.cuda)"
+        nvcc --version
 # conda install pytorch=1.7.0 torchvision torchaudio cudatoolkit=10.2 -c pytorch
 #    - name: Lint with flake8
 #      run: |
