@@ -59,6 +59,11 @@ jobs:
 #        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Install package
       run: |
+        export nvcc="/usr/local/cuda-10.2/bin/nvcc"
+        export CUDA_HOME="/usr/local/cuda-10.2/"
+        echo $CUDA_HOME
+        echo $nvcc
+        nvcc -V
         python setup.py develop --user
     - name: Test with pytest
       run: |
