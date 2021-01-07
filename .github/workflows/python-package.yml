@@ -32,7 +32,6 @@ jobs:
         source .env/bin/activate
         which python
         python --version
-        pip --version
     - name: Install dependencies
       run: |
         source .env/bin/activate
@@ -42,6 +41,7 @@ jobs:
         pip install flake8 pytest wheel airspeed
         python -c "print('---------- INSTALLING requirements.txt ...')"
         alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
+        nvcc --version
         export CUDA_HOME="/usr/local/cuda-10.2/"
     - name: Are GPUs recognized by our DL frameworks
       run: |
