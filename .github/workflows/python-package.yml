@@ -41,15 +41,13 @@ jobs:
         pip install flake8 pytest wheel airspeed
         python -c "print('---------- INSTALLING requirements.txt ...')"
         alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
-        nvcc --version
-        echo $CUDA_HOME
-        echo $CUDA_HOME
         echo "CUDA_HOME=/usr/local/cuda-10.2/" >> $GITHUB_ENV
         echo $CUDA_HOME
     - name: Are GPUs recognized by our DL frameworks
       run: |
         python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
         python -c "import torch; print('Number of GPUs available:', torch.cuda.device_count(), 'CUDA version:', torch.version.cuda)"
+        alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
         nvcc --version
         echo $CUDA_HOME
 # conda install pytorch=1.7.0 torchvision torchaudio cudatoolkit=10.2 -c pytorch
@@ -61,6 +59,7 @@ jobs:
 #        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Install package
       run: |
+        echo $CUDA_HOME
         python setup.py develop --user
     - name: Test with pytest
       run: |
