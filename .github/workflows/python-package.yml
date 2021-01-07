@@ -54,7 +54,7 @@ jobs:
         nvcc --version
         echo $CUDA_HOME
 # conda install pytorch=1.7.0 torchvision torchaudio cudatoolkit=10.2 -c pytorch
-#    - name: Lint with flake8
+#     - name: Lint with flake8
 #      run: |
 #        # stop the build if there are Python syntax errors or undefined names
 #        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
