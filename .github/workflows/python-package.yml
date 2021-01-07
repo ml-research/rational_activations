@@ -49,6 +49,7 @@ jobs:
         echo "PATH=/usr/local/cuda-10.2/bin:$PATH" >> $GITHUB_ENV
     - name: Are GPUs recognized by our DL frameworks
       run: |
+        source .env/bin/activate
         python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
         python -c "import torch; print('Number of GPUs available:', torch.cuda.device_count(), 'CUDA version:', torch.version.cuda)"
         nvcc --version
@@ -62,7 +63,9 @@ jobs:
 #        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Install package
       run: |
+        source .env/bin/activate
         python setup.py develop --user
     - name: Test with pytest
       run: |
+        source .env/bin/activate
         python -m pytest
