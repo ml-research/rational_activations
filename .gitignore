@@ -1,6 +1,7 @@
 # Project exclude paths
 /venv/
 *.pyx
+*.pyc
 .idea
 #src/.tox
 src/build
