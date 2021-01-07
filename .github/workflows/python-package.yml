@@ -44,7 +44,7 @@ jobs:
         nvcc --version
         echo $CUDA_HOME
         echo $CUDA_HOME
-        echo "/usr/local/cuda-10.2/" >> "$CUDA_HOME"
+        echo "CUDA_HOME=/usr/local/cuda-10.2/" >> $GITHUB_ENV
         echo $CUDA_HOME
     - name: Are GPUs recognized by our DL frameworks
       run: |
