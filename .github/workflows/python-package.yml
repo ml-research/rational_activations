@@ -40,10 +40,10 @@ jobs:
         pip install -r requirements.txt
         pip install flake8 pytest wheel airspeed
         python -c "print('---------- INSTALLING requirements.txt ...')"
-      # alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
-      # This is somewhat bizarre, but you can't set env variables to bash
-      # commands in the action workflow - so we have to use this odd way of
-      # exporting a variable instead.
+# alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
+# This is somewhat bizarre, but you can't set env variables to bash
+# commands in the action workflow - so we have to use this odd way of
+# exporting a variable instead.
         echo "CUDA_HOME=/usr/local/cuda-10.2/" >> $GITHUB_ENV
         echo "nvcc=/usr/local/cuda-10.2/bin/nvcc" >> $GITHUB_ENV
     - name: Are GPUs recognized by our DL frameworks
