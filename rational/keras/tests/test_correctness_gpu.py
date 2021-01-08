@@ -11,7 +11,8 @@ independently from each other.
 """
 
 # instantiate a tensor for testing (from numpy array)
-test_tensor = tf.convert_to_tensor(np.array([-2., -1, 0., 1., 2.], np.float32), np.float32)
+test_tensor = tf.convert_to_tensor(
+    np.array([-2., -1, 0., 1., 2.], np.float32), np.float32)
 # instantiate expected result, to be used as ground truth
 expected_result = np.array([-0.02, -0.01, 0, 1, 2])
 
@@ -29,7 +30,7 @@ def _test_on_cuda(version: str):
                                                                                trainable=False)
 
     # run the function under test on our test tensor
-    result = fut(test_tensor).clone().detach().cpu().numpy()
+    result = fut(test_tensor).numpy()
 
     # check that the result is correct (enough)
     assert np.all(np.isclose(result, expected_result, atol=5e-02))
