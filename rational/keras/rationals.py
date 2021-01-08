@@ -43,25 +43,20 @@ class Rational(Layer):
         super(Rational, self).__init__()
 
         w_numerator, w_denominator = get_parameters(version, degrees, approx_func)
-        
-        self.numerator = self.add_weight(shape=(len(w_numerator),), name='w_numerator', trainable=trainable and train_numerator,
-                                         initializer=tf.keras.initializers.Constant(w_numerator))
-        self.denominator = self.add_weight(shape=(len(w_denominator),), name='w_denominator', trainable=trainable and train_numerator,
-                                         initializer=tf.keras.initializers.Constant(w_denominator))
-        
-        if version == "A":
-            rational_func = Rational_KERAS_A_F
-        elif version == "B":
-            rational_func = Rational_KERAS_B_F
-        elif version == "C":
-            rational_func = Rational_KERAS_C_F
-        elif version == "D":
-            rational_func = Rational_KERAS_D_F
-        else:
-            raise ValueError("version %s not implemented" % version)
 
-        self.rational_func = rational_func
-        
+        self.numerator = self.add_weight(shape=(len(w_numerator),), name='w_numerator',
+                                         trainable=trainable and train_numerator,
+                                         initializer=tf.keras.initializers.Constant(w_numerator))
+        self.denominator = self.add_weight(shape=(len(w_denominator),), name='w_denominator',
+                                           trainable=trainable and train_numerator,
+                                           initializer=tf.keras.initializers.Constant(w_denominator))
+
+        # set correct rational activation function version
+        fun_dict = {'A': Rational_KERAS_A_F, 'B': Rational_KERAS_B_F, 'C': Rational_KERAS_C_F, 'D': Rational_KERAS_D_F}
+        self.rational_func = fun_dict.get(version)
+        if self.rational_func is None:
+            raise ValueError("rational activation function version %s not implemented" % version)
+
     def build(self, input_shape):
         super(Rational, self).build(input_shape)
 
