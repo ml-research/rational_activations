@@ -1,9 +1,12 @@
+"""
+this file tests that cuda and cpu results are consistent
+"""
 import tensorflow as tf
+import numpy as np
 
-from rational.keras import Rational
 from tensorflow.nn import leaky_relu
 from tensorflow.math import tanh, sigmoid
-import numpy as np
+from rational.keras import Rational
 
 # instantiate a tensor for testing (from numpy array)
 test_tensor = tf.convert_to_tensor(
@@ -13,19 +16,21 @@ test_tensor = tf.convert_to_tensor(
 def _test_consistency(version: str, approx_func):
     """
     test rational activation function from keras package on test_tensor,
-    validating that cuda and cpu results are consistent, i.e. that there is no significant difference
-    between cuda and cpu results
+    validating that cuda and cpu results are consistent, i.e. that there is no significant
+    difference between cuda and cpu results
 
     :param approx_func: which function to use as initial shape
     :param version: which version of the function to test
     """
 
     # instantiate rational activation functions under test on cpu and cuda
-    cpu_fut = Rational(version=version, cuda=False, approx_func=approx_func.__name__) if version != 'D' \
-        else Rational(version=version, cuda=False, approx_func=approx_func.__name__, trainable=False)
+    cpu_fut = Rational(version=version, cuda=False, approx_func=approx_func.__name__) \
+        if version != 'D' else Rational(version=version, cuda=False,
+                                        approx_func=approx_func.__name__, trainable=False)
 
-    cuda_fut = Rational(version=version, cuda=True, approx_func=approx_func.__name__) if version != 'D' \
-        else Rational(version=version, cuda=True, approx_func=approx_func.__name__, trainable=False)
+    cuda_fut = Rational(version=version, cuda=True, approx_func=approx_func.__name__) \
+        if version != 'D' else Rational(version=version, cuda=True,
+                                        approx_func=approx_func.__name__, trainable=False)
     # run the functions under test on our test tensor
     cpu_result = cpu_fut(test_tensor).numpy()
     cuda_result = cuda_fut(test_tensor).numpy()

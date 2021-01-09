@@ -1,17 +1,15 @@
-import tensorflow as tf
-
-import numpy as np
-
-from rational.keras import Rational
-from tensorflow.nn import leaky_relu
-from tensorflow.math import tanh, sigmoid
-from rational.keras.tests import activation
-
 """
 This test file tests the keras rational activation functions on cuda devices.
-The individual test methods are repetitive for the sake of comprehension. This way, they can be executed and analyzed
-independently from each other.
+The individual test methods are repetitive for the sake of comprehension. This way, they can be
+executed and analyzed independently from each other.
 """
+import tensorflow as tf
+import numpy as np
+
+from tensorflow.nn import leaky_relu
+from tensorflow.math import tanh, sigmoid
+from rational.keras import Rational
+from rational.keras.tests import activation
 
 # instantiate a tensor for testing (from numpy array)
 test_tensor = tf.convert_to_tensor(
