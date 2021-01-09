@@ -1,8 +1,7 @@
 from tensorflow.keras.layers import Layer
 import tensorflow as tf
 
-from rational.keras.rational_keras_functions import Rational_KERAS_A_F, Rational_KERAS_B_F, Rational_KERAS_C_F, \
-    Rational_KERAS_D_F
+from rational.keras.versions import a, b, c, d
 from rational.utils.get_weights import get_parameters
 
 
@@ -51,6 +50,7 @@ class Rational(Layer):
 
         w_numerator, w_denominator = get_parameters(version, degrees, approx_func)
 
+        # add trainable weight vectors for numerator (a_0, ... a_n) and denominator (b_0, ... b_m)
         self.numerator = self.add_weight(shape=(len(w_numerator),), name='w_numerator',
                                          trainable=trainable and train_numerator,
                                          initializer=tf.keras.initializers.Constant(w_numerator))
@@ -58,9 +58,8 @@ class Rational(Layer):
                                            trainable=trainable and train_numerator,
                                            initializer=tf.keras.initializers.Constant(w_denominator))
 
-        # set correct rational activation function version
-        fun_dict = {'A': Rational_KERAS_A_F, 'B': Rational_KERAS_B_F, 'C': Rational_KERAS_C_F, 'D': Rational_KERAS_D_F}
-        self.rational_func = fun_dict.get(version)
+        # set rational activation function version
+        self.rational_func = {'A': a, 'B': b, 'C': c, 'D': d}.get(version)
         if self.rational_func is None:
             raise ValueError("rational activation function version %s not implemented" % version)
 
@@ -88,8 +87,8 @@ class Rational(Layer):
         - training (boolean, whether the call is in inference mode or training mode)
         - mask (boolean tensor encoding masked timesteps in the input, used in RNN layers)
 
-        :param inputs: Input tensor, or list/tuple of input tensors.
+        :param inputs: input tensor
         :param training: TODO
-        :return: A tensor or list/tuple of tensors.
+        :return: output tensor, with the respective rational activation function applied to it
         """
         return self.rational_func(inputs, self.numerator, self.denominator, training)
