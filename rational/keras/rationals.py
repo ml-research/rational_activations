@@ -7,11 +7,18 @@ from rational.utils.get_weights import get_parameters
 
 
 class Rational(Layer):
+    """
+    a class representing rational activation functions for tensorflow, inheriting from tensorflow.keras.layers.Layer
+    """
+
     def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=False,
                  version="A", trainable=True, train_numerator=True,
                  train_denominator=True):
         """
-        Rational activation function inherited from tensorflow keras ``Layer``
+        Inherited from tensorflow.keras.layers.Layer
+
+        Defines custom layer attributes, and creates layer state variables that do not depend on input shapes,
+        using ``add_weight()``
 
         Arguments:
                 approx_func (str):
@@ -58,7 +65,31 @@ class Rational(Layer):
             raise ValueError("rational activation function version %s not implemented" % version)
 
     def build(self, input_shape):
+        """
+        Inherited from tensorflow.keras.layers.Layer
+
+        This method can be used to create weights that depend on the shape(s) of the input(s),
+        using ``add_weight()``. ``__call__()`` will automatically build the layer (if it has not been built yet)
+        by calling ``build()``.
+
+        :param input_shape: Instance of `TensorShape`, or list of instances of `TensorShape` if the layer expects a list
+         of inputs (one instance per input).
+        """
         super(Rational, self).build(input_shape)
 
     def call(self, inputs, training=True):
+        """
+        Inherited from tensorflow.keras.layers.Layer
+
+        Called in ``__call__`` after making sure ``build()`` has been called. ``call()`` performs the logic of applying
+        the layer to the input tensors (which should be passed in as argument). Two reserved keyword arguments you can
+        optionally use in ``call()`` are:
+
+        - training (boolean, whether the call is in inference mode or training mode)
+        - mask (boolean tensor encoding masked timesteps in the input, used in RNN layers)
+
+        :param inputs: Input tensor, or list/tuple of input tensors.
+        :param training: TODO
+        :return: A tensor or list/tuple of tensors.
+        """
         return self.rational_func(inputs, self.numerator, self.denominator, training)
