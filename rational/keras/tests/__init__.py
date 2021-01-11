@@ -4,4 +4,4 @@ E.g.: Only that way can Rational be imported 'directly' in the test files
 """
 
 from ..rationals import Rational
-from ._helpers import activation
+from ._helpers import _activation, _test_template
