@@ -24,13 +24,14 @@ def _test_consistency(version: str, approx_func):
     """
 
     # instantiate rational activation functions under test on cpu and cuda
+    trainable = False
     cpu_fut = Rational(version=version, cuda=False, approx_func=approx_func.__name__) \
         if version != 'D' else Rational(version=version, cuda=False,
-                                        approx_func=approx_func.__name__, trainable=False)
+                                        approx_func=approx_func.__name__, trainable=trainable)
 
     cuda_fut = Rational(version=version, cuda=True, approx_func=approx_func.__name__) \
         if version != 'D' else Rational(version=version, cuda=True,
-                                        approx_func=approx_func.__name__, trainable=False)
+                                        approx_func=approx_func.__name__, trainable=trainable)
     # run the functions under test on our test tensor
     cpu_result = cpu_fut(test_tensor).numpy()
     cuda_result = cuda_fut(test_tensor).numpy()

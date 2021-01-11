@@ -29,8 +29,9 @@ def _test_on_cuda(version: str, approx_func):
     expected_result = activation(approx_func, np.array([-0.02, -0.01, 0, 1, 2]))
 
     # instantiate a rational activation function under test
-    fut = Rational(version=version, cuda=True, approx_func=approx_func.__name__) if version != 'D' \
-        else Rational(version=version, cuda=True, trainable=False, approx_func=approx_func)
+    trainable = False
+    fut = Rational(version=version, cuda=True, approx_func=approx_func.__name__, trainable=trainable) \
+        if version != 'D' else Rational(version=version, cuda=True, trainable=trainable, approx_func=approx_func)
 
     # run the function under test on our test tensor
     result = fut(test_tensor).numpy()
