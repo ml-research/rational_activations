@@ -1,50 +1,46 @@
+"""
+file contains the Rational class, the anchor class of the keras package
+"""
 from tensorflow.keras.layers import Layer
 import tensorflow as tf
 
-from rational.keras.versions import a, b, c, d
+from rational.keras.versions import version_a, version_b, version_c, version_d
 from rational.utils.get_weights import get_parameters
 
 
 class Rational(Layer):
     """
-    a class representing rational activation functions for tensorflow, inheriting from tensorflow.keras.layers.Layer
+    a class representing rational activation functions for tensorflow, inheriting from
+    tensorflow.keras.layers.Layer
     """
 
-    def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=False,
-                 version="A", trainable=True, train_numerator=True,
-                 train_denominator=True):
+    def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=False, version="A",
+                 trainable=True, train_numerator=True, train_denominator=True):
         """
         Inherited from tensorflow.keras.layers.Layer
 
-        Defines custom layer attributes, and creates layer state variables that do not depend on input shapes,
-        using ``add_weight()``
+        Defines custom layer attributes, and creates layer state variables that do not depend on
+        input shapes, using ``add_weight()``
 
-        Arguments:
-                approx_func (str):
-                    The name of the approximated function for initialisation. \
-                    The different initialable functions are available in \
-                    `rational.rationals_config.json`. \n
-                    Default ``leaky_relu``.
-                degrees (tuple of int):
-                    The degrees of the numerator (P) and denominator (Q).\n
-                    Default ``(5, 4)``
-                cuda (bool):
-                    Use GPU CUDA version. \n
-                    If ``None``, use cuda if available on the machine\n
-                    Default ``None``
-                version (str):
-                    Version of Rational to use. Rational(x) = P(x)/Q(x)\n
-                    `A`: Q(x) = 1 + \|b_1.x\| + \|b_2.x\| + ... + \|b_n.x\|\n
-                    `B`: Q(x) = 1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
-                    `C`: Q(x) = 0.1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
-                    `D`: like `B` with noise\n
-                    Default ``A``
-                trainable (bool):
-                    If the weights are trainable, i.e, if they are updated during \
-                    backward pass\n
-                    Default ``True``
-        Returns:
-            Module: Rational module
+        :param approx_func: The name of the approximated function for initialisation.
+        The different functions are available in `rational.rationals_config.json`.
+        Default ``leaky_relu``.
+        :param degrees: The degrees of the numerator (P) and denominator (Q).
+        Default ``(5, 4)``
+        :param cuda: Use GPU CUDA version.
+        If ``None``, use cuda if available on the machine
+        Default ``None``
+        :param version: Version of Rational to use. Rational(x) = P(x)/Q(x)
+        `A`: Q(x) = 1 + \|b_1.x\| + \|b_2.x\| + ... + \|b_n.x\|
+        `B`: Q(x) = 1 + \|b_1.x + b_2.x + ... + b_n.x\|
+        `C`: Q(x) = 0.1 + \|b_1.x + b_2.x + ... + b_n.x\|
+        `D`: like `B` with noise
+        Default ``A``
+        :param trainable: If the weights are trainable, i.e, if they are updated during
+        backward pass.
+        Default ``True``
+        :param train_numerator: whether numerator coefficients are trainable
+        :param train_denominator: whether denominator coefficients are trainable
         """
         super(Rational, self).__init__()
 
@@ -56,14 +52,16 @@ class Rational(Layer):
                                          initializer=tf.keras.initializers.Constant(w_numerator))
 
         self.denominator = self.add_weight(shape=(len(w_denominator),), name='w_denominator',
-                                           trainable=trainable and train_numerator,
-                                           initializer=tf.keras.initializers.Constant(w_denominator))
+                                           trainable=trainable and train_denominator,
+                                           initializer=tf.keras.initializers
+                                           .Constant(w_denominator))
 
         # record whether weights are trainable. Used later by call() method
         self.training = trainable
 
         # set rational activation function version
-        self.rational_func = {'A': a, 'B': b, 'C': c, 'D': d}.get(version)
+        self.rational_func = {'A': version_a, 'B': version_b, 'C': version_c, 'D': version_d}\
+            .get(version)
         if self.rational_func is None:
             raise ValueError("rational activation function version %s not implemented" % version)
 
@@ -72,11 +70,11 @@ class Rational(Layer):
         Inherited from tensorflow.keras.layers.Layer
 
         This method can be used to create weights that depend on the shape(s) of the input(s),
-        using ``add_weight()``. ``__call__()`` will automatically build the layer (if it has not been built yet)
-        by calling ``build()``.
+        using ``add_weight()``. ``__call__()`` will automatically build the layer (if it has not
+        been built yet) by calling ``build()``.
 
-        :param input_shape: Instance of `TensorShape`, or list of instances of `TensorShape` if the layer expects a list
-         of inputs (one instance per input).
+        :param input_shape: Instance of `TensorShape`, or list of instances of `TensorShape` if
+        the layer expects a list of inputs (one instance per input).
         """
         super(Rational, self).build(input_shape)
 
@@ -84,9 +82,9 @@ class Rational(Layer):
         """
         Inherited from tensorflow.keras.layers.Layer
 
-        Called in ``__call__`` after making sure ``build()`` has been called. ``call()`` performs the logic of applying
-        the layer to the input tensors (which should be passed in as argument). Two reserved keyword arguments you can
-        optionally use in ``call()`` are:
+        Called in ``__call__`` after making sure ``build()`` has been called. ``call()`` performs
+        the logic of applying the layer to the input tensors (which should be passed in as
+        argument). Two reserved keyword arguments you can optionally use in ``call()`` are:
 
         - training (boolean, whether the call is in inference mode or training mode)
         - mask (boolean tensor encoding masked timesteps in the input, used in RNN layers)
