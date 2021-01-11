@@ -35,7 +35,7 @@ def _test_on_cpu(version, data, func):
     expected_res = activation(func, data)
 
     # instantiate Rational activation function with specific version
-    trainable = False if version != 'D' else True
+    trainable = False  # if version != 'D' else True
     rational = Rational(approx_func=func.__name__, version=version,
                         cuda=False, trainable=trainable)(test_tensor).numpy()
 
