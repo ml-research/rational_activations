@@ -27,33 +27,33 @@ def test_d_on_cpu_lrelu():
     _test_template(version='D', approx_func=leaky_relu, cuda=CUDA)
 
 
-def test_a__on_cpu_tanh():
+def test_a_on_cpu_tanh():
     _test_template(version='A', approx_func=tanh, cuda=CUDA)
 
 
-def test_b__on_cpu_tanh():
+def test_b_on_cpu_tanh():
     _test_template(version='B', approx_func=tanh, cuda=CUDA)
 
 
-def test_c__on_cpu_tanh():
+def test_c_on_cpu_tanh():
     _test_template(version='C', approx_func=tanh, cuda=CUDA)
 
 
-def test_d__on_cpu_tanh():
+def test_d_on_cpu_tanh():
     _test_template(version='D', approx_func=tanh, cuda=CUDA)
 
 
-def test_a__on_cpu_sigmoid():
+def test_a_on_cpu_sigmoid():
     _test_template(version='A', approx_func=sigmoid, cuda=CUDA)
 
 
-def test_b__on_cpu_sigmoid():
+def test_b_on_cpu_sigmoid():
     _test_template(version='B', approx_func=sigmoid, cuda=CUDA)
 
 
-def test_c__on_cpu_sigmoid():
+def test_c_on_cpu_sigmoid():
     _test_template(version='C', approx_func=sigmoid, cuda=CUDA)
 
 
-def test_d__on_cpu_sigmoid():
+def test_d_on_cpu_sigmoid():
     _test_template(version='D', approx_func=sigmoid, cuda=CUDA)
