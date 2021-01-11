@@ -28,8 +28,9 @@ def _test_on_cpu(version, data, func):
     expected_res = activation(func, data)
 
     # instantiate Rational activation function with specific version
+    trainable = False  # if version != 'D' else True
     rational = Rational(approx_func=func.__name__, version=version,
-                        cuda=False)(test_tensor).numpy()
+                        cuda=False, trainable=trainable)(test_tensor).numpy()
 
     assert np.all(np.isclose(rational, expected_res, atol=5e-02))
 
@@ -46,8 +47,8 @@ def test_c_on_cpu_lrelu():
     _test_on_cpu(version='C', data=test_data, func=leaky_relu)
 
 
-# def test_d_on_cpu_lrelu():
-# _test_on_cpu(version='D', data=data, func=leaky_relu)
+def test_d_on_cpu_lrelu():
+    _test_on_cpu(version='D', data=test_data, func=leaky_relu)
 
 
 def test_a__on_cpu_tanh():
@@ -62,8 +63,8 @@ def test_c__on_cpu_tanh():
     _test_on_cpu(version='C', data=test_data, func=tanh)
 
 
-# def test_d__on_cpu_tanh():
-# _test_on_cpu(version='D', data=data, func=tanh)
+def test_d__on_cpu_tanh():
+    _test_on_cpu(version='D', data=test_data, func=tanh)
 
 
 def test_a__on_cpu_sigmoid():
@@ -77,5 +78,7 @@ def test_b__on_cpu_sigmoid():
 def test_c__on_cpu_sigmoid():
     _test_on_cpu(version='C', data=test_data, func=sigmoid)
 
-# def test_d__on_cpu_sigmoid():
-# _test_on_cpu(version='D', data=data, func=sigmoid)
+
+def test_d__on_cpu_sigmoid():
+    _test_on_cpu(version='D', data=test_data, func=sigmoid)
+

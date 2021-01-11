@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 
-def _get_xps(x, denominator_weights, numerator_weights):
+def _get_xps(x, numerator_weights, denominator_weights):
     """
     creates a list of ascending powers of x
 
@@ -38,7 +38,7 @@ def a(x, numerator_weights, denominator_weights, training):
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
 
-    xps = _get_xps(x, denominator_weights, numerator_weights)
+    xps = _get_xps(x, numerator_weights, denominator_weights)
 
     numerator = 0
     for i in range(numerator_weights.shape[0]):
@@ -69,7 +69,7 @@ def b(x, numerator_weights, denominator_weights, training):
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
 
-    xps = _get_xps(x, denominator_weights, numerator_weights)
+    xps = _get_xps(x, numerator_weights, denominator_weights)
 
     numerator = 0
     for i in range(numerator_weights.shape[0]):
@@ -100,7 +100,7 @@ def c(x, numerator_weights, denominator_weights, training):
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
 
-    xps = _get_xps(x, denominator_weights, numerator_weights)
+    xps = _get_xps(x, numerator_weights, denominator_weights)
 
     numerator = 0
     for i in range(numerator_weights.shape[0]):
@@ -128,9 +128,34 @@ def d(x, numerator_weights, denominator_weights, training, random_deviation=0.1)
     :param numerator_weights: vector containing the weights a_0, ... a_n
     :param denominator_weights: vector containing the weights b_0, ... b_m
     :param training: whether the call is in inference mode or training mode
-    :param: random_deviation: random deviation
+    :param random_deviation: random deviation
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
 
     """
-    # TODO @Ting-Yu implement
-    raise NotImplementedError()
+    # if in training mode, apply Function B
+    if not training:
+        return b(x, numerator_weights, denominator_weights, training)
+
+    # else: in inference mode
+    else:
+        # get list of polynomial [1, X, X^2, X^3....X^n]
+        xps = _get_xps(denominator_weights, x, numerator_weights)
+
+        # assign weights to coefficients of numerator of polynomial
+        numerator = 0
+        for i in range(numerator_weights.shape[0]):
+            # assign noise factor with uniform distribution
+            noise = tf.random.uniform(
+                shape=x.shape, minval=1-random_deviation, maxval=1+random_deviation, dtype=tf.dtypes.float32)
+            w_n_noised = numerator_weights[i] * noise
+            numerator = numerator + w_n_noised * xps[i]
+
+        # assign weights to coefficients of denominator of polynomial
+        denominator = 0
+        for j in range(denominator_weights.shape[0]):
+            noise = tf.random.uniform(
+                shape=x.shape, minval=1-random_deviation, maxval=1+random_deviation, dtype=tf.dtypes.float32)
+            w_d_noised = denominator_weights[j] * noise
+            denominator = denominator + w_d_noised * xps[j]
+
+        return numerator / (1 + tf.abs(denominator))

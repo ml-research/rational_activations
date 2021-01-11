@@ -54,9 +54,13 @@ class Rational(Layer):
         self.numerator = self.add_weight(shape=(len(w_numerator),), name='w_numerator',
                                          trainable=trainable and train_numerator,
                                          initializer=tf.keras.initializers.Constant(w_numerator))
+
         self.denominator = self.add_weight(shape=(len(w_denominator),), name='w_denominator',
                                            trainable=trainable and train_numerator,
                                            initializer=tf.keras.initializers.Constant(w_denominator))
+
+        # record whether weights are trainable. Used later by call() method
+        self.training = trainable
 
         # set rational activation function version
         self.rational_func = {'A': a, 'B': b, 'C': c, 'D': d}.get(version)
@@ -76,7 +80,7 @@ class Rational(Layer):
         """
         super(Rational, self).build(input_shape)
 
-    def call(self, inputs, training=True):
+    def call(self, inputs, **kwargs):
         """
         Inherited from tensorflow.keras.layers.Layer
 
@@ -88,7 +92,6 @@ class Rational(Layer):
         - mask (boolean tensor encoding masked timesteps in the input, used in RNN layers)
 
         :param inputs: input tensor
-        :param training: TODO
         :return: output tensor, with the respective rational activation function applied to it
         """
-        return self.rational_func(inputs, self.numerator, self.denominator, training)
+        return self.rational_func(inputs, self.numerator, self.denominator, self.training)
