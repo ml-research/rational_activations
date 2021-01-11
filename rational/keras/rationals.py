@@ -48,6 +48,8 @@ class Rational(Layer):
                                          initializer=tf.keras.initializers.Constant(w_numerator))
         self.denominator = self.add_weight(shape=(len(w_denominator),), name='w_denominator', trainable=trainable and train_numerator,
                                          initializer=tf.keras.initializers.Constant(w_denominator))
+        # record whether weights are trainable. Used later by call() method
+        self.training = trainable
         
         if version == "A":
             rational_func = Rational_KERAS_A_F
@@ -65,5 +67,5 @@ class Rational(Layer):
     def build(self, input_shape):
         super(Rational, self).build(input_shape)
 
-    def call(self, inputs, training=True):
-        return self.rational_func(inputs, self.numerator, self.denominator, training)
+    def call(self, inputs, **kwargs):
+        return self.rational_func(inputs, self.numerator, self.denominator, self.training)
