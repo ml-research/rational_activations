@@ -26,7 +26,7 @@ def _get_xps(in_tensor, numerator_weights, denominator_weights):
     return xps
 
 
-def version_a(in_tensor, numerator_weights, denominator_weights, training):
+def _version_a(in_tensor, numerator_weights, denominator_weights, training):
     """
     version a of rational activation function
 
@@ -57,7 +57,7 @@ def version_a(in_tensor, numerator_weights, denominator_weights, training):
     return numerator / denominator
 
 
-def version_b(in_tensor, numerator_weights, denominator_weights, training):
+def _version_b(in_tensor, numerator_weights, denominator_weights, training):
     """
     version b of rational activation function
 
@@ -88,7 +88,7 @@ def version_b(in_tensor, numerator_weights, denominator_weights, training):
     return numerator / (1 + tf.abs(denominator))
 
 
-def version_c(in_tensor, numerator_weights, denominator_weights, training):
+def _version_c(in_tensor, numerator_weights, denominator_weights, training):
     """
     version c of rational activation function
 
@@ -119,7 +119,7 @@ def version_c(in_tensor, numerator_weights, denominator_weights, training):
     return numerator / (0.1 + tf.abs(denominator))
 
 
-def version_d(in_tensor, numerator_weights, denominator_weights, training, random_deviation=0.1):
+def _version_d(in_tensor, numerator_weights, denominator_weights, training, random_deviation=0.1):
     """
     version d of rational activation function
 
@@ -140,7 +140,7 @@ def version_d(in_tensor, numerator_weights, denominator_weights, training, rando
     """
     # if in training mode, apply Function B
     if not training:
-        return version_b(in_tensor, numerator_weights, denominator_weights, training)
+        return _version_b(in_tensor, numerator_weights, denominator_weights, training)
 
     # else: inference mode
     # get list of polynomial [1, X, X^2, X^3....X^n]

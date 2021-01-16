@@ -4,7 +4,7 @@ file contains the Rational class, the anchor class of the keras package
 from tensorflow.keras.layers import Layer
 import tensorflow as tf
 
-from rational.keras.versions import version_a, version_b, version_c, version_d
+from rational.keras.versions import _version_a, _version_b, _version_c, _version_d
 from rational.utils.get_weights import get_parameters
 
 
@@ -27,13 +27,12 @@ class Rational(Layer):
         Default ``leaky_relu``.
         :param degrees: The degrees of the numerator (P) and denominator (Q).
         Default ``(5, 4)``
-        :param cuda: Use GPU CUDA version.
-        If ``None``, use cuda if available on the machine
-        Default ``None``
+        :param cuda: whether to execute on cuda device. NOTE: CURRENTLY NOT USED, i.e.
+        function always executes on cuda device if available.
         :param version: Version of Rational to use. Rational(x) = P(x)/Q(x)
-        `A`: Q(x) = 1 + \|b_1.x\| + \|b_2.x\| + ... + \|b_n.x\|
-        `B`: Q(x) = 1 + \|b_1.x + b_2.x + ... + b_n.x\|
-        `C`: Q(x) = 0.1 + \|b_1.x + b_2.x + ... + b_n.x\|
+        `A`: Q(x) = 1 + |b_1.x| + |b_2.x| + ... + |b_n.x|
+        `B`: Q(x) = 1 + |b_1.x + b_2.x + ... + b_n.x|
+        `C`: Q(x) = 0.1 + |b_1.x + b_2.x + ... + b_n.x|
         `D`: like `B` with noise
         Default ``A``
         :param trainable: If the weights are trainable, i.e, if they are updated during
@@ -60,7 +59,7 @@ class Rational(Layer):
         self.training = trainable
 
         # set rational activation function version
-        self.rational_func = {'A': version_a, 'B': version_b, 'C': version_c, 'D': version_d}\
+        self.rational_func = {'A': _version_a, 'B': _version_b, 'C': _version_c, 'D': _version_d}\
             .get(version)
         if self.rational_func is None:
             raise ValueError("rational activation function version %s not implemented" % version)
