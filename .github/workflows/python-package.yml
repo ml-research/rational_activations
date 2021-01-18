@@ -64,7 +64,7 @@ jobs:
     - name: Install package
       run: |
         source .env/bin/activate
-        apt-get install libfoo-dev
+        sudo apt-get install libfoo-dev
         python setup.py develop --user
     - name: Test with pytest
       run: |
