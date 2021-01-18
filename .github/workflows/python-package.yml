@@ -39,7 +39,7 @@ jobs:
         pip install torch==1.7.0
         python -c "print('---------- INSTALLING requirements.txt ...')"
         pip install -r requirements.txt
-        pip install flake8 pytest wheel airspeed
+        pip install flake8 pytest airspeed
         # alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
         # This is somewhat bizarre, but you can't set env variables to bash
         # commands in the action workflow - so we have to use this odd way of
@@ -64,6 +64,7 @@ jobs:
     - name: Install package
       run: |
         source .env/bin/activate
+        apt-get install libfoo-dev
         python setup.py develop --user
     - name: Test with pytest
       run: |
