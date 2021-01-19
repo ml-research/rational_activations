@@ -30,7 +30,6 @@ def _test_backward_template(version: str, function_is_layer: bool):
     It tests for a given version of Rational whether Rational can be integrated into a small
     tensorflow model. It also tests whether the rational activation function's coefficients
     (weights) are updated
-
     :param version: version of the rational activation function
     :param function_is_layer: declare function as a tf.keras.layer in the model if True. Else declare as
     the activation parameter for a given tf.keras.layer
@@ -50,7 +49,8 @@ def _test_backward_template(version: str, function_is_layer: bool):
     if function_is_layer:
         model = tf.keras.Sequential([
             # convolutional layer
-            tf.keras.layers.Conv2D(filters=32, kernel_size=(4, 4), input_shape=(28, 28, 1)),
+            tf.keras.layers.Conv2D(filters=32, kernel_size=(
+                4, 4), input_shape=(28, 28, 1)),
 
             # rational activation function as layer
             fut,
@@ -64,7 +64,8 @@ def _test_backward_template(version: str, function_is_layer: bool):
     else:
         model = tf.keras.Sequential([
             # convolutional layer
-            tf.keras.layers.Conv2D(filters=32, kernel_size=(4, 4), input_shape=(28, 28, 1), activation=fut),
+            tf.keras.layers.Conv2D(filters=32, kernel_size=(
+                4, 4), input_shape=(28, 28, 1), activation=fut),
 
             # transform 2D to 1D with flatten
             tf.keras.layers.Flatten(),

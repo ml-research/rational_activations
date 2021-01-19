@@ -150,7 +150,7 @@ def _version_d(in_tensor, numerator_weights, denominator_weights, training, rand
     numerator = 0
     for i in range(numerator_weights.shape[0]):
         # assign noise factor with uniform distribution
-        noise = tf.random.uniform(shape=in_tensor.shape, minval=1 - random_deviation,
+        noise = tf.random.uniform(shape=(1, 25, 25, 32), minval=1 - random_deviation,
                                   maxval=1+random_deviation, dtype=tf.dtypes.float32)
         w_n_noised = numerator_weights[i] * noise
         numerator = numerator + w_n_noised * xps[i]
@@ -158,7 +158,8 @@ def _version_d(in_tensor, numerator_weights, denominator_weights, training, rand
     # assign weights to coefficients of denominator of polynomial
     denominator = 0
     for j in range(denominator_weights.shape[0]):
-        noise = tf.random.uniform(shape=in_tensor.shape, minval=1 - random_deviation,
+        # assign noise factor with uniform distribution
+        noise = tf.random.uniform(shape=(1, 25, 25, 32), minval=1 - random_deviation,
                                   maxval=1+random_deviation, dtype=tf.dtypes.float32)
         w_d_noised = denominator_weights[j] * noise
         denominator = denominator + w_d_noised * xps[j]
