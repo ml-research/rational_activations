@@ -1,6 +1,7 @@
 # Project exclude paths
 /venv/
 *.pyx
+*.pyc
 .idea
 #src/.tox
 src/build
@@ -14,3 +15,4 @@ src/dist
 dist
 .tox
 .ipynb_checkpoints
+*.pyc
