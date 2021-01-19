@@ -172,7 +172,12 @@ class Rational(nn.Module):
 
         if cuda is None:
             cuda = torch_cuda_available()
-        device = "cuda" if cuda else "cpu"
+        if cuda is True:
+            device = "cuda"
+        elif cuda is False:
+            device = "cpu"
+        else:
+            device = cuda
 
         w_numerator, w_denominator = get_parameters(version, degrees,
                                                     approx_func)
@@ -181,14 +186,16 @@ class Rational(nn.Module):
                                       requires_grad=trainable and train_numerator)
         self.denominator = nn.Parameter(torch.FloatTensor(w_denominator).to(device),
                                         requires_grad=trainable and train_denominator)
+        self.register_parameter("numerator", self.numerator)
+        self.register_parameter("denominator", self.denominator)
+        self.device = device
         self.degrees = degrees
         self.version = version
         self.training = trainable
-        self.device = device
 
         self.init_approximation = approx_func
 
-        if cuda:
+        if "cuda" in device:
             if version == "A":
                 rational_func = Rational_CUDA_A_F
             elif version == "B":
@@ -216,6 +223,8 @@ class Rational(nn.Module):
             self.activation_function = rational_func
         self._handle_retrieve_mode = None
         self.distribution = None
+        self.best_fitted_function = None
+        self.best_fitted_function_params = None
 
     def forward(self, x):
         out = self.activation_function(x, self.numerator, self.denominator,
@@ -240,9 +249,10 @@ class Rational(nn.Module):
             raise ValueError("version %s not implemented" % self.version)
         self.activation_function = rational_func
         self.device = "cpu"
-        return super().cpu()
+        self.numerator = nn.Parameter(self.numerator.cpu())
+        self.denominator = nn.Parameter(self.denominator.cpu())
 
-    def cuda(self):
+    def cuda(self, device="0"):
         if self.version == "A":
             rational_func = Rational_CUDA_A_F
         elif self.version == "B":
@@ -253,16 +263,37 @@ class Rational(nn.Module):
             rational_func = Rational_CUDA_D_F
         else:
             raise ValueError("version %s not implemented" % self.version)
-
+        if "cuda" in device:
+            self.device = f"device"
+        else:
+            self.device = f"cuda:{device}"
         self.activation_function = rational_func.apply
-        self.device = "cuda"
-        return super().cuda()
+        self.numerator = nn.Parameter(self.numerator.cuda(self.device))
+        self.denominator = nn.Parameter(self.denominator.cuda(self.device))
+
+    def to(self, device):
+        if "cpu" in str(device):
+            self.cpu()
+        elif "cuda" in str(device):
+            self.cuda(device)
+
+    def _apply(self, fn):
+        if "Module.cpu" in str(fn):
+            self.cpu()
+        elif "Module.cuda" in str(fn):
+            self.cuda()
+        elif "Module.to" in str(fn):
+            device = fn.__closure__[1].cell_contents
+            assert type(device) == torch.device  # otherwise loop on __closure__
+            self.to(device)
+        else:
+            return super._apply(fn)
 
     def numpy(self):
         """
         Returns a numpy version of this activation function.
         """
-        from rational import Rational as Rational_numpy
+        from rational.numpy import Rational as Rational_numpy
         rational_n = Rational_numpy(self.init_approximation, self.degrees,
                                     self.version)
         rational_n.numerator = self.numerator.tolist()
@@ -293,11 +324,60 @@ class Rational(nn.Module):
             dist: The final distance between the rational function and the \
             fitted one
         """
+        used_dist = False
         rational_numpy = self.numpy()
         if x is not None:
-            rational_numpy.fit(function, x, show)
+            (a, b, c, d), distance = rational_numpy.fit(function, x)
         else:
-            rational_numpy.fit(function, show=show)
+            if self.distribution is not None:
+                freq, bins = _cleared_arrays(self.distribution)
+                x = bins
+                used_dist = True
+            else:
+                import numpy as np
+                x = np.arange(-3., 3., 0.1)
+            (a, b, c, d), distance = rational_numpy.fit(function, x)
+        if show:
+            import matplotlib.pyplot as plt
+            import torch
+            plt.plot(x, rational_numpy(x), label="Rational (self)")
+            if '__name__' in dir(function):
+                func_label = function.__name__
+            else:
+                func_label = str(function)
+            result = a * function(c * torch.tensor(x) + d) + b
+            plt.plot(x, result, label=f"Fitted {func_label}")
+            if used_dist:
+                ax = plt.gca()
+                ax2 = ax.twinx()
+                ax2.set_yticks([])
+                grey_color = (0.5, 0.5, 0.5, 0.6)
+                ax2.bar(bins, freq, width=bins[1] - bins[0],
+                        color=grey_color, edgecolor=grey_color)
+            plt.legend()
+            plt.show()
+        return (a, b, c, d), distance
+
+    def best_fit(self, functions_list, x=None, shows=False):
+        if self.distribution is not None:
+            freq, bins = _cleared_arrays(self.distribution)
+            x = bins
+        (a, b, c, d), distance = self.fit(functions_list[0], x=x, show=shows)
+        min_dist = distance
+        params = (a, b, c, d)
+        final_function = functions_list[0]
+        for func in functions_list[1:]:
+            (a, b, c, d), distance = self.fit(functions_list[0], x=x, show=shows)
+            print(f"{func}: {distance}")
+            if min_dist > distance:
+                min_dist = distance
+                params = (a, b, c, d)
+                final_func = func
+                print(f"{func} is the new best fitted function")
+        self.best_fitted_function = final_func
+        self.best_fitted_function_params = params
+        return final_func, (a, b, c, d)
+
 
     def _from_old(self, old_rational_func):
         self.version = old_rational_func.version
@@ -308,7 +388,6 @@ class Rational(nn.Module):
             print("Found a non zero center, please adapt the bias of the",
                   "previous layer to have an equivalent neural network")
         self.training = old_rational_func.training
-        self.device = self.numerator.device
         if "init_approximation" not in dir("init_approximation"):
             self.init_approximation = "leaky_relu"
         else:
@@ -342,6 +421,38 @@ class Rational(nn.Module):
         self._handle_retrieve_mode = None
         self.distribution = None
 
+    def change_version(self, version):
+        assert version in ["A", "B", "C", "D"]
+        if version == self.version:
+            print(f"This Rational function has already the correct type {self.version}")
+            return
+        if "cuda" in str(self.device):
+            if version == "A":
+                rational_func = Rational_CUDA_A_F
+            elif version == "B":
+                rational_func = Rational_CUDA_B_F
+            elif version == "C":
+                rational_func = Rational_CUDA_C_F
+            elif version == "D":
+                rational_func = Rational_CUDA_D_F
+            else:
+                raise ValueError("version %s not implemented" % version)
+            self.activation_function = rational_func.apply
+            self.version = version
+        else:
+            if version == "A":
+                rational_func = Rational_PYTORCH_A_F
+            elif version == "B":
+                rational_func = Rational_PYTORCH_B_F
+            elif version == "C":
+                rational_func = Rational_PYTORCH_C_F
+            elif version == "D":
+                rational_func = Rational_PYTORCH_D_F
+            else:
+                raise ValueError("version %s not implemented" % self.version)
+            self.activation_function = rational_func
+            self.version = version
+
     def input_retrieve_mode(self, auto_stop=True, max_saves=1000, bin_width=0.1):
         """
         Will retrieve the distribution of the input in self.distribution. \n
@@ -359,6 +470,9 @@ class Rational(nn.Module):
                     together.\n
                     Default ``1000``
         """
+        if self._handle_retrieve_mode is not None:
+            print("Already in retrieve mode")
+            return
         from physt import h1 as hist1
         self.distribution = hist1(None, "fixed_width", bin_width=bin_width,
                                   adaptive=True)
@@ -377,7 +491,7 @@ class Rational(nn.Module):
         print("Training mode, no longer retrieving the input.")
         self._handle_retrieve_mode.remove()
 
-    def show(self, input_range=None, display=True, distribution=None):
+    def show(self, input_range=None, fitted_function=True, display=True):
         """
         Show the function using `matplotlib`.
 
@@ -385,47 +499,67 @@ class Rational(nn.Module):
                 input_range (range):
                     The range to print the function on.\n
                     Default ``None``
-                display (bool):
-                    If ``True``, displays the graph.
+                fitted_function (bool):
+                    If ``True``, displays the best fitted function if searched.
                     Otherwise, returns it. \n
                     Default ``True``
+                display (bool):
+                    If ``True``, displays the graph.
+                    Otherwise, returns a dictionary with functions informations. \n
+                    Default ``True``
         """
-        import matplotlib.pyplot as plt
-        try:
-            import seaborn as sns
-            sns.set_style("whitegrid")
-        except ImportError as e:
-            print("seaborn not found on computer, install it for better",
-                  "visualisation")
-        ax = plt.gca()
-        if input_range is None:
-            if distribution is None:
-                distribution = self.distribution
-            if distribution is None:
-                input_range = torch.arange(-3, 3, 0.01, device=self.device)
-            else:
-                freq, bins = _cleared_arrays(distribution)
-                if freq is None:
-                    input_range = torch.arange(-3, 3, 0.01, device=self.device)
-                else:
-                    ax2 = ax.twinx()
-                    ax2.set_yticks([])
-                    grey_color = (0.5, 0.5, 0.5, 0.6)
-
-                    ax2.bar(bins, freq, width=bins[1] - bins[0],
-                            color=grey_color, edgecolor=grey_color)
-                    input_range = torch.tensor(bins, device=self.device).float()
+        freq = None
+        if input_range is None and self.distribution is None:
+            input_range = torch.arange(-3, 3, 0.01, device=self.device)
+        elif self.distribution is not None:
+            freq, bins = _cleared_arrays(self.distribution)
+            if freq is not None:
+                input_range = torch.tensor(bins, device=self.device).float()
         else:
             input_range = torch.tensor(input_range, device=self.device).float()
         outputs = self.activation_function(input_range, self.numerator,
                                            self.denominator, False)
+        inputs_np = input_range.detach().cpu().numpy()
         outputs_np = outputs.detach().cpu().numpy()
-        ax.plot(input_range.detach().cpu().numpy(),
-                outputs_np)
         if display:
+            import matplotlib.pyplot as plt
+            try:
+                import seaborn as sns
+                sns.set_style("whitegrid")
+            except ImportError:
+                print("Seaborn not found on computer, install it for better",
+                      "visualisation")
+            ax = plt.gca()
+            if freq is not None:
+                ax2 = ax.twinx()
+                ax2.set_yticks([])
+                grey_color = (0.5, 0.5, 0.5, 0.6)
+                ax2.bar(bins, freq, width=bins[1] - bins[0],
+                        color=grey_color, edgecolor=grey_color)
+            ax.plot(inputs_np, outputs_np)
+            if self.best_fitted_function is not None:
+                if '__name__' in dir(self.best_fitted_function):
+                    func_label = self.best_fitted_function.__name__
+                else:
+                    func_label = str(self.best_fitted_function)
+                a, b, c, d = self.best_fitted_function_params
+                result = a * self.best_fitted_function(c * torch.tensor(inputs_np).to(self.device) + d) + b
+                plt.plot(inputs_np, result.detach().cpu().numpy(), label=f"Fitted {func_label}")
             plt.show()
         else:
-            return plt.gcf()
+            if freq is None:
+                hist_dict = None
+            else:
+                hist_dict = {"bins": bins, "freq": freq,
+                             "width": bins[1] - bins[0]}
+            if "best_fitted_function" not in vars(self) or self.best_fitted_function is None:
+                fitted_function = None
+            else:
+                fitted_function = {"function": self.best_fitted_function,
+                                   "params": (a, b, c, d)}
+            return {"hist": hist_dict,
+                    "line": {"x": inputs_np, "y": outputs_np},
+                    "fitted_function": fitted_function}
 
 
 def _save_input(self, input, output):
@@ -437,6 +571,7 @@ def _save_input_auto_stop(self, input, output):
     self.distribution.fill_n(input[0].detach().cpu().numpy())
     if self.inputs_saved > self._max_saves:
         self.training_mode()
+
 
 def _cleared_arrays(hist, tolerance=0.001):
     hist = hist.normalize()
