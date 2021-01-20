@@ -1,0 +1,35 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Python package
+
+on:
+  push:
+    branches: [ ci-cd ]
+  pull_request:
+    branches: [ ci-cd ]
+
+jobs:
+  build:
+
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        python-version: ['3.6'] #['3.5', '3.6', '3.7', '3.8']
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install package
+      run: |
+        echo "TORCH_LIB=/usr/lib64/python3.6/site-packages/torch/lib:$TORCH_LIB" >> $GITHUB_ENV
+        docker run -i --gpus device=all --name rat_manylinux -v $(pwd):/rational_activations df31f4268b9b zsh
+        python setup.py install
+        python -m pytest
+    - name: Clean
+      if: ${{ always() }}
+      run: |
+          docker ps -a | grep Exit | cut -d ' ' -f 1 | xargs docker rm
