@@ -3,10 +3,10 @@ This file consists test for the backward pass of rational activation functions.
 I.e. it is tested here whether they are in fact trainable
 """
 import tensorflow as tf
-from tensorflow.keras.datasets import mnist
-from tensorflow.keras.utils import to_categorical
 import numpy as np
 
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.utils import to_categorical
 from rational.keras import Rational
 
 # load MNIST data set
@@ -31,9 +31,10 @@ def _test_backward_template(version: str, function_is_layer: bool):
     It tests for a given version of Rational whether Rational can be integrated into a small
     tensorflow model. It also tests whether the rational activation function's coefficients
     (weights) are updated
+
     :param version: version of the rational activation function
-    :param function_is_layer: declare function as a tf.keras.layer in the model if True. Else declare as
-    the activation parameter for a given tf.keras.layer
+    :param function_is_layer: declare function as a tf.keras.layer in the model if True.
+    Else declare as the activation parameter for a given tf.keras.layer
     """
     # create our rational activation function under test
     fut = Rational(version=version)
