@@ -65,8 +65,4 @@ jobs:
       run: |
         docker run -i --gpus device=all --name rat_manylinux -v $(pwd):/rational_activations df31f4268b9b zsh
         ./pypi_build_scripts/make_manylinux.sh
-#source .env/bin/activate
-#sudo apt-get install python3.7-dev
-    - name: Test with pytest
-      run: |
         python -m pytest
