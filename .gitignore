@@ -15,4 +15,5 @@ src/dist
 dist
 .tox
 .ipynb_checkpoints
-*.pyc
+venv
+.pytest_cache

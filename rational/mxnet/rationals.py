@@ -40,7 +40,7 @@ class Rational(HybridBlock):
     """
 
     def __init__(self, approx_func='leaky_relu', degrees=(5, 4), cuda=False,
-                 version="A", trainable=True, train_numerator=True,
+                 version='A', trainable=True, train_numerator=True,
                  train_denominator=True):
         super(Rational, self).__init__()
         w_numerator, w_denominator = get_parameters(version, degrees, approx_func)
@@ -55,25 +55,16 @@ class Rational(HybridBlock):
                                                grad_req='write' if train_denominator and trainable else 'null')
 
         self.degrees = degrees
-        self.version = version
         self.training = trainable
 
         self.init_approximation = approx_func
 
-        if version == "A":
-            rational_func = _version_a
-        elif version == "B":
-            rational_func = _version_b
-        elif version == "C":
-            rational_func = _version_c
-        elif version == "D":
-            rational_func = _version_d
-        else:
-            raise ValueError("version %s not implemented" % version)
-
-        self.activation_function = rational_func
+        # set rational activation function version
+        self.rational_func = {'A': _version_a, 'B': _version_b, 'C': _version_c, 'D': _version_d} \
+            .get(version)
+        if self.rational_func is None:
+            raise ValueError("rational activation function version %s not implemented" % version)
 
     def hybrid_forward(self, F, x, *args, **kwargs):
-        out = self.activation_function(x, self.numerator.data(self.device),
-                                       self.denominator.data(self.device), self.training)
-        return out
+        return self.rational_func(x, self.numerator.data(self.device),
+                                  self.denominator.data(self.device), self.training)
