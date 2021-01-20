@@ -63,8 +63,7 @@ jobs:
 #        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Install package
       run: |
-        echo "TORCH_LIB=/usr/lib64/python3.6/site-packages/torch/lib/:$TORCH_LIB" >> $GITHUB_ENV
-        docker run -i --gpus device=all --name rat_manylinux -v $(pwd):/rational_activations df31f4268b9b zsh
+        source .env/bin/activate
         ./pypi_build_scripts/make_manylinux.sh
         python -m pytest
     - name: Clean
