@@ -63,8 +63,7 @@ jobs:
 #        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Install package
       run: |
-        source .env/bin/activate
-        sudo apt-get install libfoo-dev
+        docker run -ti --gpus device=all --name rat_manyl -v $(pwd):/rational_activations df31f4268b9b zsh
         python setup.py develop --user
     - name: Test with pytest
       run: |
