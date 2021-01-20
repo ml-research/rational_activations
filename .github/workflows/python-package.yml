@@ -67,3 +67,7 @@ jobs:
         docker run -i --gpus device=all --name rat_manylinux -v $(pwd):/rational_activations df31f4268b9b zsh
         ./pypi_build_scripts/make_manylinux.sh
         python -m pytest
+    - name: Clean
+        if: always()
+        run: |
+          docker ps -a | grep Exit | cut -d ' ' -f 1 | xargs docker rm
