@@ -1,7 +1,10 @@
+"""
+TODO explain what this file is doing
+"""
 from rational.utils.get_weights import get_parameters
 from mxnet.gluon.block import HybridBlock
 from mxnet import initializer, cpu, gpu
-from rational.mxnet.rational_mxnet_functions import Rational_MXNET_A_F, Rational_MXNET_B_F, Rational_MXNET_C_F, Rational_MXNET_D_F
+from rational.mxnet.versions import _version_a, _version_b, _version_c, _version_d
 
 
 class Rational(HybridBlock):
@@ -35,6 +38,7 @@ class Rational(HybridBlock):
     Returns:
         Module: Rational module
     """
+
     def __init__(self, approx_func='leaky_relu', degrees=(5, 4), cuda=False,
                  version="A", trainable=True, train_numerator=True,
                  train_denominator=True):
@@ -57,13 +61,13 @@ class Rational(HybridBlock):
         self.init_approximation = approx_func
 
         if version == "A":
-            rational_func = Rational_MXNET_A_F
+            rational_func = _version_a
         elif version == "B":
-            rational_func = Rational_MXNET_B_F
+            rational_func = _version_b
         elif version == "C":
-            rational_func = Rational_MXNET_C_F
+            rational_func = _version_c
         elif version == "D":
-            rational_func = Rational_MXNET_D_F
+            rational_func = _version_d
         else:
             raise ValueError("version %s not implemented" % version)
 
