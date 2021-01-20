@@ -63,8 +63,10 @@ jobs:
 #        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Install package
       run: |
-        docker run -ti --gpus device=all --name rat_manyl -v $(pwd):/rational_activations df31f4268b9b zsh
+        docker run -i --gpus device=all --name rat_manyl -v $(pwd):/rational_activations df31f4268b9b zsh
         python setup.py develop --user
+#source .env/bin/activate
+#sudo apt-get install python3.7-dev
     - name: Test with pytest
       run: |
         source .env/bin/activate
