@@ -68,6 +68,6 @@ jobs:
         ./pypi_build_scripts/make_manylinux.sh
         python -m pytest
     - name: Clean
-        if: ${{ always() }}
-        run: |
+      if: ${{ always() }}
+      run: |
           docker ps -a | grep Exit | cut -d ' ' -f 1 | xargs docker rm
