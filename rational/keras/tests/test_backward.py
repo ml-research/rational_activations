@@ -1,5 +1,6 @@
 """
-TODO
+This file consists test for the backward pass of rational activation functions.
+I.e. it is tested here whether they are in fact trainable
 """
 import tensorflow as tf
 from tensorflow.keras.datasets import mnist

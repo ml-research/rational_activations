@@ -1,6 +1,6 @@
 import torch
 from torch.nn.functional import leaky_relu
-from rational_torch import Rational
+from rational.torch import Rational
 import numpy as np
 
 

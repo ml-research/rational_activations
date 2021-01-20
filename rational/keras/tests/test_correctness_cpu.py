@@ -1,7 +1,6 @@
 """
 This file tests that cpu calculations produce correct results.
 """
-
 from tensorflow.nn import leaky_relu
 from tensorflow.math import tanh, sigmoid
 
