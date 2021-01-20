@@ -64,9 +64,5 @@ jobs:
     - name: Install package
       run: |
         source .env/bin/activate
-        ./pypi_build_scripts/make_manylinux.sh
+        python setup.py develop
         python -m pytest
-    - name: Clean
-      if: ${{ always() }}
-      run: |
-          docker ps -a | grep Exit | cut -d ' ' -f 1 | xargs docker rm
