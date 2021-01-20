@@ -146,11 +146,14 @@ def _version_d(in_tensor, numerator_weights, denominator_weights, training, rand
     # get list of polynomial [1, X, X^2, X^3....X^n]
     xps = _get_xps(in_tensor, numerator_weights, denominator_weights)
 
+    # replace None wiht 1 in in_tensor.shape to avoid value error
+    input_shape = [1 if x is None else x for x in in_tensor.shape]
+
     # assign weights to coefficients of numerator of polynomial
     numerator = 0
     for i in range(numerator_weights.shape[0]):
         # assign noise factor with uniform distribution
-        noise = tf.random.uniform(shape=in_tensor.shape, minval=1 - random_deviation,
+        noise = tf.random.uniform(shape=input_shape, minval=1 - random_deviation,
                                   maxval=1+random_deviation, dtype=tf.dtypes.float32)
         w_n_noised = numerator_weights[i] * noise
         numerator = numerator + w_n_noised * xps[i]
@@ -158,7 +161,8 @@ def _version_d(in_tensor, numerator_weights, denominator_weights, training, rand
     # assign weights to coefficients of denominator of polynomial
     denominator = 0
     for j in range(denominator_weights.shape[0]):
-        noise = tf.random.uniform(shape=in_tensor.shape, minval=1 - random_deviation,
+        # assign noise factor with uniform distribution
+        noise = tf.random.uniform(shape=input_shape, minval=1 - random_deviation,
                                   maxval=1+random_deviation, dtype=tf.dtypes.float32)
         w_d_noised = denominator_weights[j] * noise
         denominator = denominator + w_d_noised * xps[j]
