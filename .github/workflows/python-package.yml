@@ -15,7 +15,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        python-version: ['3.6'] #['3.5', '3.6', '3.7', '3.8']
+        python-version: ['3.7'] #['3.5', '3.6', '3.7', '3.8']
 
     steps:
     - uses: actions/checkout@v2
@@ -63,9 +63,10 @@ jobs:
 #        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Install package
       run: |
-        source .env/bin/activate
-        python setup.py develop
+        docker run -i --gpus device=all --name rat_manylinux -v $(pwd):/rational_activations df31f4268b9b zsh
+        ./pypi_build_scripts/make_manylinux.sh
+#source .env/bin/activate
+#sudo apt-get install python3.7-dev
     - name: Test with pytest
       run: |
-        source .env/bin/activate
         python -m pytest
