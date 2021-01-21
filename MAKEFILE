@@ -22,8 +22,7 @@ docker-run :
 docker-test-image :
 	docker build \
 		--pull \
-		-f Dockerfile.test \
-		--build-arg TORCH=$(DOCKER_TEST_TORCH_VERSION) \
+		-f Dockerfile_cicd \
 		-t $(DOCKER_TEST_IMAGE_NAME) .
 
 .PHONY : docker-test-run
