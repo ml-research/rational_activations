@@ -16,3 +16,7 @@ dist
 .tox
 .ipynb_checkpoints
 *.pyc
+.coverage
+.eggs/
+examples/pytorch/data/
+wheelhouse/
