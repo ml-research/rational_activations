@@ -37,7 +37,7 @@ docker-test-image:
 
 .PHONY: docker-test-run
 docker-test-run:
-	docker run --gpus all $(DOCKER_TEST_IMAGE_NAME) -v $(pwd):/rational_activations df31f4268b9b zsh
+	docker run --gpus all $(DOCKER_TEST_IMAGE_NAME)
 	nvidia-smi
 	python setup.py develop --user
 	python -m pytest
