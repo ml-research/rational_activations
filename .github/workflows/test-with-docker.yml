@@ -10,7 +10,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Run GPU tests
+
       run: |
+        echo "CUDA_HOME=/usr/local/cuda-10.2/" >> $GITHUB_ENV
+        echo "PATH=/usr/local/cuda-10.2/bin:$PATH" >> $GITHUB_ENV
         make docker-test-run-zsh
 
 
