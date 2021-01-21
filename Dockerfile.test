@@ -3,10 +3,10 @@ FROM python:3.7
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-# ENV LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64
+# ENV LD_LIBRARY_PATH /usr/local/cuda-10.2:/usr/local/cuda-10.2/lib64
 
 ENV NVIDIA_VISIBLE_DEVICES all
-ENV CUDA_HOME "/usr/local/cuda-10.2/"
+# ENV CUDA_HOME "/usr/local/cuda-10.2/"
 
 
 WORKDIR /stage/rational_activations
@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir torch==1.7.0
 
 COPY setup.py .
 COPY requirements.txt .
-RUN pwd && nvidia-smi && ls -l
+RUN pwd && nvidia-smi && ls -l && nvcc --version && echo $CUDA_HOME
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir flake8 pytest airspeed \
     && pip install --no-cache-dir -r requirements.txt -e .\
