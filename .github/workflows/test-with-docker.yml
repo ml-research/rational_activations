@@ -7,19 +7,10 @@ on:
   push:
     branches: [ ci-cd ]
 
-jobs:
-  build:
+runs:
+  using: 'docker'
+  image: 'Dockerfile_cicd'
 
-    runs-on: self-hosted
-    container: rational_manylinux/rat_manyl
-    steps:
-    - uses: actions/checkout@v2
-    - name: Install package
-      run: |
-        nvidia-smi
-        nvcc --version
-        python setup.py develop --user
-        python -m pytest
 #    - name: Clean
 #      if: ${{ always() }}
 #      run: |
