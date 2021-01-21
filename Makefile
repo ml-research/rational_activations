@@ -1,5 +1,3 @@
-export CUDA_HOME := "/usr/local/cuda-10.2/"
-export PATH := "/usr/local/cuda-10.2/bin":$(PATH)
 SRC = AIML-TUDA
 
 DOCKER_TAG = latest
@@ -8,15 +6,8 @@ DOCKER_TEST_IMAGE_NAME = rational_manylinux:$(DOCKER_TAG)
 # DOCKER_TEST_TORCH_VERSION = 'torch==1.7.1+cu110 -f https://download.pytorch.org/whl/torch_stable.html'
 # DOCKER_RUN_CMD = docker run -i --gpus device=all --name rat_manylinux -v $(pwd):/rational_activations df31f4268b9b zsh
 
-ifeq ($(shell uname),Darwin)
-ifeq ($(shell which gsed),)
-$(error Please install GNU sed with 'brew install gnu-sed')
-else
-SED = gsed
-endif
-else
-SED = sed
-endif
+export CUDA_HOME := "/usr/local/cuda-10.2/"
+export PATH := "/usr/local/cuda-10.2/bin":$(PATH)  # for nvcc to find the correct one
 
 .PHONY : docker-image
 docker-image :

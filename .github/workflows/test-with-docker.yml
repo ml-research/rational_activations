@@ -11,8 +11,6 @@ jobs:
     - uses: actions/checkout@v2
     - name: Run GPU tests
       run: |
-        echo "CUDA_HOME=/usr/local/cuda-10.2/" >> $GITHUB_ENV
-        echo "PATH=/usr/local/cuda-10.2/bin:$PATH" >> $GITHUB_ENV
         make docker-test-run-zsh
 
 
@@ -26,3 +24,15 @@ jobs:
 #        docker run -i --gpus device=all --name rat_manylinux -v $(pwd):/rational_activations df31f4268b9b zsh
 #        python setup.py install
 #        python -m pytest
+# run: |
+#        echo "CUDA_HOME=/usr/local/cuda-10.2/" >> $GITHUB_ENV
+#        echo "PATH=/usr/local/cuda-10.2/bin:$PATH" >> $GITHUB_ENV
+#        make docker-test-run-zsh
+#steps:
+  #    - uses: actions/checkout@v2
+  #    - name: Build test image
+  #      run: |
+  #        make docker-test-image
+  #    - name: Run GPU tests
+  #      run: |
+  #        make docker-test-run
