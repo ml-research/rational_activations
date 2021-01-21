@@ -49,6 +49,7 @@ docker-test-run :
 docker-test-run-zsh:
 	docker run -i --gpus device=all --name rat_manylinux -v $(pwd):/rational_activations df31f4268b9b zsh
 	alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
+	export PATH="/usr/local/cuda-10.2/bin/"
 	export CUDA_HOME="/usr/local/cuda-10.2/"
 	nvidia-smi
 	python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
@@ -57,5 +58,4 @@ docker-test-run-zsh:
 	echo $CUDA_HOME
 	python setup.py develop --user
 	python -m pytest
-#	docker run --gpus all $(DOCKER_TEST_IMAGE_NAME)
 
