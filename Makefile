@@ -1,5 +1,5 @@
 export CUDA_HOME := "/usr/local/cuda-10.2/"
-export PATH := "/usr/local/cuda-10.2/bin"
+export PATH := "/usr/local/cuda-10.2/bin":$(PATH)
 SRC = AIML-TUDA
 
 DOCKER_TAG = latest
@@ -56,6 +56,7 @@ docker-test-run-zsh:
 	nvcc --version
 	echo $(CUDA_HOME)
 	echo CUDA_HOME: $$CUDA_HOME
+	echo PATH: $(PATH)
 	python setup.py develop --user
 	python -m pytest
 
