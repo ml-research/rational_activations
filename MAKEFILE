@@ -30,14 +30,14 @@ docker-run:
 
 .PHONY: docker-test-image
 docker-test-image:
-    docker build \
-        --pull \
+	docker build \
+		--pull \
 		-f Dockerfile_cicd \
 		-t $(DOCKER_TEST_IMAGE_NAME) .
 
 .PHONY: docker-test-run
 docker-test-run:
-    docker run --gpus all $(DOCKER_TEST_IMAGE_NAME) -v $(pwd):/rational_activations df31f4268b9b zsh
-    nvidia-smi
-    python setup.py develop --user
+	docker run --gpus all $(DOCKER_TEST_IMAGE_NAME) -v $(pwd):/rational_activations df31f4268b9b zsh
+	nvidia-smi
+	python setup.py develop --user
 	python -m pytest
