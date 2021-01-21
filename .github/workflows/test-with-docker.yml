@@ -19,10 +19,10 @@ jobs:
 
 
 
-#    - name: Clean
-#      if: ${{ always() }}
-#      run: |
-#          docker ps -a | grep Exit | cut -d ' ' -f 1 | xargs docker rm
+    - name: Clean
+      if: ${{ always() }}
+      run: |
+          docker ps -a | grep Exit | cut -d ' ' -f 1 | xargs docker rm
 #    - name: Install package
 #      run: |
 #        echo "TORCH_LIB=/usr/lib64/python3.6/site-packages/torch/lib:$TORCH_LIB" >> $GITHUB_ENV
