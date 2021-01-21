@@ -38,6 +38,10 @@ docker-test-image:
 docker-test-run:
 	docker run -i --gpus device=all --name rat_manylinux -v $(pwd):/rational_activations df31f4268b9b zsh
 	nvidia-smi
+	python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
+	python -c "import torch; print('Number of GPUs available:', torch.cuda.device_count(), 'CUDA version:', torch.version.cuda)"
+	nvcc --version
+	echo $CUDA_HOME
 	python setup.py develop --user
 	python -m pytest
 #	docker run --gpus all $(DOCKER_TEST_IMAGE_NAME)
