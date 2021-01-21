@@ -5,14 +5,18 @@ ENV CUDA_HOME "/usr/local/cuda-10.2/"
 
 
 WORKDIR /stage/rational_activations
+RUN pip install --no-cache-dir torch==1.7.0
 
-COPY . .
+COPY setup.py .
+COPY requirements.txt .
 RUN pwd && nvidia-smi && ls -l
 RUN pip install --upgrade pip \
-    && pip install torch==1.7.0 flake8 pytest airspeed \
-    && pip install -r requirements.txt \
+    && pip install --no-cache-dir flake8 pytest airspeed \
+    && pip install --no-cache-dir -r requirements.txt -e .\
     && alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
-#RUN python setup.py develop --user \
+
+COPY . .
+RUN python setup.py develop --user
 #     && python -m pytest
 
 ENTRYPOINT ["make"]
