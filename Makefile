@@ -1,3 +1,5 @@
+export CUDA_HOME := "/usr/local/cuda-10.2/"
+export PATH := "/usr/local/cuda-10.2/bin"
 SRC = AIML-TUDA
 
 DOCKER_TAG = latest
@@ -53,6 +55,7 @@ docker-test-run-zsh:
 	python -c "import torch; print('Number of GPUs available:', torch.cuda.device_count(), 'CUDA version:', torch.version.cuda)"
 	nvcc --version
 	echo $(CUDA_HOME)
+	echo CUDA_HOME: $$CUDA_HOME
 	python setup.py develop --user
 	python -m pytest
 
