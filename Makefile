@@ -30,13 +30,13 @@ docker-run:
 
 .PHONY: docker-test-image
 docker-test-image:
-	docker build \
+	docker build --no-cache\
 		-f Dockerfile.test \
 		-t $(DOCKER_TEST_IMAGE_NAME) .
 
 .PHONY : docker-test-run
 docker-test-run :
-	docker run --no-cache --gpus device=all $(DOCKER_TEST_IMAGE_NAME)
+	docker run --gpus device=all $(DOCKER_TEST_IMAGE_NAME)
 	nvcc --version
 	echo $(CUDA_HOME)
 	pwd
