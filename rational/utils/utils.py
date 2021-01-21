@@ -94,5 +94,5 @@ def find_closest_equivalent(rational_func, new_func, x):
     params = curve_fit(equivalent_func, x, y, initials)
     a, b, c, d = params[0]
     final_func_output = np.array(equivalent_func(x, a, b, c, d))
-    final_distance = ((y - final_func_output)**2).sum()
+    final_distance = np.sqrt(((y - final_func_output)**2).sum())
     return (a, b, c, d), final_distance

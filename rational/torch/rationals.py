@@ -349,7 +349,6 @@ class Rational(nn.Module):
             else:
                 func_label = str(function)
             result = a * function(c * torch.tensor(x) + d) + b
-            import ipdb; ipdb.set_trace()
             ax.plot(x, result, label=f"Fitted {func_label}")
             if used_dist:
                 ax2 = ax.twinx()
@@ -370,11 +369,12 @@ class Rational(nn.Module):
             x = bins
         (a, b, c, d), distance = self.fit(functions_list[0], x=x, show=shows)
         min_dist = distance
+        print(f"{functions_list[0]}: {distance:>3}")
         params = (a, b, c, d)
         final_function = functions_list[0]
         for func in functions_list[1:]:
-            (a, b, c, d), distance = self.fit(functions_list[0], x=x, show=shows)
-            print(f"{func}: {distance}")
+            (a, b, c, d), distance = self.fit(func, x=x, show=shows)
+            print(f"{func}: {distance:>3}")
             if min_dist > distance:
                 min_dist = distance
                 params = (a, b, c, d)
@@ -426,6 +426,7 @@ class Rational(nn.Module):
 
         self._handle_retrieve_mode = None
         self.distribution = None
+        return self
 
     def change_version(self, version):
         assert version in ["A", "B", "C", "D"]
@@ -491,6 +492,9 @@ class Rational(nn.Module):
             self._max_saves = max_saves
         else:
             self._handle_retrieve_mode = self.register_forward_hook(_save_input)
+        self.forward(torch.tensor([1., 2.]).cuda())
+        self(torch.tensor([1., 2.]).cuda())
+
 
     def training_mode(self):
         """
@@ -500,7 +504,8 @@ class Rational(nn.Module):
         self._handle_retrieve_mode.remove()
         self._handle_retrieve_mode = None
 
-    def show(self, input_range=None, fitted_function=True, display=True):
+    def show(self, input_range=None, fitted_function=True, display=True,
+             tolerance=0.001, exclude_zero=False):
         """
         Show the function using `matplotlib`.
 
@@ -516,12 +521,16 @@ class Rational(nn.Module):
                     If ``True``, displays the graph.
                     Otherwise, returns a dictionary with functions informations. \n
                     Default ``True``
+                tolerance (float):
+                    Tolerance the bins frequency.
+                    If tolerance is 0.001, every frequency smaller than 0.001. will be cutted out of the histogram.\n
+                    Default ``True``
         """
         freq = None
         if input_range is None and self.distribution is None:
             input_range = torch.arange(-3, 3, 0.01, device=self.device)
-        elif self.distribution is not None:
-            freq, bins = _cleared_arrays(self.distribution)
+        elif self.distribution is not None and len(self.distribution.bins) > 0:
+            freq, bins = _cleared_arrays(self.distribution, tolerance)
             if freq is not None:
                 input_range = torch.tensor(bins, device=self.device).float()
         else:
@@ -543,6 +552,9 @@ class Rational(nn.Module):
                 ax2 = ax.twinx()
                 ax2.set_yticks([])
                 grey_color = (0.5, 0.5, 0.5, 0.6)
+                if exclude_zero:
+                    bins = bins[1:]
+                    freq = freq[1:]
                 ax2.bar(bins, freq, width=bins[1] - bins[0],
                         color=grey_color, edgecolor=grey_color)
             ax.plot(inputs_np, outputs_np, label="Rational (self)")
@@ -562,23 +574,26 @@ class Rational(nn.Module):
             else:
                 hist_dict = {"bins": bins, "freq": freq,
                              "width": bins[1] - bins[0]}
-            if "best_fitted_function" not in vars(self) or self.best_fitted_function is None:
+            if "best_fitted_function" not in dir(self) or self.best_fitted_function is None:
                 fitted_function = None
             else:
+                a, b, c, d = self.best_fitted_function_params
+                result = a * self.best_fitted_function(c * torch.tensor(inputs_np).to(self.device) + d) + b
                 fitted_function = {"function": self.best_fitted_function,
-                                   "params": (a, b, c, d)}
+                                   "params": (a, b, c, d),
+                                   "y": result.detach().cpu().numpy()}
             return {"hist": hist_dict,
                     "line": {"x": inputs_np, "y": outputs_np},
                     "fitted_function": fitted_function}
 
 
 def _save_input(self, input, output):
-    self.distribution.fill_n(input[0].detach().cpu().numpy(), dropna=False)
+    self.distribution.fill_n(input[0])
 
 
 def _save_input_auto_stop(self, input, output):
     self.inputs_saved += 1
-    self.distribution.fill_n(input[0].detach().cpu().numpy())
+    self.distribution.fill_n(input[0])
     if self.inputs_saved > self._max_saves:
         self.training_mode()
 

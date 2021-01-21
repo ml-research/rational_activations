@@ -1,15 +1,17 @@
 import cupy as cp
+from torch.utils.dlpack import to_dlpack
 
 
 class Histogram():
     def __init__(self, bin_size=0.1, random_select=False):
         self.bins = cp.array([])
         self.weights = cp.array([], dtype=cp.int)
-        self.bin_size = 0.1
+        self.bin_size = bin_size
         self._empty = True
+        self._rd = int(cp.log10(1./bin_size).item())
 
     def fill_n(self, input):
-        self._update_hist(cp.asarray(input, dtype=(cp.float64)))
+        self._update_hist(cp.fromDlpack(to_dlpack(input)))
 
     def _update_hist(self, new_input):
         range_ext = cp.around(new_input.min() - self.bin_size / 2, 1), \
@@ -23,7 +25,7 @@ class Histogram():
         else: #  update the hist
             self.weights, self.bins = concat_hists(self.weights, self.bins,
                                                    weights, bins[:-1],
-                                                   self.bin_size)
+                                                   self.bin_size, self._rd)
 
     def __repr__(self):
         if self._empty:
@@ -39,10 +41,18 @@ class Histogram():
         else:
             return self.weights / self.weights.sum(), self.bins
 
+    def _from_physt(self, phystogram):
+        if (phystogram.bin_sizes == phystogram.bin_sizes[0]).all():
+            self.bin_size = phystogram.bin_sizes[0]
+        self.bins = cp.array(phystogram.bin_left_edges)
+        self.weights = cp.array(phystogram.frequencies)
+        return self
 
-def concat_hists(weights1, bins1, weights2, bins2, bin_size):
-    min1, max1 = cp.around(bins1[0], 1), cp.around(bins1[-1], 1)
-    min2, max2 = cp.around(bins2[0], 1), cp.around(bins2[-1], 1)
+
+
+def concat_hists(weights1, bins1, weights2, bins2, bin_size, rd):
+    min1, max1 = cp.around(bins1[0], rd), cp.around(bins1[-1], rd)
+    min2, max2 = cp.around(bins2[0], rd), cp.around(bins2[-1], rd)
     mini, maxi = min(min1, min2), max(max1, max2)
     new_bins = cp.arange(mini, maxi + bin_size*0.9, bin_size)  # * 0.9 to avoid unexpected random inclusion of last element
     if min1 - mini != 0 and maxi - max1 != 0:
@@ -71,4 +81,5 @@ def concat_hists(weights1, bins1, weights2, bins2, bin_size):
                       'constant', constant_values=0)
     else:
         ext2 = weights2
-    return ext1 + ext2, new_bins
+    new_ext = ext1 + ext2
+    return new_ext, new_bins
