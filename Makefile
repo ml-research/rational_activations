@@ -37,9 +37,9 @@ docker-test-image:
 
 .PHONY: docker-test-run
 docker-test-run:
-    docker run -i --gpus all --name rat_manylinux -v $(pwd):/rational_activations df31f4268b9b zsh
-    nvidia-smi
-    python setup.py develop --user
-    python -m pytest
+	docker run -i --gpus all --name rat_manylinux -v $(pwd):/rational_activations df31f4268b9b zsh
+	nvidia-smi
+	python setup.py develop --user
+	python -m pytest
 #	docker run --gpus all $(DOCKER_TEST_IMAGE_NAME)
 
