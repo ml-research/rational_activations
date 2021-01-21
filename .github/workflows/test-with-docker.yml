@@ -12,9 +12,6 @@ jobs:
     - name: Build test image
       run: |
         make docker-test-image DOCKER_TAG=latest
-    - name: Run GPU tests
-      run: |
-        make docker-test-run DOCKER_TAG=latest
 
 
 

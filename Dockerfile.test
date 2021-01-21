@@ -1,0 +1,5 @@
+FROM rational_manylinux
+
+RUN nvidia-smi
+RUN python setup.py develop --user \
+    python -m pytest
