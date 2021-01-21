@@ -4,16 +4,14 @@ on:
   push:
     branches: [ ci-cd ]
 jobs:
-  build:
+  gpu_checks:
+    name: GPU Checks
     runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
-    - name: Install package
+    - name: Run GPU tests
       run: |
-        python setup.py develop --user
-        python -m pytest
-      with:
-        dockerfile: Dockerfile_cicd
+        make docker-test-run
 
 
 
