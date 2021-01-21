@@ -24,19 +24,19 @@ docker-image :
 		--build-arg TORCH=$(DOCKER_TORCH_VERSION) \
 		-t $(DOCKER_IMAGE_NAME) .
 
-.PHONY : docker-run
-docker-run :
+.PHONY: docker-run
+docker-run:
 	$(DOCKER_RUN_CMD) --gpus all $(DOCKER_IMAGE_NAME) $(ARGS)
 
-.PHONY : docker-test-image
-docker-test-image :
+.PHONY: docker-test-image
+docker-test-image:
     docker build \
         --pull \
 		-f Dockerfile_cicd \
 		-t $(DOCKER_TEST_IMAGE_NAME) .
 
-.PHONY : docker-test-run
-docker-test-run :
+.PHONY: docker-test-run
+docker-test-run:
     docker run --gpus all $(DOCKER_TEST_IMAGE_NAME) -v $(pwd):/rational_activations df31f4268b9b zsh
     nvidia-smi
     python setup.py develop --user
