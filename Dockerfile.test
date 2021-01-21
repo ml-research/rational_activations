@@ -1,12 +1,18 @@
 FROM rational_manylinux
 
 ENV NVIDIA_VISIBLE_DEVICES all
+ENV CUDA_HOME "/usr/local/cuda-10.2/"
+
 
 WORKDIR /stage/rational_activations
 
 COPY . .
 RUN pwd && nvidia-smi && ls -l
-RUN python setup.py develop --user \
-    && python -m pytest
+RUN pip install --upgrade pip \
+    && pip install torch==1.7.0 flake8 pytest airspeed \
+    && pip install -r requirements.txt \
+    && alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
+#RUN python setup.py develop --user \
+#     && python -m pytest
 
 ENTRYPOINT ["make"]
