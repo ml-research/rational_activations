@@ -14,8 +14,11 @@ RUN pip install --upgrade pip \
     && pip install --no-cache-dir flake8 pytest airspeed \
     && pip install --no-cache-dir -r requirements.txt -e .\
     && alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
-RUN python -m pytest
 
+# Now add the full package source and re-install just the package.
+COPY . .
+RUN pip install --no-cache-dir --no-deps -e .
+RUN python -m pytest
 
 #COPY . .
 #RUN python setup.py develop --user
