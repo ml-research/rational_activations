@@ -1,4 +1,9 @@
-FROM rational_manylinux
+FROM python:3.7
+
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+
+# ENV LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64
 
 ENV NVIDIA_VISIBLE_DEVICES all
 ENV CUDA_HOME "/usr/local/cuda-10.2/"
@@ -18,7 +23,7 @@ RUN pip install --upgrade pip \
 # Now add the full package source and re-install just the package.
 COPY . .
 RUN pip install --no-cache-dir --no-deps -e .
-RUN python -m pytest
+# RUN python -m pytest
 
 #COPY . .
 #RUN python setup.py develop --user

@@ -43,7 +43,6 @@ docker-test-run :
 	ls -l
 	python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
 	python -c "import torch; print('Number of GPUs available:', torch.cuda.device_count(), 'CUDA version:', torch.version.cuda)"
-	python setup.py develop
 	python -m pytest
 
 .PHONY: docker-test-run-zsh
