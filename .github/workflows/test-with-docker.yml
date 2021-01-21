@@ -19,7 +19,8 @@ jobs:
 
 
 
-    - name: Clean 
+    - name: Clean
+      if: ${{ always() }}
       run: |
           docker ps -a | grep Exit | cut -d ' ' -f 1 | xargs docker rm
 #    - name: Install package
