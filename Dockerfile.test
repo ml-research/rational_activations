@@ -8,3 +8,4 @@ RUN python setup.py develop --user \
     && python -m pytest
 
 ENTRYPOINT ["make"]
+
