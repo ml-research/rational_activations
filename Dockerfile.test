@@ -3,7 +3,7 @@ FROM python:3.7
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-# ENV LD_LIBRARY_PATH /usr/local/cuda-10.2:/usr/local/cuda-10.2/lib64
+ENV LD_LIBRARY_PATH /usr/local/cuda-10.2:/usr/local/cuda-10.2/lib64
 
 ENV NVIDIA_VISIBLE_DEVICES all
 # ENV CUDA_HOME "/usr/local/cuda-10.2/"
