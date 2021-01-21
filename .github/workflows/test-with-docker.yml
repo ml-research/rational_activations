@@ -12,11 +12,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install package
-        run: |
+      run: |
           python setup.py develop --user
     - name: Test
-        run: |
+      run: |
           python -m pytest
+
 
 
 #    - name: Clean
