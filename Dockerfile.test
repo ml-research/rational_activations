@@ -7,6 +7,7 @@ ENV LD_LIBRARY_PATH /usr/local/cuda-10.2:/usr/local/cuda-10.2/lib64
 
 ENV NVIDIA_VISIBLE_DEVICES all
 # ENV CUDA_HOME "/usr/local/cuda-10.2/"
+RUN alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
 
 
 WORKDIR /stage/rational_activations
@@ -17,8 +18,7 @@ COPY requirements.txt .
 RUN pwd && nvidia-smi && ls -l && nvcc --version && echo $CUDA_HOME
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir flake8 pytest airspeed \
-    && pip install --no-cache-dir -r requirements.txt -e .\
-    && alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
+    && pip install --no-cache-dir -r requirements.txt -e .
 
 # Now add the full package source and re-install just the package.
 COPY . .
