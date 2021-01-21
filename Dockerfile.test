@@ -13,8 +13,9 @@ RUN pwd && nvidia-smi && ls -l
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir flake8 pytest airspeed \
     && pip install --no-cache-dir -r requirements.txt -e .\
-    && alias nvcc="/usr/local/cuda-10.2/bin/nvcc" \
-    && python -m pytest
+    && alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
+RUN python -m pytest
+
 
 #COPY . .
 #RUN python setup.py develop --user
