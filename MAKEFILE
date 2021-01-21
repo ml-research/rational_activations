@@ -9,6 +9,3 @@ DOCKER_TEST_IMAGE_NAME = rational_manylinux:$(DOCKER_TAG)
 .PHONY : docker-test-run
 docker-test-run :
 	docker run --gpus all $(DOCKER_TEST_IMAGE_NAME) -v $(pwd):/rational_activations df31f4268b9b zsh
-	nvidia-smi
-	python setup.py develop --user
-	python -m pytest
