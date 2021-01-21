@@ -4,7 +4,7 @@ ENV NVIDIA_VISIBLE_DEVICES all
 
 WORKDIR /stage/rational_activations
 
-RUN pwd && nvidia-smi
+RUN pwd && nvidia-smi && ls
 RUN python setup.py develop --user \
     && python -m pytest
 
