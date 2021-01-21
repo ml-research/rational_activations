@@ -1,8 +1,5 @@
 # action.yml
 name: Python test
-runs:
-  using: 'docker'
-  image: 'Dockerfile_cicd'
 on:
   push:
     branches: [ ci-cd ]
@@ -12,11 +9,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install package
+      with:
+        dockerfile: Dockerfile_cicd
       run: |
-          python setup.py develop --user
-    - name: Test
-      run: |
-          python -m pytest
+        python setup.py develop --user
+        python -m pytest
 
 
 
