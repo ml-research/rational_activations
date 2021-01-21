@@ -9,11 +9,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install package
-      with:
-        dockerfile: Dockerfile_cicd
       run: |
         python setup.py develop --user
         python -m pytest
+      with:
+        dockerfile: Dockerfile_cicd
+
 
 
 
