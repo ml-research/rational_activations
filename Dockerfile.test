@@ -1,5 +1,11 @@
 FROM rational_manylinux
 
-RUN nvidia-smi
+ENV NVIDIA_VISIBLE_DEVICES all
+
+WORKDIR /stage/rational_activations
+
+RUN pwd && nvidia-smi
 RUN python setup.py develop --user \
-    python -m pytest
+    && python -m pytest
+
+ENTRYPOINT ["make"]
