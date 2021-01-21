@@ -37,6 +37,8 @@ docker-test-image:
 .PHONY: docker-test-run
 docker-test-run:
 	docker run -i --gpus device=all --name rat_manylinux -v $(pwd):/rational_activations df31f4268b9b zsh
+	alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
+	export CUDA_HOME="/usr/local/cuda-10.2/"
 	nvidia-smi
 	python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
 	python -c "import torch; print('Number of GPUs available:', torch.cuda.device_count(), 'CUDA version:', torch.version.cuda)"
