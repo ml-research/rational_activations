@@ -30,7 +30,7 @@ docker-run:
 
 .PHONY: docker-test-image
 docker-test-image:
-	docker build \
+    docker build \
 		--pull \
 		-f Dockerfile_cicd \
 		-t $(DOCKER_TEST_IMAGE_NAME) .
