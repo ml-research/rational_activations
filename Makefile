@@ -31,7 +31,6 @@ docker-run:
 .PHONY: docker-test-image
 docker-test-image:
 	docker build \
-		--pull \
 		-f Dockerfile.test \
 		-t $(DOCKER_TEST_IMAGE_NAME) .
 
