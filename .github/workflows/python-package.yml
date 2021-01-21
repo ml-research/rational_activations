@@ -5,9 +5,7 @@ name: Python package
 
 on:
   push:
-    branches: [ ci-cd ]
-  pull_request:
-    branches: [ ci-cd ]
+    branches: [ xx ]
 
 jobs:
   build:
@@ -65,4 +63,6 @@ jobs:
       run: |
         source .env/bin/activate
         python setup.py develop
+    - name: Test
+        source .env/bin/activate
         python -m pytest
