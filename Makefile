@@ -52,7 +52,7 @@ docker-test-run-zsh:
 	python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
 	python -c "import torch; print('Number of GPUs available:', torch.cuda.device_count(), 'CUDA version:', torch.version.cuda)"
 	nvcc --version
-	echo $CUDA_HOME
+	echo $(CUDA_HOME)
 	python setup.py develop --user
 	python -m pytest
 
