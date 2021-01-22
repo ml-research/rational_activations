@@ -158,7 +158,7 @@ setup(
             'rational/_cuda/rational_cuda_kernels.cu',
         ],
         extra_compile_args={'cxx': [],
-            'nvcc': ['-gencode=arch=compute_60,code="sm_60,compute_60"', '-lineinfo']
+            'nvcc': ['-gencode=arch=compute_60,code="sm_60,compute_60"', '-lineinfo'], #['-gencode=arch=compute_60,code="sm_60,compute_60"', '-lineinfo']
         }
     ),
     ] if torch_cuda_available() else [],
