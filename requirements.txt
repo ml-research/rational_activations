@@ -3,5 +3,5 @@ scipy
 matplotlib~=3.3.3
 torch>=1.5.0
 tensorflow>=2.0.0
-
-setuptools~=51.1.2
+mxnet>=1.7.0.post1
+setuptools>=51.3.3
