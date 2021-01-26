@@ -66,5 +66,5 @@ class Rational(HybridBlock):
             raise ValueError("rational activation function version %s not implemented" % version)
 
     def hybrid_forward(self, F, x, *args, **kwargs):
-        return self.rational_func(x, self.numerator.data(self.device),
+        return self.rational_func(F, x, self.numerator.data(self.device),
                                   self.denominator.data(self.device), self.training)

@@ -4,7 +4,7 @@ TODO explain what this file is doing
 from mxnet import nd
 
 
-def _get_xps(x, numerator_weights, denominator_weights):
+def _get_xps(F, x, numerator_weights, denominator_weights):
     xps = list()
     xps.append(x)
     for _ in range(max(len(numerator_weights), len(denominator_weights))):
@@ -13,13 +13,13 @@ def _get_xps(x, numerator_weights, denominator_weights):
     return xps
 
 
-def _version_a(x, numerator_weights, denominator_weights, training):
+def _version_a(F, x, numerator_weights, denominator_weights, training):
     # P(X) / Q(X) = a_0 + a_1 * X + ... + a_n * X ^ n /
     #               1 + | b_0 * X | + | b_1 * X | ^ 2 + ... + | b_i * X | ^ {i + 1}
 
     z = nd.reshape(x, shape=(-1,))
 
-    xps = _get_xps(z, numerator_weights, denominator_weights)
+    xps = _get_xps(F, z, numerator_weights, denominator_weights)
 
     numerator = nd.array([0], dtype='float32')
     for i, w_n in enumerate(numerator_weights):
@@ -32,13 +32,13 @@ def _version_a(x, numerator_weights, denominator_weights, training):
     return nd.divide(numerator, denominator).reshape(x.shape)
 
 
-def _version_b(x, numerator_weights, denominator_weights, training):
+def _version_b(F, x, numerator_weights, denominator_weights, training):
     # P(X) / Q(X) = a_0 + a_1 * X + ... + a_n * X ^ n /
     #               1 + |b_0*X + b_1*X^2 + ... + b_{n-1}*X^n|
 
     z = nd.reshape(x, shape=(-1,))
 
-    xps = _get_xps(z, numerator_weights, denominator_weights)
+    xps = _get_xps(F, z, numerator_weights, denominator_weights)
 
     numerator = nd.array([0], dtype='float32')
     for i, w_n in enumerate(numerator_weights):
@@ -51,13 +51,13 @@ def _version_b(x, numerator_weights, denominator_weights, training):
     return nd.divide(numerator, (1.0 + nd.abs(denominator))).reshape(x.shape)
 
 
-def _version_c(x, numerator_weights, denominator_weights, training):
+def _version_c(F, x, numerator_weights, denominator_weights, training):
     # P(X) / Q(X) = a_0 + a_1 * X + ... + a_n * X ^ n /
     #               eps + |b_1*X + b_1*X^2 + ... + b_{n-1}*X^n|
 
     z = nd.reshape(x, shape=(-1,))
 
-    xps = _get_xps(z, numerator_weights, denominator_weights)
+    xps = _get_xps(F, z, numerator_weights, denominator_weights)
 
     numerator = nd.array([0], dtype='float32')
     for i, w_n in enumerate(numerator_weights):
@@ -70,7 +70,7 @@ def _version_c(x, numerator_weights, denominator_weights, training):
     return nd.divide(numerator, (0.1 + nd.abs(denominator))).reshape(x.shape)
 
 
-def _version_d(x, numerator_weights, denominator_weights, training, random_deviation=0.1):
+def _version_d(F, x, numerator_weights, denominator_weights, training, random_deviation=0.1):
     # P(X)/Q(X) = noised(a_0) + noised(a_1)*X +noised(a_2)*X^2 + ... + noised(a_n)*X^n /
     #                1 + |noised(b_0)*X + noised(b_1)*X^2 + ... + noised(b_{n-1})*X^n|
     # Noised parameters have uniform noise to be in range [(1-random_deviation)*parameter,(1+random_deviation)*parameter].
@@ -83,7 +83,7 @@ def _version_d(x, numerator_weights, denominator_weights, training, random_devia
     lower_bound = nd.array([1 - random_deviation])
     upper_bound = nd.array([1 + random_deviation])
 
-    xps = _get_xps(z, numerator_weights, denominator_weights)
+    xps = _get_xps(F, z, numerator_weights, denominator_weights)
 
     numerator = nd.array([0], dtype='float32')
     for i, w_n in enumerate(numerator_weights):
