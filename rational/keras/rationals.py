@@ -1,5 +1,5 @@
 """
-file contains the Rational class, the anchor class of the keras package
+This file contains the Rational class, the anchor class of the keras package
 """
 from tensorflow.keras.layers import Layer
 import tensorflow as tf

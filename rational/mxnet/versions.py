@@ -5,10 +5,11 @@ a,b,c and d.
 from mxnet import nd
 
 
-def _get_xps(x, numerator_weights, denominator_weights):
+def _get_xps(F, x, numerator_weights, denominator_weights):
     """
     creates a list of ascending powers of x
 
+    :param F: a function space that depends on the type of x. If x's type is NDArray, then F will be mxnet.nd
     :param in_tensor: input tensor
     :param numerator_weights: vector containing the weights a_0, ... a_n
     :param denominator_weights: vector containing the weights b_0, ... b_m
@@ -26,7 +27,7 @@ def _get_xps(x, numerator_weights, denominator_weights):
     return xps
 
 
-def _version_a(x, numerator_weights, denominator_weights, training):
+def _version_a(F, x, numerator_weights, denominator_weights, training):
     """
     version a of rational activation function
 
@@ -35,6 +36,7 @@ def _version_a(x, numerator_weights, denominator_weights, training):
 
     note: q(x) contains m absolute value terms here
 
+    :param F: a function space that depends on the type of x. If x's type is NDArray, then F will be mxnet.nd
     :param in_tensor: input tensor
     :param numerator_weights: vector containing the weights a_0, ... a_n
     :param denominator_weights: vector containing the weights b_0, ... b_m
@@ -44,7 +46,7 @@ def _version_a(x, numerator_weights, denominator_weights, training):
 
     z = nd.reshape(x, shape=(-1,))
 
-    xps = _get_xps(z, numerator_weights, denominator_weights)
+    xps = _get_xps(F, z, numerator_weights, denominator_weights)
 
     numerator = nd.array([0], dtype='float32')
     for i, w_n in enumerate(numerator_weights):
@@ -57,7 +59,7 @@ def _version_a(x, numerator_weights, denominator_weights, training):
     return nd.divide(numerator, denominator).reshape(x.shape)
 
 
-def _version_b(x, numerator_weights, denominator_weights, training):
+def _version_b(F, x, numerator_weights, denominator_weights, training):
     """
     version b of rational activation function
 
@@ -66,6 +68,7 @@ def _version_b(x, numerator_weights, denominator_weights, training):
 
     note: q(x) contains only one absolute value term here
 
+    :param F: a function space that depends on the type of x. If x's type is NDArray, then F will be mxnet.nd
     :param in_tensor: input tensor
     :param numerator_weights: vector containing the weights a_0, ... a_n
     :param denominator_weights: vector containing the weights b_0, ... b_m
@@ -75,7 +78,7 @@ def _version_b(x, numerator_weights, denominator_weights, training):
 
     z = nd.reshape(x, shape=(-1,))
 
-    xps = _get_xps(z, numerator_weights, denominator_weights)
+    xps = _get_xps(F, z, numerator_weights, denominator_weights)
 
     numerator = nd.array([0], dtype='float32')
     for i, w_n in enumerate(numerator_weights):
@@ -88,7 +91,7 @@ def _version_b(x, numerator_weights, denominator_weights, training):
     return nd.divide(numerator, (1.0 + nd.abs(denominator))).reshape(x.shape)
 
 
-def _version_c(x, numerator_weights, denominator_weights, training):
+def _version_c(F, x, numerator_weights, denominator_weights, training):
     """
     version c of rational activation function
 
@@ -97,6 +100,7 @@ def _version_c(x, numerator_weights, denominator_weights, training):
 
     note: q(x) contains a variable term (epsilon) here, and also a b_0 term
 
+    :param F: a function space that depends on the type of x. If x's type is NDArray, then F will be mxnet.nd
     :param in_tensor: input tensor
     :param numerator_weights: vector containing the weights a_0, ... a_n
     :param denominator_weights: vector containing the weights b_0, ... b_m
@@ -106,7 +110,7 @@ def _version_c(x, numerator_weights, denominator_weights, training):
 
     z = nd.reshape(x, shape=(-1,))
 
-    xps = _get_xps(z, numerator_weights, denominator_weights)
+    xps = _get_xps(F, z, numerator_weights, denominator_weights)
 
     numerator = nd.array([0], dtype='float32')
     for i, w_n in enumerate(numerator_weights):
@@ -119,7 +123,7 @@ def _version_c(x, numerator_weights, denominator_weights, training):
     return nd.divide(numerator, (0.1 + nd.abs(denominator))).reshape(x.shape)
 
 
-def _version_d(x, numerator_weights, denominator_weights, training, random_deviation=0.1):
+def _version_d(F, x, numerator_weights, denominator_weights, training, random_deviation=0.1):
     """
     version d of rational activation function
 
@@ -130,6 +134,7 @@ def _version_d(x, numerator_weights, denominator_weights, training, random_devia
     Noised parameters have uniform noise to be in range
     [(1-random_deviation)*parameter,(1+random_deviation)*parameter].
 
+    :param F: a function space that depends on the type of x. If x's type is NDArray, then F will be mxnet.nd
     :param in_tensor: input tensor
     :param numerator_weights: vector containing the weights a_0, ... a_n
     :param denominator_weights: vector containing the weights b_0, ... b_m
@@ -149,7 +154,7 @@ def _version_d(x, numerator_weights, denominator_weights, training, random_devia
     lower_bound = nd.array([1 - random_deviation])
     upper_bound = nd.array([1 + random_deviation])
 
-    xps = _get_xps(z, numerator_weights, denominator_weights)
+    xps = _get_xps(F, z, numerator_weights, denominator_weights)
 
     numerator = nd.array([0], dtype='float32')
     for i, w_n in enumerate(numerator_weights):
