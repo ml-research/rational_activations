@@ -1,6 +1,7 @@
 """
 This file contains the Rational class, the anchor class of the mxnet package
 """
+import mxnet as mx
 from mxnet import initializer
 from mxnet.gluon import HybridBlock
 
@@ -46,6 +47,10 @@ class Rational(HybridBlock):
         # read initial parameter configuration from external files
         w_numerator, w_denominator = get_parameters(
             version, degrees, approx_func)
+
+        # convert w_numerator and w_denominator to mxnet arrays
+        w_numerator = mx.nd.array(w_numerator)
+        w_denominator = mx.nd.array(w_denominator)
 
         # set specified context (currently not happening, since unclear, how and why helpful)
         # self.device = gpu() if cuda else cpu()
