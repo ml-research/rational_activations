@@ -112,13 +112,14 @@ def _version_c(F, x, numerator_weights, denominator_weights, training):
 
     xps = _get_xps(F, z, numerator_weights, denominator_weights)
 
-    numerator = nd.array([0], dtype='float32')
-    for i, w_n in enumerate(numerator_weights):
-        numerator = numerator + nd.multiply(w_n, xps[i])
+    # multiply numerator weights with xps values, then sum them up
+    numerator = F.sum(F.broadcast_mul(numerator_weights, xps))
 
-    denominator = nd.array([0], dtype='float32')
-    for j, w_d in enumerate(denominator_weights):
-        denominator = denominator + nd.multiply(w_d, xps[j])
+    # multiply denominator weights with xps values calculate absolute value,
+    # then sum them up
+    # NOTE THE INDEX CHANGE HERE, ACCOUNTING FOR THE '+1
+    denominator = F.sum(F.broadcast_abs(
+        F.broadcast_mul(denominator_weights, xps[1:])))
 
     return nd.divide(numerator, (0.1 + nd.abs(denominator))).reshape(x.shape)
 
