@@ -21,9 +21,9 @@ def _get_xps(F, x, numerator_weights, denominator_weights):
     xps.append(x)
     # add x^2, x^3, ... x^{max(n,m)} to the list
     for _ in range(max(len(numerator_weights), len(denominator_weights))):
-        xps.append(nd.multiply(xps[-1], x))
+        xps.append(F.__mul__(xps[-1], x))
     # inserts a tensor that is shaped like x, but contains only 1s as the first element
-    xps.insert(0, nd.ones_like(x))
+    xps.insert(0, F.ones_like(x))
     return xps
 
 
@@ -44,19 +44,21 @@ def _version_a(F, x, numerator_weights, denominator_weights, training):
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
 
-    z = nd.reshape(x, shape=(-1,))
+    z = x.reshape((-1,))
 
     xps = _get_xps(F, z, numerator_weights, denominator_weights)
 
-    numerator = nd.array([0], dtype='float32')
-    for i, w_n in enumerate(numerator_weights):
-        numerator = numerator + nd.multiply(w_n, xps[i])
+    # multiply numerator weights with xps values, then sum them up
+    numerator = F.sum(
+        F.broadcast_mul(numerator_weights, xps))
 
-    denominator = nd.array([1.0], dtype='float32')
-    for j, w_d in enumerate(denominator_weights):
-        denominator = denominator + nd.abs(nd.multiply(w_d, xps[j + 1]))
+    # multiply denominator weights with xps values calculate absolute value,
+    # then sum them up
+    denominator = F.sum(
+        F.broadcast_abs(
+            F.broadcast_mul(denominator_weights, xps[1:])))  # NOTE THE INDEX CHANGE HERE, ACCOUNTING FOR THE '+1
 
-    return nd.divide(numerator, denominator).reshape(x.shape)
+    return F.__div__(numerator, denominator).reshape(x.shape)
 
 
 def _version_b(F, x, numerator_weights, denominator_weights, training):
