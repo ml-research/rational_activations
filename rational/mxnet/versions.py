@@ -13,17 +13,22 @@ def _get_xps(F, x, numerator_weights, denominator_weights):
     :param x: input sequence of scalars
     :param numerator_weights: vector containing the weights a_0, ... a_n
     :param denominator_weights: vector containing the weights b_0, ... b_m
-    :return: a list that looks approximately like this [1-tensor, x, x^2, ... x^m]
+    :return: a two-dimensional mx.ndarray that looks approximately like this [ones, x, x^2, ... x^{max(n,m) + 1}]
     """
-    # create a list
-    xps = list()
-    # append the input tensor to the list
-    xps.append(x)
-    # add x^2, x^3, ... x^{max(n,m)} to the list
-    for _ in range(max(len(numerator_weights), len(denominator_weights))):
-        xps.append(F.__mul__(xps[-1], x))
-    # inserts a tensor that is shaped like x, but contains only 1s as the first element
-    xps.insert(0, F.ones_like(x))
+    # create an empty mx.ndarray (two-dimensional)
+    length = 2 + max(len(numerator_weights), len(denominator_weights))
+    xps = nd.empty(shape=(length, len(x)))
+
+    # append an array containing ones
+    xps[0] = F.ones_like(x)
+
+    # append x to the list
+    xps[1] = x
+
+    # add x^2, x^3, ... x^{max(n,m) + 1} to the list
+    for i in range(max(len(numerator_weights), len(denominator_weights))):
+        xps[2 + i] = F.broadcast_mul(x, xps[1 + i])
+
     return xps
 
 
