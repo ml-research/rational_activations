@@ -2,7 +2,7 @@
 This file contains the mathematical implementations of the rational activation function versions
 a,b,c and d.
 """
-from mxnet import nd
+from mxnet import nd, symbol
 
 
 def _get_xps(F, x, numerator_weights, denominator_weights):
@@ -16,14 +16,17 @@ def _get_xps(F, x, numerator_weights, denominator_weights):
     :return: a list that looks approximately like this [1-tensor, x, x^2, ... x^m]
     """
     # create a list
-    xps = list()
+    xps = F.Concat(F.op.ones_like(x), x)
     # append the input tensor to the list
-    xps.append(x)
+    # xps.append(x)
     # add x^2, x^3, ... x^{max(n,m)} to the list
+    last = x
     for _ in range(max(len(numerator_weights), len(denominator_weights))):
-        xps.append(F.__mul__(xps[-1], x))
+        next = F.elemwise_mul(last, x)
+        xps = F.Concat(xps, F.elemwise_mul(last, x))
+        last = next
     # inserts a tensor that is shaped like x, but contains only 1s as the first element
-    xps.insert(0, F.ones_like(x))
+    #xps.insert(0, F.op.ones_like(x))
     return xps
 
 
@@ -47,7 +50,7 @@ def _version_a(F, x, numerator_weights, denominator_weights, training):
     z = x.reshape((-1,))
 
     xps = _get_xps(F, z, numerator_weights, denominator_weights)
-
+    return xps
     # multiply numerator weights with xps values, then sum them up
     numerator = F.sum(
         F.broadcast_mul(numerator_weights, xps))
@@ -55,10 +58,10 @@ def _version_a(F, x, numerator_weights, denominator_weights, training):
     # multiply denominator weights with xps values calculate absolute value,
     # then sum them up
     denominator = F.sum(
-        F.broadcast_abs(
-            F.broadcast_mul(denominator_weights, xps[1:])))  # NOTE THE INDEX CHANGE HERE, ACCOUNTING FOR THE '+1
+        F.abs(
+            F.broadcast_mul(denominator_weights, F.slice(xps, begin=1, end=len(xps)))))  # NOTE THE INDEX CHANGE HERE, ACCOUNTING FOR THE '+1
 
-    return F.__div__(numerator, denominator).reshape(x.shape)
+    return F.elemwise_div(numerator, denominator)
 
 
 def _version_b(F, x, numerator_weights, denominator_weights, training):
