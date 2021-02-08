@@ -88,7 +88,7 @@ class Rational(Layer):
         - training (boolean, whether the call is in inference mode or training mode)
         - mask (boolean tensor encoding masked timesteps in the input, used in RNN layers)
 
-        :param inputs: input tensor
+        :param inputs: input sequence of scalars
         :return: output tensor, with the respective rational activation function applied to it
         """
         return self.rational_func(inputs, self.numerator, self.denominator, self.training)
