@@ -2,7 +2,7 @@
 This file contains the mathematical implementations of the rational activation function versions
 a,b,c and d.
 """
-from mxnet import nd
+import mxnet as mx
 
 
 def _get_xps(F, x, numerator_weights, denominator_weights):
@@ -15,19 +15,18 @@ def _get_xps(F, x, numerator_weights, denominator_weights):
     :param denominator_weights: vector containing the weights b_0, ... b_m
     :return: a two-dimensional mx.ndarray that looks approximately like this [ones, x, x^2, ... x^{max(n,m) + 1}]
     """
-    # create an empty mx.ndarray (two-dimensional)
-    length = 2 + max(len(numerator_weights), len(denominator_weights))
-    xps = nd.empty(shape=(length, len(x)))
+    # create an empty array (two-dimensional)
+    amt_xs = 1 + max(F.shape_array(numerator_weights)[0], F.shape_array(denominator_weights)[0])
 
-    # append an array containing ones
-    xps[0] = F.ones_like(x)
+    #  create an array containing ones
+    xps = F.ones_like(x)
 
-    # append x to the list
-    xps[1] = x
-
-    # add x^2, x^3, ... x^{max(n,m) + 1} to the list
-    for i in range(max(len(numerator_weights), len(denominator_weights))):
-        xps[2 + i] = F.broadcast_mul(x, xps[1 + i])
+    # append x, x^2, ... x^{max(n,m) + 1} to the list
+    mx.sym.elemwise_div()
+    mx.nd.elemwise_div()
+    for i in range(amt_xs):
+        x_i = F.broadcast_power(x, i + 1)
+        xps = F.concat(xps, x_i)
 
     return xps
 
@@ -82,7 +81,7 @@ def _version_b(F, x, numerator_weights, denominator_weights, training):
     :param training: whether the call is in inference mode or training mode
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
-
+    """
     z = nd.reshape(x, shape=(-1,))
 
     xps = _get_xps(F, z, numerator_weights, denominator_weights)
@@ -96,6 +95,8 @@ def _version_b(F, x, numerator_weights, denominator_weights, training):
         denominator = denominator + nd.multiply(w_d, xps[j + 1])
 
     return nd.divide(numerator, (1.0 + nd.abs(denominator))).reshape(x.shape)
+    """
+    return None
 
 
 def _version_c(F, x, numerator_weights, denominator_weights, training):
@@ -115,6 +116,7 @@ def _version_c(F, x, numerator_weights, denominator_weights, training):
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
 
+    """
     z = nd.reshape(x, shape=(-1,))
 
     xps = _get_xps(F, z, numerator_weights, denominator_weights)
@@ -129,6 +131,8 @@ def _version_c(F, x, numerator_weights, denominator_weights, training):
         F.broadcast_mul(denominator_weights, xps[1:])))
 
     return nd.divide(numerator, (0.1 + nd.abs(denominator))).reshape(x.shape)
+    """
+    return None
 
 
 def _version_d(F, x, numerator_weights, denominator_weights, training, random_deviation=0.1):
@@ -149,6 +153,8 @@ def _version_d(F, x, numerator_weights, denominator_weights, training, random_de
     :param training: whether the call is in inference mode or training mode
     :param random_deviation: random deviation
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
+
+    """
 
     """
     # if in training mode, apply Function B
@@ -181,3 +187,5 @@ def _version_d(F, x, numerator_weights, denominator_weights, training, random_de
         denominator = denominator + nd.multiply(w_d_noised, xps[j + 1])
 
     return nd.divide(numerator, (1 + nd.abs(denominator))).reshape(x.shape)
+    """
+    return None
