@@ -15,13 +15,12 @@ def _get_xps(F, x, weights):
     :return: a two-dimensional mx.ndarray that looks approximately like this
      [[1,1,...], [--x--], [--x^2--],... , [--x^n--]]
     """
-    # create an empty array (two-dimensional)
-    max_pow = int(F.shape_array(weights).asnumpy()[0])
     #  create an array containing ones
     xps = F.expand_dims(F.ones_like(x), axis=0)
 
-    # append x, x^2, ... x^n to the list
-    for i in range(max_pow):
+    # append arrays containing x, x^2, ... x^n to the list
+    len_weights = int(F.shape_array(weights).asnumpy()[0])
+    for i in range(len_weights):
         mx.sym.elemwise_mul()
         factor = F.sum(F.ones(shape=(1, i + 1)))
         x_i = F.expand_dims(F.broadcast_power(x, factor), axis=0)
