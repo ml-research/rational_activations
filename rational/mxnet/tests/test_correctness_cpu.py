@@ -2,18 +2,16 @@
 This file tests that cpu calculations produce correct results.
 """
 import mxnet as mx
-from ..rationals import Rational
-from mxnet.ndarray import LeakyReLU
 from mxnet import gluon
-import numpy as np
 
+from ..rationals import Rational
 
 # build a small neural net containing one Rational layer
 net = gluon.nn.HybridSequential()
 with net.name_scope():
     net.add(Rational())
 net.initialize()
-net.hybridize()
+# net.hybridize()
 
 
 def test():

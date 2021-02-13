@@ -12,20 +12,20 @@ def _get_xps(F, x, weights):
     :param F: a function space that depends on the type of x. If x's type is NDArray, then F will be mxnet.nd
     :param x: input sequence of scalars
     :param weights: vector containing the weights a_0, ... a_n
-    :return: TODO a two-dimensional mx.ndarray that looks approximately like this [ones, x, x^2, ... x^{max(n,m) + 1}]
+    :return: a two-dimensional mx.ndarray that looks approximately like this
+     [[1,1,...], [--x--], [--x^2--],... , [--x^n--]]
     """
     # create an empty array (two-dimensional)
-    max_pow = F.shape_array(weights)[0]
-
+    max_pow = int(F.shape_array(weights).asnumpy()[0])
     #  create an array containing ones
-    xps = F.ones_like(x)
+    xps = F.expand_dims(F.ones_like(x), axis=0)
 
-    # append x, x^2, ... x^{max(n,m) + 1} to the list
-    mx.sym.elemwise_div()
-    mx.nd.elemwise_div()
+    # append x, x^2, ... x^n to the list
     for i in range(max_pow):
-        x_i = F.broadcast_power(x, i + 1)
-        xps = F.concat(xps, x_i)
+        mx.sym.elemwise_mul()
+        factor = F.sum(F.ones(shape=(1, i + 1)))
+        x_i = F.expand_dims(F.broadcast_power(x, factor), axis=0)
+        xps = F.concat(xps, x_i, dim=0)
 
     return xps
 
