@@ -5,18 +5,17 @@ a,b,c and d.
 import mxnet as mx
 
 
-def _get_xps(F, x, numerator_weights, denominator_weights):
+def _get_xps(F, x, weights):
     """
     creates a list of ascending powers of x
 
     :param F: a function space that depends on the type of x. If x's type is NDArray, then F will be mxnet.nd
     :param x: input sequence of scalars
-    :param numerator_weights: vector containing the weights a_0, ... a_n
-    :param denominator_weights: vector containing the weights b_0, ... b_m
-    :return: a two-dimensional mx.ndarray that looks approximately like this [ones, x, x^2, ... x^{max(n,m) + 1}]
+    :param weights: vector containing the weights a_0, ... a_n
+    :return: TODO a two-dimensional mx.ndarray that looks approximately like this [ones, x, x^2, ... x^{max(n,m) + 1}]
     """
     # create an empty array (two-dimensional)
-    amt_xs = 1 + max(F.shape_array(numerator_weights)[0], F.shape_array(denominator_weights)[0])
+    max_pow = F.shape_array(weights)[0]
 
     #  create an array containing ones
     xps = F.ones_like(x)
@@ -24,7 +23,7 @@ def _get_xps(F, x, numerator_weights, denominator_weights):
     # append x, x^2, ... x^{max(n,m) + 1} to the list
     mx.sym.elemwise_div()
     mx.nd.elemwise_div()
-    for i in range(amt_xs):
+    for i in range(max_pow):
         x_i = F.broadcast_power(x, i + 1)
         xps = F.concat(xps, x_i)
 
@@ -47,22 +46,23 @@ def _version_a(F, x, numerator_weights, denominator_weights, training):
     :param training: whether the call is in inference mode or training mode
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
-
-    z = x.reshape((-1,))
-
-    xps = _get_xps(F, z, numerator_weights, denominator_weights)
+    # get powers of x for numerator weights
+    xps_num = _get_xps(F, x, numerator_weights)
 
     # multiply numerator weights with xps values, then sum them up
     numerator = F.sum(
-        F.broadcast_mul(numerator_weights, xps))
+        F.broadcast_mul(xps_num, numerator_weights), axis=0)
+
+    # get powers of x for denominator weights
+    xps_den = _get_xps(F, x, denominator_weights)
 
     # multiply denominator weights with xps values calculate absolute value,
     # then sum them up
     denominator = F.sum(
         F.broadcast_abs(
-            F.broadcast_mul(denominator_weights, xps[1:])))  # NOTE THE INDEX CHANGE HERE, ACCOUNTING FOR THE '+1
+            F.broadcast_mul(xps_den, denominator_weights)), axis=0)
 
-    return F.__div__(numerator, denominator).reshape(x.shape)
+    return F.elemwise_div(numerator, denominator)   # TODO or broadcast_div?
 
 
 def _version_b(F, x, numerator_weights, denominator_weights, training):
