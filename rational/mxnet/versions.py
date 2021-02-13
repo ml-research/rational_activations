@@ -14,20 +14,12 @@ def _get_xps(F, x, numerator_weights, denominator_weights):
     :param denominator_weights: vector containing the weights b_0, ... b_m
     :return: a two-dimensional mx.ndarray that looks approximately like this [ones, x, x^2, ... x^{max(n,m) + 1}]
     """
-    # create an empty mx.ndarray (two-dimensional)
-    length = 2 + max(len(numerator_weights), len(denominator_weights))
-    xps = nd.empty(shape=(length, len(x)))
 
-    # append an array containing ones
-    xps[0] = F.ones_like(x)
-
-    # append x to the list
-    xps[1] = x
-
-    # add x^2, x^3, ... x^{max(n,m) + 1} to the list
-    for i in range(max(len(numerator_weights), len(denominator_weights))):
-        xps[2 + i] = F.broadcast_mul(x, xps[1 + i])
-
+    xps = list()
+    xps.append(x)
+    for _ in range(max(len(numerator_weights), len(denominator_weights))):
+        xps.append(nd.multiply(xps[-1], x))
+    xps.insert(0, nd.ones_like(x))
     return xps
 
 
@@ -46,20 +38,19 @@ def _version_a(F, x, numerator_weights, denominator_weights, training):
     """
 
     z = x.reshape((-1,))
-
+    # print('here', numerator_weights, len(numerator_weights))
+    # print('there', z)
     xps = _get_xps(F, z, numerator_weights, denominator_weights)
 
-    # multiply numerator weights with xps values, then sum them up
-    numerator = F.sum(
-        F.broadcast_mul(numerator_weights, xps))
+    numerator = nd.array([0], dtype='float32')
+    for i, w_n in enumerate(numerator_weights):
+        numerator = numerator + nd.multiply(w_n, xps[i])
 
-    # multiply denominator weights with xps values calculate absolute value,
-    # then sum them up
-    denominator = F.sum(
-        F.broadcast_abs(
-            F.broadcast_mul(denominator_weights, xps[1:])))  # NOTE THE INDEX CHANGE HERE, ACCOUNTING FOR THE '+1
+    denominator = nd.array([1.0], dtype='float32')
+    for j, w_d in enumerate(denominator_weights):
+        denominator = denominator + nd.abs(nd.multiply(w_d, xps[j + 1]))
 
-    return F.__div__(numerator, denominator).reshape(x.shape)
+    return nd.divide(numerator, denominator).reshape(x.shape)
 
 
 def _version_b(F, x, numerator_weights, denominator_weights, training):

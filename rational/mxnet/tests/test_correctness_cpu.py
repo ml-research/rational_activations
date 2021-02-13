@@ -11,14 +11,14 @@ import numpy as np
 # build a small neural net containing one Rational layer
 net = gluon.nn.HybridSequential()
 with net.name_scope():
-    net.add(Rational())
+    net.add(Rational(version='C'))
 net.initialize()
-net.hybridize()
 
 
 def test():
     input_data = mx.nd.array([-2., -1, 0., 1., 2.])
-    net(input_data)
+    net(input_data)  # need to feed data for polynomial calculations before hyberdize!
+    net.hybridize()  # running time: all ndarrays converted to symbols
 
     # expected_res = LeakyReLU(data=input)
     # result = fut(input).numpy()
