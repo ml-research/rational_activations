@@ -2,7 +2,6 @@
 This file contains the mathematical implementations of the rational activation function versions
 a,b,c and d.
 """
-import mxnet as mx
 
 
 def _get_xps(F, x, weights):
@@ -20,8 +19,7 @@ def _get_xps(F, x, weights):
 
     # append arrays containing x, x^2, ... x^n to the list
     len_weights = int(F.shape_array(weights).asnumpy()[0])
-    for i in range(len_weights):
-        mx.sym.elemwise_mul()
+    for i in range(len_weights - 1):
         factor = F.sum(F.ones(shape=(1, i + 1)))
         x_i = F.expand_dims(F.broadcast_power(x, factor), axis=0)
         xps = F.concat(xps, x_i, dim=0)
@@ -50,18 +48,19 @@ def _version_a(F, x, numerator_weights, denominator_weights, training):
 
     # multiply numerator weights with xps values, then sum them up
     numerator = F.sum(
-        F.broadcast_mul(xps_num, numerator_weights), axis=0)
+        F.broadcast_mul(xps_num, F.expand_dims(numerator_weights, axis=1)), axis=0)
 
     # get powers of x for denominator weights
     xps_den = _get_xps(F, x, denominator_weights)
 
+    # in accordance with the formula (see docstring), a one-vector is added to the sum
+    ones = F.ones_like(x)
     # multiply denominator weights with xps values calculate absolute value,
-    # then sum them up
-    denominator = F.sum(
-        F.broadcast_abs(
-            F.broadcast_mul(xps_den, denominator_weights)), axis=0)
+    # then sum them up and add the ones vector
+    denominator = F.elemwise_add(ones, F.sum(F.abs(
+            F.broadcast_mul(xps_den, F.expand_dims(denominator_weights, axis=1))), axis=0))
 
-    return F.elemwise_div(numerator, denominator)   # TODO or broadcast_div?
+    return F.elemwise_div(numerator, denominator)
 
 
 def _version_b(F, x, numerator_weights, denominator_weights, training):
