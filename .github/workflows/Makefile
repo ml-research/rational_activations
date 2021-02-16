@@ -49,7 +49,7 @@ docker-test-run-zsh:
 	echo $(CUDA_HOME)
 	echo CUDA_HOME: $$CUDA_HOME
 	echo PATH: $(PATH)
-	cd REPO_ROOT
+	cd $(REPO_ROOT)
 	python setup.py develop --user
 	python -m pytest
 
