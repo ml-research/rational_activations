@@ -1,4 +1,4 @@
-# Rational Activations - Learnable Rational Activation Functions
+<span style="white-space: nowrap;">![Logo](./images/rationals_logo.png)</span><h1>Rational Activations - Learnable Rational Activation Functions</h1>
 First introduce as PAU in Padé Activation Units: End-to-end Learning of Activation Functions in Deep Neural Network
 
 Arxiv link: https://arxiv.org/abs/1907.06732
