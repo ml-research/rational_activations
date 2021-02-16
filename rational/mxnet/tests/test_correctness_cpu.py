@@ -16,7 +16,7 @@ net.initialize()
 # net.hybridize()
 
 
-def test():
+def test_ndarray():
     input_data = mx.nd.array([-2., -1, 0., 1., 2.])
     result = net(input_data)
     expected_res = LeakyReLU(input_data, slope=0.01)
@@ -26,11 +26,11 @@ def test():
     pass
 
 
-def test1():
+def test_symbol():
     a = mx.sym.Variable('A')
     executor = a.simple_bind(ctx=mx.cpu(), A=(5, ))
     input_data = executor.forward(A=mx.nd.array([-2., -1, 0., 1., 2.]))
-    result = net(input_data)
-    expected_res = LeakyReLU(input_data, slope=0.01)
+    result = net(input_data[0])
+    expected_res = LeakyReLU(input_data[0], slope=0.01)
     assert np.all(np.isclose(expected_res.asnumpy(),
                              result.asnumpy(), atol=5e-02))
