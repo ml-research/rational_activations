@@ -31,14 +31,14 @@ def _version_a(in_tensor, numerator_weights, denominator_weights, training):
     version a of rational activation function
 
     f(x) = p(x) / q(x) = (a_0 + a_1 * x + a_2 * x^2 + ... + a_n * x^n) /
-                (1 + |b_1 * x| + | b_2 * x^2| + ... + | b_m * x^m|)
+                (1 + |b_0 * x| + | b_1 * x^2| + ... + | b_m * x^{m+1}|)
 
     note: q(x) contains m absolute value terms here
 
     :param in_tensor: input tensor
     :param numerator_weights: vector containing the weights a_0, ... a_n
     :param denominator_weights: vector containing the weights b_0, ... b_m
-    :param training: whether the call is in inference mode or training mode
+    :param training: (NOT IN USE) whether the call is in inference mode or training mode
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
 
@@ -69,7 +69,7 @@ def _version_b(in_tensor, numerator_weights, denominator_weights, training):
     :param in_tensor: input tensor
     :param numerator_weights: vector containing the weights a_0, ... a_n
     :param denominator_weights: vector containing the weights b_0, ... b_m
-    :param training: whether the call is in inference mode or training mode
+    :param training: (NOT IN USE) whether the call is in inference mode or training mode
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
 
@@ -100,7 +100,7 @@ def _version_c(in_tensor, numerator_weights, denominator_weights, training):
     :param in_tensor: input tensor
     :param numerator_weights: vector containing the weights a_0, ... a_n
     :param denominator_weights: vector containing the weights b_0, ... b_m
-    :param training: whether the call is in inference mode or training mode
+    :param training: (NOT IN USE) whether the call is in inference mode or training mode
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
 
@@ -133,7 +133,7 @@ def _version_d(in_tensor, numerator_weights, denominator_weights, training, rand
     :param in_tensor: input tensor
     :param numerator_weights: vector containing the weights a_0, ... a_n
     :param denominator_weights: vector containing the weights b_0, ... b_m
-    :param training: whether the call is in inference mode or training mode
+    :param training: (NOT IN USE) whether the call is in inference mode or training mode
     :param random_deviation: random deviation
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
 
