@@ -8,7 +8,6 @@ expected_res = np.array([-0.02, -0.01, 0, 1, 2])
 inp = torch.from_numpy(np.array(t)).reshape(-1)
 cuda_inp = torch.tensor(np.array(t), dtype=torch.float, device="cuda").reshape(-1)
 
-
 rationalA_lrelu_cpu = Rational(version='A', cuda=False)(inp).detach().numpy()
 rationalB_lrelu_cpu = Rational(version='B', cuda=False)(inp).detach().numpy()
 rationalC_lrelu_cpu = Rational(version='C', cuda=False)(inp).detach().numpy()
@@ -66,6 +65,7 @@ def test_cpu_equal_gpu_B():
 
 def test_cpu_equal_gpu_C():
     assert np.all(np.isclose(rationalC_lrelu_cpu, rationalC_lrelu_gpu, atol=1e-06))
+
 
 def test_cpu_equal_gpu_D():
     assert np.all(np.isclose(rationalD_lrelu_cpu, rationalD_lrelu_gpu, atol=1e-06))
