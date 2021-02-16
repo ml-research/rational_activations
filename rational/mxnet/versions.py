@@ -163,7 +163,7 @@ def _version_d(F, x, numerator_weights, denominator_weights, training, random_de
 
     f(x) = p(x) / q(x) =
     (noised(a_0) + noised(a_1) * x + noised(a_2) * x^2 + ... + noised(a_n) * x^n) /
-                (1 + |noised(b_1) * x + noised(b_2) * x^2 + ... + noised(b_m) * X^m|)
+                (1 + |noised(b_0) * x + noised(b_1) * x^2 + ... + noised(b_m) * X^{m+1}|)
 
     Noised parameters have uniform noise to be in range
     [(1-random_deviation)*parameter,(1+random_deviation)*parameter].

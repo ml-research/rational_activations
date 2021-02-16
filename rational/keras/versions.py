@@ -125,7 +125,7 @@ def _version_d(in_tensor, numerator_weights, denominator_weights, training, rand
 
     f(x) = p(x) / q(x) =
     (noised(a_0) + noised(a_1) * x + noised(a_2) * x^2 + ... + noised(a_n) * x^n) /
-                (1 + |noised(b_1) * x + noised(b_2) * x^2 + ... + noised(b_m) * X^m|)
+                (1 + |noised(b_0) * x + noised(b_1) * x^2 + ... + noised(b_m) * X^{m+1}|)
 
     Noised parameters have uniform noise to be in range
     [(1-random_deviation)*parameter,(1+random_deviation)*parameter].
@@ -165,6 +165,6 @@ def _version_d(in_tensor, numerator_weights, denominator_weights, training, rand
         noise = tf.random.uniform(shape=input_shape, minval=1 - random_deviation,
                                   maxval=1+random_deviation, dtype=tf.dtypes.float32)
         w_d_noised = denominator_weights[j] * noise
-        denominator = denominator + w_d_noised * xps[j]
+        denominator = denominator + w_d_noised * xps[j + 1]
 
     return numerator / (1 + tf.abs(denominator))
