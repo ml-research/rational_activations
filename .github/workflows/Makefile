@@ -50,6 +50,8 @@ docker-test-run-zsh:
 	echo CUDA_HOME: $$CUDA_HOME
 	echo PATH: $(PATH)
 	cd $(REPO_ROOT)
+	pwd
+	ls -l
 	python setup.py develop --user
 	python -m pytest
 
