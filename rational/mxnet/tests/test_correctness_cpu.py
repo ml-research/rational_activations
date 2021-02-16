@@ -13,16 +13,13 @@ net = gluon.nn.HybridSequential()
 with net.name_scope():
     net.add(Rational())
 net.initialize()
-net.hybridize()
+# net.hybridize()
 
 
 def test():
     input_data = mx.nd.array([-2., -1, 0., 1., 2.])
     result = net(input_data)
+    expected_res = LeakyReLU(input_data, slope=0.01)
 
-    # expected_res = LeakyReLU(data=input_data)
-    # result = fut(input).numpy()
-    # print('leakyrelu', expected_res)
-    # print('rational', result)
-    # assert np.all(np.isclose(expected_res, result, atol=5e-02))
+    assert np.all(np.isclose(expected_res.asnumpy(), result.asnumpy(), atol=5e-02))
     pass
