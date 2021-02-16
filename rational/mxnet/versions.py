@@ -92,7 +92,7 @@ def _version_b(F, x, numerator_weights, denominator_weights, training):
     version b of rational activation function
 
     f(x) = p(x) / q(x) = (a_0 + a_1 * x + a_2 * x^2 + ... + a_n * x^n) /
-                (1 + |b_1 * x + b_2 * x^2 + ... + b_m * x^m|)
+                (1 + |b_0 * x + b_1 * x^2 + ... + b_m * x^{m + 1}|)
 
     note: q(x) contains only one absolute value term here
 
@@ -126,7 +126,7 @@ def _version_c(F, x, numerator_weights, denominator_weights, training):
     version c of rational activation function
 
     f(x) = p(x) / q(x) = (a_0 + a_1 * x + a_2 * x^2 + ... + a_n * x^n) /
-                (epsilon + |b_0 + b_1 * x + b_2 * x^2 + ... + b_m * x^m|)
+                (0.1 + |b_0 + b_1 * x + b_2 * x^2 + ... + b_m * x^m|)
 
     note: q(x) contains a variable term (epsilon) here, and also a b_0 term
 
