@@ -2,6 +2,7 @@ SRC = AIML-TUDA
 
 DOCKER_TAG = latest
 DOCKER_TEST_IMAGE_NAME = rational_manylinux:$(DOCKER_TAG)
+REPO_ROOT = ../../
 # DOCKER_TORCH_VERSION = 'torch==1.7.1'
 # DOCKER_TEST_TORCH_VERSION = 'torch==1.7.1+cu110 -f https://download.pytorch.org/whl/torch_stable.html'
 # DOCKER_RUN_CMD = docker run -i --gpus device=all --name rat_manylinux -v $(pwd):/rational_activations df31f4268b9b zsh
@@ -48,6 +49,7 @@ docker-test-run-zsh:
 	echo $(CUDA_HOME)
 	echo CUDA_HOME: $$CUDA_HOME
 	echo PATH: $(PATH)
+	cd REPO_ROOT
 	python setup.py develop --user
 	python -m pytest
 
