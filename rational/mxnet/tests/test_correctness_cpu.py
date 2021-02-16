@@ -24,3 +24,13 @@ def test():
     assert np.all(np.isclose(expected_res.asnumpy(),
                              result.asnumpy(), atol=5e-02))
     pass
+
+
+def test1():
+    a = mx.sym.Variable('A')
+    executor = a.simple_bind(ctx=mx.cpu(), A=(5, ))
+    input_data = executor.forward(A=mx.nd.array([-2., -1, 0., 1., 2.]))
+    result = net(input_data)
+    expected_res = LeakyReLU(input_data, slope=0.01)
+    assert np.all(np.isclose(expected_res.asnumpy(),
+                             result.asnumpy(), atol=5e-02))
