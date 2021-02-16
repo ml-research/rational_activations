@@ -90,7 +90,7 @@ def find_closest_equivalent(rational_func, new_func, x):
     import torch
 
     def equivalent_func(x_array, a, b, c, d):
-        return a * new_func(c * torch.tensor(x_array) + d) + b
+        return a * new_func(c * x_array + d) + b
     params = curve_fit(equivalent_func, x, y, initials)
     a, b, c, d = params[0]
     final_func_output = np.array(equivalent_func(x, a, b, c, d))

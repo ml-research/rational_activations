@@ -326,6 +326,8 @@ class Rational(nn.Module):
             dist: The final distance between the rational function and the \
             fitted one
         """
+        if type(function) is Rational:
+            function = function.numpy()
         used_dist = False
         rational_numpy = self.numpy()
         if x is not None:
