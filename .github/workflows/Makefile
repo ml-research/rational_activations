@@ -16,6 +16,7 @@ docker-test-run-zsh:
 	nvcc --version
 	echo CUDA_HOME: $$CUDA_HOME
 	echo PATH: $$PATH
+	ls /usr/local/
 	nvidia-smi
 	cd $(REPO_ROOT) && \
 	 python$(Python) setup.py develop --user && \
