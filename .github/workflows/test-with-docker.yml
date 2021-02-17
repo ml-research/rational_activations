@@ -19,7 +19,7 @@ jobs:
         cd .github/workflows
         CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }}/
           PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$PATH
-          make docker-test-run-zsh CUDA=${{ matrix.cuda-version }}/
+          make docker-test-run-zsh CUDA=${{ matrix.cuda-version }}
 #    - name: Install package
 #      run: |
 #        echo "TORCH_LIB=/usr/lib64/python3.6/site-packages/torch/lib:$TORCH_LIB" >> $GITHUB_ENV
