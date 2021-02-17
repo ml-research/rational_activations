@@ -13,7 +13,7 @@ net = gluon.nn.HybridSequential()
 with net.name_scope():
     net.add(Rational())
 net.initialize()
-# net.hybridize()
+net.hybridize()
 
 
 def test():

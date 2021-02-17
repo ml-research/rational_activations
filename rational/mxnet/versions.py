@@ -4,7 +4,7 @@ a,b,c and d.
 """
 
 
-def _get_xps_num(F, x, weights):
+def _get_xps_num(F, x, weights, weights_len):
     """
     creates a sequence of ascending powers of x for numerator
 
@@ -18,8 +18,7 @@ def _get_xps_num(F, x, weights):
     xps = F.expand_dims(F.ones_like(x), axis=0)
 
     # append arrays containing x, x^2, ... x^n to the list
-    len_weights = int(F.shape_array(weights).asnumpy()[0])
-    for i in range(len_weights - 1):
+    for i in range(weights_len - 1):
         factor = F.sum(F.ones(shape=(1, i + 1)))
         x_i = F.expand_dims(F.broadcast_power(x, factor), axis=0)
         xps = F.concat(xps, x_i, dim=0)
@@ -27,7 +26,7 @@ def _get_xps_num(F, x, weights):
     return xps
 
 
-def _get_xps_denom(F, x, weights):
+def _get_xps_denom(F, x, weights, weights_len):
     """
     creates a sequence of ascending powers of x for denominator
 
@@ -41,8 +40,7 @@ def _get_xps_denom(F, x, weights):
     xps = F.expand_dims(F.elemwise_mul(x, F.ones_like(x)), axis=0)
 
     # append arrays containing x^2, ... x^{n+1} to the list
-    len_weights = int(F.shape_array(weights).asnumpy()[0])
-    for i in range(len_weights - 1):
+    for i in range(weights_len - 1):
         factor = F.sum(F.ones(shape=(1, i + 2)))
         x_i = F.expand_dims(F.broadcast_power(x, factor), axis=0)
         xps = F.concat(xps, x_i, dim=0)
@@ -50,7 +48,7 @@ def _get_xps_denom(F, x, weights):
     return xps
 
 
-def _version_a(F, x, numerator_weights, denominator_weights, training):
+def _version_a(F, x, numerator_weights, denominator_weights, training, num_len, denom_len):
     """
     version a of rational activation function
 
@@ -67,14 +65,14 @@ def _version_a(F, x, numerator_weights, denominator_weights, training):
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
     # get powers of x for numerator weights
-    xps_num = _get_xps_num(F, x, numerator_weights)
+    xps_num = _get_xps_num(F, x, numerator_weights, num_len)
 
     # multiply numerator weights with xps values, then sum them up
     numerator = F.sum(
         F.broadcast_mul(xps_num, F.expand_dims(numerator_weights, axis=1)), axis=0)
 
     # get powers of x for denominator weights
-    xps_den = _get_xps_denom(F, x, denominator_weights)
+    xps_den = _get_xps_denom(F, x, denominator_weights, denom_len)
 
     # in accordance with the formula (see docstring), a one-vector is added to the sum
     ones = F.ones_like(x)

@@ -52,6 +52,11 @@ class Rational(HybridBlock):
         w_numerator = mx.nd.array(w_numerator)
         w_denominator = mx.nd.array(w_denominator)
 
+        # register the amount of weights in numerator and denominator, since we need them during symbolic
+        # execution, but are unable to retrieve them at later stages
+        self.numerator_length = len(w_numerator)
+        self.denominator_length = len(w_denominator)
+
         # set specified context (currently not happening, since unclear, how and why helpful)
         # self.device = gpu() if cuda else cpu()
 
@@ -84,4 +89,5 @@ class Rational(HybridBlock):
                 "rational activation function version %s not implemented" % version)
 
     def hybrid_forward(self, F, x, numerator, denominator):
-        return self.rational_func(F, x, numerator, denominator, self.training)
+        return self.rational_func(F, x, numerator, denominator, self.training, self.numerator_length,
+                                  self.denominator_length)
