@@ -9,7 +9,11 @@ jobs:
     runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
-    - name: Run GPU tests
+    - name: Run GPU tests CUDA 10.1
+      run: |
+        cd .github/workflows
+        CUDA_HOME="/usr/local/cuda-10.1/" PATH="/usr/local/cuda-10.1/bin":$PATH make docker-test-run-zsh
+    - name: Run GPU tests CUDA 10.2
       run: |
         cd .github/workflows
         CUDA_HOME="/usr/local/cuda-10.2/" PATH="/usr/local/cuda-10.2/bin":$PATH make docker-test-run-zsh
