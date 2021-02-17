@@ -21,6 +21,5 @@ docker-test-run-zsh:
 	cd $(REPO_ROOT) && \
 	 python$(Python) setup.py develop --user && \
 	 python$(Python) -m pytest
-	docker ps -a | grep Exit | cut -d ' ' -f 1 | xargs docker rm
 
 
