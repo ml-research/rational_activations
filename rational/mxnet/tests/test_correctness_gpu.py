@@ -64,6 +64,7 @@ def test_a_on_gpu_lrelu_sym():
 def test_b_on_gpu_lrelu_sym():
     _test_template(version='B', approx_func=LeakyReLU, cuda=CUDA, sym=True)
 
+
 def test_c_on_gpu_lrelu_sym():
     _test_template(version='C', approx_func=LeakyReLU, cuda=CUDA, sym=True)
 
