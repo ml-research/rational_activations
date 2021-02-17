@@ -188,37 +188,34 @@ def _version_d(F, x, numerator_weights, denominator_weights, training, num_len, 
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
 
     """
-
-    """
-    # if in training mode, apply Function B
+    # if in training mode, apply "normal" version B, else apply noise to  weights
     if not training:
         # do not add noise
-        return _version_b(F, x, numerator_weights, denominator_weights, False)
+        return _version_b(F, x, numerator_weights, denominator_weights, False, num_len, denom_len)
 
-    # else: inference mode
-    # get list of polynomial [1, X, X^2, X^3....X^n]
-    z = nd.reshape(x, shape=(-1,))
-    lower_bound = nd.array([1 - random_deviation])
-    upper_bound = nd.array([1 + random_deviation])
+    # get powers of x for numerator weights
+    xps_num = _get_xps_num(F, x, num_len)
 
-    xps = _get_xps(F, z, numerator_weights, denominator_weights)
+    # apply noise to numerator weights
+    noise = F.uniform(low=1 - random_deviation, high=1 + random_deviation, shape=num_len)
+    numerator_weights = F.elemwise_mul(numerator_weights, noise)
 
-    numerator = nd.array([0], dtype='float32')
-    for i, w_n in enumerate(numerator_weights):
-        w_n_noised = nd.multiply(w_n, nd.sample_uniform(low=lower_bound,
-                                                        high=upper_bound,
-                                                        shape=z.shape,
-                                                        dtype='float32'))
-        numerator = numerator + nd.multiply(w_n_noised, xps[i])
+    # multiply numerator weights with xps values, then sum them up
+    numerator = F.sum(
+        F.broadcast_mul(xps_num, F.expand_dims(numerator_weights, axis=1)), axis=0)
 
-    denominator = nd.array([0], dtype='float32')
-    for j, w_d in enumerate(denominator_weights):
-        w_d_noised = nd.multiply(w_d, nd.sample_uniform(low=lower_bound,
-                                                        high=upper_bound,
-                                                        shape=z.shape,
-                                                        dtype='float32'))
-        denominator = denominator + nd.multiply(w_d_noised, xps[j + 1])
+    # get powers of x for denominator weights
+    xps_den = _get_xps_denom(F, x, denom_len)
 
-    return nd.divide(numerator, (1 + nd.abs(denominator))).reshape(x.shape)
-    """
-    return None
+    # apply noise to denominator weights
+    noise = F.uniform(low=1 - random_deviation, high=1 + random_deviation, shape=denom_len)
+    denominator_weights = F.elemwise_mul(denominator_weights, noise)
+
+    # in accordance with the formula (see docstring), a one-vector is added to the sum
+    ones = F.ones_like(x)
+    # multiply denominator weights with xps values calculate absolute value,
+    # then sum them up and add the ones vector
+    denominator = F.elemwise_add(ones, F.abs(F.sum(
+        F.broadcast_mul(xps_den, F.expand_dims(denominator_weights, axis=1)), axis=0)))
+
+    return F.elemwise_div(numerator, denominator)

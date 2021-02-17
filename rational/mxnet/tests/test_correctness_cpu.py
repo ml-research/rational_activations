@@ -11,7 +11,7 @@ from ..rationals import Rational
 # build a small neural net containing one Rational layer
 net = gluon.nn.HybridSequential()
 with net.name_scope():
-    net.add(Rational(version='C'))
+    net.add(Rational(version='D'))
 net.initialize()
 net.hybridize()
 
