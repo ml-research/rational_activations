@@ -9,7 +9,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        Cuda: ["10.1", "10.2", "11.0"]
+        Cuda: [10.1, 10.2, 11.0]
     steps:
     - uses: actions/checkout@v2
       with:
