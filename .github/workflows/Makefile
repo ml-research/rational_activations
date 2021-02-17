@@ -10,7 +10,7 @@ REPO_ROOT = ../../
 
 .PHONY: docker-test-run-zsh
 docker-test-run-zsh:
-	docker run -i --gpus device=all --name rat_manylinux_$(CUDA) -v $(pwd):/rational_activations df31f4268b9b zsh
+	docker run -i --gpus device=all --name rat_manylinux_$(CUDA)_$(Python) -v $(pwd):/rational_activations df31f4268b9b zsh
 	python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
 	python -c "import torch; print('Number of GPUs available:', torch.cuda.device_count(), 'CUDA version:', torch.version.cuda)"
 	nvcc --version
@@ -18,8 +18,8 @@ docker-test-run-zsh:
 	echo PATH: $$PATH
 	nvidia-smi
 	cd $(REPO_ROOT) && \
-	 python setup.py develop --user && \
-	 python -m pytest
+	 python$(Python) setup.py develop --user && \
+	 python$(Python) -m pytest
 	docker ps -a | grep Exit | cut -d ' ' -f 1 | xargs docker rm
 
 
