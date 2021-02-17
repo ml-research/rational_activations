@@ -5,11 +5,11 @@ on:
     branches: [ ci-cd ]
 jobs:
   gpu_checks:
-    name: GPU Tests
+    name: GPU Tests CUDA=
     runs-on: self-hosted
     strategy:
       matrix:
-        cuda-version: ['10.1', '10.2', '11.0']
+        cuda-version: ['10.1', '10.2']
     steps:
     - uses: actions/checkout@v2
       with:
