@@ -17,12 +17,6 @@ jobs:
       run: |
         cd .github/workflows
         CUDA_HOME="/usr/local/cuda-10.2/" PATH="/usr/local/cuda-10.2/bin":$PATH make docker-test-run-zsh
-
-
-    - name: Clean
-      if: ${{ always() }}
-      run: |
-          docker ps -a | grep Exit | cut -d ' ' -f 1 | xargs docker rm
 #    - name: Install package
 #      run: |
 #        echo "TORCH_LIB=/usr/lib64/python3.6/site-packages/torch/lib:$TORCH_LIB" >> $GITHUB_ENV
