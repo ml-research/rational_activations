@@ -41,3 +41,6 @@ jobs:
   #    - name: Build test image
   #      run: |
   #        make docker-test-image
+  #    - name: Run GPU tests
+  #      run: |
+  #        make docker-test-run
