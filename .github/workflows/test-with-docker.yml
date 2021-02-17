@@ -5,18 +5,19 @@ on:
     branches: [ ci-cd ]
 jobs:
   gpu_checks:
-    name: GPU Checks
+    name: GPU Tests
     runs-on: self-hosted
+    strategy:
+      matrix:
+        Cuda: ["10.1", "10.2", "11.0"]
     steps:
     - uses: actions/checkout@v2
-    - name: Run GPU tests CUDA 10.1
+      with:
+        cuda-version: ${{ matrix.Cuda }}
+    - name: Run GPU tests ${{ matrix.cuda-version }}
       run: |
         cd .github/workflows
-        CUDA_HOME="/usr/local/cuda-10.1/" PATH="/usr/local/cuda-10.1/bin":$PATH make docker-test-run-zsh
-    - name: Run GPU tests CUDA 10.2
-      run: |
-        cd .github/workflows
-        CUDA_HOME="/usr/local/cuda-10.2/" PATH="/usr/local/cuda-10.2/bin":$PATH make docker-test-run-zsh
+        CUDA_HOME="/usr/local/cuda-${{ matrix.cuda-version }}/" PATH="/usr/local/cuda-${{ matrix.cuda-version }}/bin":$PATH make docker-test-run-zsh
 #    - name: Install package
 #      run: |
 #        echo "TORCH_LIB=/usr/lib64/python3.6/site-packages/torch/lib:$TORCH_LIB" >> $GITHUB_ENV
