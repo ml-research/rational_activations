@@ -5,7 +5,7 @@ on:
     branches: [ ci-cd ]
 jobs:
   gpu_checks:
-    name: GPU Tests Cuda =
+    name: Tests (Cuda, Python) =
     runs-on: self-hosted
     strategy:
       matrix:
@@ -19,8 +19,8 @@ jobs:
     - name: Run GPU tests CUDA=${{ matrix.cuda-version }} & Python${{ matrix.python-version }}
       run: |
         cd .github/workflows
-        CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }}/
-          PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$PATH
+        CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }}/ \
+          PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$PATH \
           make docker-test-run-zsh CUDA=${{ matrix.cuda-version }} Python=${{ matrix.python-version }}
 #    - name: Install package
 #      run: |
