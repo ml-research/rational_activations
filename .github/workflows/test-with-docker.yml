@@ -4,9 +4,6 @@ on:
   push:
     branches: [ ci-cd ]
 jobs:
-  strategy:
-    matrix:
-      Cuda-version: ["10.1", "10.2", "11.0"]
   gpu_checks:
     name: GPU Checks
     runs-on: self-hosted
