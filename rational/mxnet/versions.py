@@ -4,14 +4,13 @@ a,b,c and d.
 """
 
 
-def _get_xps_num(F, x, weights, weights_len):
+def _get_xps_num(F, x, weights_len):
     """
     creates a sequence of ascending powers of x for numerator
 
     :param weights_len: int, amount of weights, needed for symbolic execution
     :param F: a function space either mxnet.nd or mxnet.sym
     :param x: input sequence of scalars
-    :param weights: vector containing the weights a_0, ... a_n
     :return: a two-dimensional sequence that looks approximately like this
      [[1,1,...], [--x--], [--x^2--],... , [--x^n--]], where x is a vector (sequence of scalars)
     """
@@ -27,14 +26,13 @@ def _get_xps_num(F, x, weights, weights_len):
     return xps
 
 
-def _get_xps_denom(F, x, weights, weights_len):
+def _get_xps_denom(F, x, weights_len):
     """
     creates a sequence of ascending powers of x for denominator
 
     :param weights_len: int, amount of weights, needed for symbolic execution
     :param F: a function space either mxnet.nd or mxnet.sym
     :param x: input sequence of scalars
-    :param weights: vector containing the weights a_0, ... a_m
     :return: a two-dimensional sequence that looks approximately like this
      [[--x--], [--x^2--],... , [--x^n--], [--x^{m+1}--]], where x is a vector (sequence of scalars)
     """
@@ -69,14 +67,14 @@ def _version_a(F, x, numerator_weights, denominator_weights, training, num_len, 
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
     # get powers of x for numerator weights
-    xps_num = _get_xps_num(F, x, numerator_weights, num_len)
+    xps_num = _get_xps_num(F, x, num_len)
 
     # multiply numerator weights with xps values, then sum them up
     numerator = F.sum(
         F.broadcast_mul(xps_num, F.expand_dims(numerator_weights, axis=1)), axis=0)
 
     # get powers of x for denominator weights
-    xps_den = _get_xps_denom(F, x, denominator_weights, denom_len)
+    xps_den = _get_xps_denom(F, x, denom_len)
 
     # in accordance with the formula (see docstring), a one-vector is added to the sum
     ones = F.ones_like(x)
