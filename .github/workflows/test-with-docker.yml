@@ -12,7 +12,7 @@ jobs:
     - name: Run GPU tests
       run: |
         cd .github/workflows
-        make docker-test-run-zsh
+        make docker-test-run-zsh CUDA_HOME="/usr/local/cuda-10.2/" PATH="/usr/local/cuda-10.2/bin":$(PATH)
 
 
     - name: Clean

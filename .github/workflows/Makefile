@@ -7,8 +7,8 @@ REPO_ROOT = ../../
 # DOCKER_TEST_TORCH_VERSION = 'torch==1.7.1+cu110 -f https://download.pytorch.org/whl/torch_stable.html'
 # DOCKER_RUN_CMD = docker run -i --gpus device=all --name rat_manylinux -v $(pwd):/rational_activations df31f4268b9b zsh
 
-export CUDA_HOME := "/usr/local/cuda-10.2/"
-export PATH := "/usr/local/cuda-10.2/bin":$(PATH)  # for nvcc to find the correct one
+# export CUDA_HOME := "/usr/local/cuda-10.2/"
+# export PATH := "/usr/local/cuda-10.2/bin":$(PATH)  # for nvcc to find the correct one
 
 .PHONY : docker-image
 docker-image :
@@ -46,9 +46,8 @@ docker-test-run-zsh:
 	python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
 	python -c "import torch; print('Number of GPUs available:', torch.cuda.device_count(), 'CUDA version:', torch.version.cuda)"
 	nvcc --version
-	echo $(CUDA_HOME)
 	echo CUDA_HOME: $$CUDA_HOME
-	echo PATH: $(PATH)
+	echo PATH: $$PATH
 	cd $(REPO_ROOT) && \
 	 python setup.py develop --user && \
 	 python -m pytest
