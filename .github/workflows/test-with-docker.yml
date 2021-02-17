@@ -17,8 +17,8 @@ jobs:
     - name: Run GPU tests ${{ matrix.cuda-version }}
       run: |
         cd .github/workflows
-        echo "/usr/local/${{ matrix.cuda-version }}/"
-        CUDA_HOME="/usr/local/${{ matrix.cuda-version }}/" PATH="/usr/local/${{ matrix.cuda-version }}/bin":$PATH make docker-test-run-zsh
+        echo /usr/local/${{ matrix.cuda-version }}/
+        CUDA_HOME=/usr/local/${{ matrix.cuda-version }}/ PATH=/usr/local/${{ matrix.cuda-version }}/bin:$PATH make docker-test-run-zsh
 #    - name: Install package
 #      run: |
 #        echo "TORCH_LIB=/usr/lib64/python3.6/site-packages/torch/lib:$TORCH_LIB" >> $GITHUB_ENV
