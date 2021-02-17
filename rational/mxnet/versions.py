@@ -12,7 +12,8 @@ def _get_xps_num(F, x, weights_len):
     :param F: a function space either mxnet.nd or mxnet.sym
     :param x: input sequence of scalars
     :return: a two-dimensional sequence that looks approximately like this
-     [[1,1,...], [--x--], [--x^2--],... , [--x^{weights_len}--]], where x is a vector (sequence of scalars)
+     [[1,1,...], [--x--], [--x^2--],... , [--x^{weights_len}--]], where x is a vector (sequence
+     of scalars)
     """
     #  create an array containing ones
     xps = F.expand_dims(F.ones_like(x), axis=0)
@@ -34,7 +35,8 @@ def _get_xps_denom(F, x, weights_len):
     :param F: a function space either mxnet.nd or mxnet.sym
     :param x: input sequence of scalars
     :return: a two-dimensional sequence that looks approximately like this
-     [[--x--], [--x^2--],... , [--x^n--], [--x^{weights_len + 1}--]], where x is a vector (sequence of scalars)
+     [[--x--], [--x^2--],... , [--x^n--], [--x^{weights_len + 1}--]], where x is a vector (sequence
+     of scalars)
     """
     #  create an array containing x
     xps = F.expand_dims(F.elemwise_mul(x, F.ones_like(x)), axis=0)
@@ -166,7 +168,8 @@ def _version_c(F, x, numerator_weights, denominator_weights, training, num_len, 
     return F.elemwise_div(numerator, denominator)
 
 
-def _version_d(F, x, numerator_weights, denominator_weights, training, num_len, denom_len, random_deviation=0.1):
+def _version_d(F, x, numerator_weights, denominator_weights, training, num_len, denom_len,
+               random_deviation=0.1):
     """
     version d of rational activation function
 
