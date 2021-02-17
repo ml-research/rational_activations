@@ -8,6 +8,7 @@ def _get_xps_num(F, x, weights, weights_len):
     """
     creates a sequence of ascending powers of x for numerator
 
+    :param weights_len: int, amount of weights, needed for symbolic execution
     :param F: a function space either mxnet.nd or mxnet.sym
     :param x: input sequence of scalars
     :param weights: vector containing the weights a_0, ... a_n
@@ -30,6 +31,7 @@ def _get_xps_denom(F, x, weights, weights_len):
     """
     creates a sequence of ascending powers of x for denominator
 
+    :param weights_len: int, amount of weights, needed for symbolic execution
     :param F: a function space either mxnet.nd or mxnet.sym
     :param x: input sequence of scalars
     :param weights: vector containing the weights a_0, ... a_m
@@ -57,6 +59,8 @@ def _version_a(F, x, numerator_weights, denominator_weights, training, num_len, 
 
     note: q(x) contains m absolute value terms here
 
+    :param num_len: int, amount of numerator weights. Needed for symbolic execution
+    :param denom_len: int, amount of denominator weights. Needed for symbolic execution
     :param F: a function space either mxnet.nd or mxnet.sym
     :param x: input sequence of scalars
     :param numerator_weights: vector containing the weights a_0, ... a_n
@@ -84,7 +88,7 @@ def _version_a(F, x, numerator_weights, denominator_weights, training, num_len, 
     return F.elemwise_div(numerator, denominator)
 
 
-def _version_b(F, x, numerator_weights, denominator_weights, training):
+def _version_b(F, x, numerator_weights, denominator_weights, training, num_len, denom_len):
     """
     version b of rational activation function
 
@@ -93,6 +97,8 @@ def _version_b(F, x, numerator_weights, denominator_weights, training):
 
     note: q(x) contains only one absolute value term here
 
+    :param num_len: int, amount of numerator weights. Needed for symbolic execution
+    :param denom_len: int, amount of denominator weights. Needed for symbolic execution
     :param F: a function space either mxnet.nd or mxnet.sym
     :param x: input sequence of scalars
     :param numerator_weights: vector containing the weights a_0, ... a_n
@@ -118,7 +124,7 @@ def _version_b(F, x, numerator_weights, denominator_weights, training):
     return None
 
 
-def _version_c(F, x, numerator_weights, denominator_weights, training):
+def _version_c(F, x, numerator_weights, denominator_weights, training, num_len, denom_len):
     """
     version c of rational activation function
 
@@ -127,6 +133,8 @@ def _version_c(F, x, numerator_weights, denominator_weights, training):
 
     note: q(x) contains a variable term (epsilon) here, and also a b_0 term
 
+    :param num_len: int, amount of numerator weights. Needed for symbolic execution
+    :param denom_len: int, amount of denominator weights. Needed for symbolic execution
     :param F: a function space either mxnet.nd or mxnet.sym
     :param x: input sequence of scalars
     :param numerator_weights: vector containing the weights a_0, ... a_n
@@ -154,7 +162,7 @@ def _version_c(F, x, numerator_weights, denominator_weights, training):
     return None
 
 
-def _version_d(F, x, numerator_weights, denominator_weights, training, random_deviation=0.1):
+def _version_d(F, x, numerator_weights, denominator_weights, training, num_len, denom_len, random_deviation=0.1):
     """
     version d of rational activation function
 
@@ -165,6 +173,8 @@ def _version_d(F, x, numerator_weights, denominator_weights, training, random_de
     Noised parameters have uniform noise to be in range
     [(1-random_deviation)*parameter,(1+random_deviation)*parameter].
 
+    :param num_len: int, amount of numerator weights. Needed for symbolic execution
+    :param denom_len: int, amount of denominator weights. Needed for symbolic execution
     :param F: a function space either mxnet.nd or mxnet.sym
     :param x: input sequence of scalars
     :param numerator_weights: vector containing the weights a_0, ... a_n
