@@ -38,7 +38,6 @@ def _get_xps_denom(F, x, weights):
      [[--x--], [--x^2--],... , [--x^n--], [--x^{m+1}--]], where x is a vector (sequence of scalars)
     """
     #  create an array containing x
-    import mxnet as mx
     xps = F.expand_dims(F.elemwise_mul(x, F.ones_like(x)), axis=0)
 
     # append arrays containing x^2, ... x^{n+1} to the list
