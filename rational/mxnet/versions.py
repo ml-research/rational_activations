@@ -12,7 +12,7 @@ def _get_xps_num(F, x, weights_len):
     :param F: a function space either mxnet.nd or mxnet.sym
     :param x: input sequence of scalars
     :return: a two-dimensional sequence that looks approximately like this
-     [[1,1,...], [--x--], [--x^2--],... , [--x^n--]], where x is a vector (sequence of scalars)
+     [[1,1,...], [--x--], [--x^2--],... , [--x^{weights_len}--]], where x is a vector (sequence of scalars)
     """
     #  create an array containing ones
     xps = F.expand_dims(F.ones_like(x), axis=0)
@@ -34,7 +34,7 @@ def _get_xps_denom(F, x, weights_len):
     :param F: a function space either mxnet.nd or mxnet.sym
     :param x: input sequence of scalars
     :return: a two-dimensional sequence that looks approximately like this
-     [[--x--], [--x^2--],... , [--x^n--], [--x^{m+1}--]], where x is a vector (sequence of scalars)
+     [[--x--], [--x^2--],... , [--x^n--], [--x^{weights_len + 1}--]], where x is a vector (sequence of scalars)
     """
     #  create an array containing x
     xps = F.expand_dims(F.elemwise_mul(x, F.ones_like(x)), axis=0)
@@ -142,24 +142,28 @@ def _version_c(F, x, numerator_weights, denominator_weights, training, num_len, 
     :param training: (NOT IN USE) whether the call is in inference mode or training mode
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
-
-    """
-    z = nd.reshape(x, shape=(-1,))
-
-    xps = _get_xps(F, z, numerator_weights, denominator_weights)
+    # get powers of x for numerator weights
+    xps_num = _get_xps_num(F, x, num_len)
 
     # multiply numerator weights with xps values, then sum them up
-    numerator = F.sum(F.broadcast_mul(numerator_weights, xps))
+    numerator = F.sum(
+        F.broadcast_mul(xps_num, F.expand_dims(numerator_weights, axis=1)), axis=0)
+
+    # get powers of x for denominator weights
+    xps_den = _get_xps_num(F, x, denom_len)
+
+    # in accordance with the formula (see docstring), an epsilon-vector is added to the sum
+    # here: epsilon = 0.1
+    ones = F.ones_like(x)
+    factor = F.sum(F.ones(shape=(1, 10)))
+    epsilons = F.broadcast_div(ones, factor)
 
     # multiply denominator weights with xps values calculate absolute value,
-    # then sum them up
-    # NOTE THE INDEX CHANGE HERE, ACCOUNTING FOR THE '+1
-    denominator = F.sum(F.broadcast_abs(
-        F.broadcast_mul(denominator_weights, xps[1:])))
+    # then sum them up and add the ones vector
+    denominator = F.elemwise_add(epsilons, F.abs(F.sum(
+        F.broadcast_mul(xps_den, F.expand_dims(denominator_weights, axis=1)), axis=0)))
 
-    return nd.divide(numerator, (0.1 + nd.abs(denominator))).reshape(x.shape)
-    """
-    return None
+    return F.elemwise_div(numerator, denominator)
 
 
 def _version_d(F, x, numerator_weights, denominator_weights, training, num_len, denom_len, random_deviation=0.1):
