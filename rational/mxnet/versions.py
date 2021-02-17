@@ -104,22 +104,24 @@ def _version_b(F, x, numerator_weights, denominator_weights, training, num_len, 
     :param training: (NOT IN USE) whether the call is in inference mode or training mode
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
-    """
-    z = nd.reshape(x, shape=(-1,))
+    # get powers of x for numerator weights
+    xps_num = _get_xps_num(F, x, num_len)
 
-    xps = _get_xps(F, z, numerator_weights, denominator_weights)
+    # multiply numerator weights with xps values, then sum them up
+    numerator = F.sum(
+        F.broadcast_mul(xps_num, F.expand_dims(numerator_weights, axis=1)), axis=0)
 
-    numerator = nd.array([0], dtype='float32')
-    for i, w_n in enumerate(numerator_weights):
-        numerator = numerator + nd.multiply(w_n, xps[i])
+    # get powers of x for denominator weights
+    xps_den = _get_xps_denom(F, x, denom_len)
 
-    denominator = nd.array([0], dtype='float32')
-    for j, w_d in enumerate(denominator_weights):
-        denominator = denominator + nd.multiply(w_d, xps[j + 1])
+    # in accordance with the formula (see docstring), a one-vector is added to the sum
+    ones = F.ones_like(x)
+    # multiply denominator weights with xps values calculate absolute value,
+    # then sum them up and add the ones vector
+    denominator = F.elemwise_add(ones, F.abs(F.sum(
+        F.broadcast_mul(xps_den, F.expand_dims(denominator_weights, axis=1)), axis=0)))
 
-    return nd.divide(numerator, (1.0 + nd.abs(denominator))).reshape(x.shape)
-    """
-    return None
+    return F.elemwise_div(numerator, denominator)
 
 
 def _version_c(F, x, numerator_weights, denominator_weights, training, num_len, denom_len):
