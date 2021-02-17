@@ -9,11 +9,11 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        Cuda: ['cuda-10.1', 'cuda-10.2', 'cuda-11.0']
+        cuda-version: ['cuda-10.1', 'cuda-10.2', 'cuda-11.0']
     steps:
     - uses: actions/checkout@v2
       with:
-        cuda-version: ${{ matrix.Cuda }}
+        cuda-version: ${{ matrix.cuda-version }}
     - name: Run GPU tests ${{ matrix.cuda-version }}
       run: |
         cd .github/workflows
