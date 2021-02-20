@@ -9,7 +9,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        cuda-version: ['10.1']
+        cuda-version: ['11.0']
         python-version: ['3.7', '3.8']
     steps:
     - uses: actions/checkout@v2
