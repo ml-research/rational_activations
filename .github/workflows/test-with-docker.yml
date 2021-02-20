@@ -22,10 +22,7 @@ jobs:
         CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }}/ \
           PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$PATH \
           make docker-test-run-zsh CUDA=${{ matrix.cuda-version }} Python=${{ matrix.python-version }}
-    - name: Remove container
-      if: ${{ always() }}
-      run: |
-        docker ps -a | grep Exit | cut -d ' ' -f 1 | xargs docker rm
+
 
   #    - name: Install package
 #      run: |
@@ -37,6 +34,10 @@ jobs:
 #        echo "CUDA_HOME=/usr/local/cuda-10.2/" >> $GITHUB_ENV
 #        echo "PATH=/usr/local/cuda-10.2/bin:$PATH" >> $GITHUB_ENV
 #        make docker-test-run-zsh
+#    - name: Remove container
+#      if: ${{ always() }}
+#      run: |
+#        docker ps -a | grep Exit | cut -d ' ' -f 1 | xargs docker rm
 #steps:
   #    - uses: actions/checkout@v2
   #    - name: Build test image
