@@ -9,7 +9,7 @@ REPO_ROOT = ../../
 
 .PHONY: docker-test-run-zsh
 docker-test-run-zsh:
-	docker attach rat_manylinux_cicd3
+	docker attach rat_manylinux_cicd
 	python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
 	python -c "import torch; print('Number of GPUs available:', torch.cuda.device_count(), 'CUDA version:', torch.version.cuda)"
 	nvcc --version
