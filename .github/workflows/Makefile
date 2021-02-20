@@ -16,8 +16,7 @@ docker-test-run-zsh:
 	echo CUDA_HOME: $$CUDA_HOME
 	echo PATH: $$PATH
 	ls /usr/local/
-	cd /usr/local/ && ls -l && ls && pwd
-	cd /usr/local/ && cd cuda-11.0 && ls && pwd
+	cd /usr/local/ && ls -l && ls && pwd && cd cuda && ls
 	nvidia-smi
 	cd $(REPO_ROOT) && \
 	 python$(Python) setup.py develop --user && \
