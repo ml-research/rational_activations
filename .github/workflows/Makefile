@@ -9,7 +9,7 @@ REPO_ROOT = ../../
 
 .PHONY: docker-test-run-zsh
 docker-test-run-zsh:
-	docker run -i --gpus device=all --name rat_manylinux_$(CUDA)_$(Python) -v $(pwd):/rational_activations 8af1c07ac31a
+	docker attach rat_manylinux_cicd
 	python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
 	python -c "import torch; print('Number of GPUs available:', torch.cuda.device_count(), 'CUDA version:', torch.version.cuda)"
 	nvcc --version
