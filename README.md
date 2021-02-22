@@ -11,10 +11,10 @@ Rational can approximate any known activation function arbitrarily well (*cf. [P
   ![rational_approx](./images/rational_approx.png)
   (*the dashed lines represent the rational approximation of every function)
 
-Rational are made to be optimized by the gradient descent, and can discover good properties of activation functions after learning (*cf [Recurrent Rational Networks]()*):
+Rational are made to be optimized by the gradient descent, and can discover good properties of activation functions after learning (*cf [Recurrent Rational Networks](https://arxiv.org/pdf/2102.09407)*):
   ![rational_properties](./images/rational_properties.png)
 ### Rationals evaluation on different tasks
-* They were first applied (as Padé Activation Units) to supervized learning (image classification) in *[Padé Activation Units:...](https://arxiv.org/abs/1907.06732)*.
+* They were first applied (as Padé Activation Units) to Supervised Learning (image classification) in *[Padé Activation Units:...](https://arxiv.org/abs/1907.06732)*.
 
   ![sl_score](./images/sl_score.png)
 
@@ -23,7 +23,7 @@ Rational are made to be optimized by the gradient descent, and can discover good
 Rational matches or outperforms common activations in terms of predictive performance and training time.
 And, therefore relieves the network designer of having to commit to a potentially underperforming choice.
 
-* Recurrent Rational Functions have then been introduced in [Recurrent Rational Networks](), and both Rational and Recurrent Rational Networks are evaluated on RL Tasks.
+* Recurrent Rational Functions have then been introduced in [Recurrent Rational Networks](https://arxiv.org/pdf/2102.09407), and both Rational and Recurrent Rational Networks are evaluated on RL Tasks.
   ![rl_scores](./images/rl_scores.png)
  :octocat: See [rational_rl](https://github.com/ml-research/rational_rl) github repo
 
