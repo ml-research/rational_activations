@@ -43,7 +43,7 @@ To use it:
    :caption: API:
    :glob:
 
-   *
+   rational_*
 
 .. toctree::
    :maxdepth: 2
