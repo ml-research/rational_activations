@@ -50,6 +50,17 @@ def _get_xps_denom(F, x, weights_len):
     return xps
 
 
+def _compute_p(F, x, num_len, numerator_weights):
+    # get powers of x for numerator weights, flatten (relevant if x is multidimensional)
+    xps_num = F.flatten(_get_xps_num(F, x, num_len))
+    # expand dimension of numerator_weights
+    numerator_weights = F.expand_dims(numerator_weights, axis=1)
+    # multiply numerator_weights with the powers of x
+    prod = F.broadcast_mul(xps_num, numerator_weights)
+    # compute the sum over the product
+    return F.sum(prod, axis=0)
+
+
 def _version_a(F, x, numerator_weights, denominator_weights, training, num_len, denom_len):
     """
     version a of rational activation function
@@ -69,14 +80,7 @@ def _version_a(F, x, numerator_weights, denominator_weights, training, num_len, 
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
     # COMPUTE P
-    # get powers of x for numerator weights, flatten (relevant if x is multidimensional)
-    xps_num = F.flatten(_get_xps_num(F, x, num_len))
-    # expand dimension of numerator_weights
-    numerator_weights = F.expand_dims(numerator_weights, axis=1)
-    # multiply numerator_weights with the powers of x
-    prod = F.broadcast_mul(xps_num, numerator_weights)
-    # compute the sum over the product
-    p = F.sum(prod, axis=0)
+    p = _compute_p(F, x, num_len, numerator_weights)
 
     # COMPUTE Q
     # flatten xps (relevant if multidimensional)
@@ -118,24 +122,29 @@ def _version_b(F, x, numerator_weights, denominator_weights, training, num_len, 
     :param training: (NOT IN USE) whether the call is in inference mode or training mode
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
-    # get powers of x for numerator weights
-    xps_num = _get_xps_num(F, x, num_len)
+    # COMPUTE P
+    p = _compute_p(F, x, num_len, numerator_weights)
 
-    # multiply numerator weights with xps values, then sum them up
-    numerator = F.sum(
-        F.broadcast_mul(xps_num, F.expand_dims(numerator_weights, axis=1)), axis=0)
+    # COMPUTE Q
+    # get powers of x for denominator weights, flatten (relevant if x is multidimensional)
+    xps_den = F.flatten(_get_xps_denom(F, x, denom_len))
+    # expand dimension of denominator_weights
+    denominator_weights = F.expand_dims(denominator_weights, axis=1)
+    # multiply denominator_weights with powers of x
+    prod = F.broadcast_mul(xps_den, denominator_weights)
+    # compute the sum
+    sum_prod = F.sum(prod, axis=0)
+    # compute the absolute value
+    abs_sum_prod = F.abs(sum_prod)
+    # add one to each element
+    ones = F.ones_like(abs_sum_prod)
 
-    # get powers of x for denominator weights
-    xps_den = _get_xps_denom(F, x, denom_len)
+    q = F.elemwise_add(ones, abs_sum_prod)
 
-    # in accordance with the formula (see docstring), a one-vector is added to the sum
-    ones = F.ones_like(x)
-    # multiply denominator weights with xps values calculate absolute value,
-    # then sum them up and add the ones vector
-    denominator = F.elemwise_add(ones, F.abs(F.sum(
-        F.broadcast_mul(xps_den, F.expand_dims(denominator_weights, axis=1)), axis=0)))
-
-    return F.elemwise_div(numerator, denominator)
+    # compute p / q
+    result_flat = F.elemwise_div(p, q)
+    # reshape to original shape of x (relevant if multidimensional)
+    return F.reshape_like(result_flat, x)
 
 
 def _version_c(F, x, numerator_weights, denominator_weights, training, num_len, denom_len):
