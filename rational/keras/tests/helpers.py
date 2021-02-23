@@ -8,7 +8,7 @@ from tensorflow.nn import leaky_relu
 from rational.keras import Rational
 
 
-def activation(func, data):
+def _activation(func, data):
     """
     apply activation function to data
 
@@ -20,7 +20,7 @@ def activation(func, data):
     return np.array(func(data))
 
 
-def test_template(version: str, approx_func, cuda: bool):
+def _test_template(version: str, approx_func, cuda: bool):
     """
     compare the result of Rational activation function with expected result
 
@@ -42,7 +42,7 @@ def test_template(version: str, approx_func, cuda: bool):
         test_tensor = tf.convert_to_tensor(np.array(test_data, np.float32), np.float32)
 
         # instantiate expected results of activation function
-        expected_res = activation(approx_func, test_data)
+        expected_res = _activation(approx_func, test_data)
 
         # instantiate Rational activation function with specific version
         trainable = False  # if version != 'D' else True
