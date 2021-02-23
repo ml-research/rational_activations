@@ -17,7 +17,7 @@ class Rational(HybridBlock):
 
     def __init__(self, approx_func='leaky_relu', degrees=(5, 4), cuda=False,
                  version='A', trainable=True, train_numerator=True,
-                 train_denominator=True):
+                 train_denominator=True, **kwargs):
         """
         Initializes this custom HybridBlock, which implements a Rational Activation Function.
         Sets the initial configuration of weights, according to the specified version and
@@ -42,7 +42,7 @@ class Rational(HybridBlock):
         :param train_numerator: whether numerator coefficients are trainable
         :param train_denominator: whether denominator coefficients are trainable
         """
-        super(Rational, self).__init__()
+        super(Rational, self).__init__(**kwargs)
 
         # read initial parameter configuration from external files
         w_numerator, w_denominator = get_parameters(

@@ -48,7 +48,8 @@ def _test_backward_template(version: str):
     net.add(nn.Dense(10))
 
     gpus = mx.test_utils.list_gpus()
-    ctx = [mx.gpu()] if gpus else [mx.cpu(0), mx.cpu(1)]
+    # include current context, so parameters can be read from this test method
+    ctx = [mx.gpu(), mx.current_context()] if gpus else [mx.cpu(0), mx.cpu(1)]
     net.initialize(ctx=ctx)
     trainer = gluon.Trainer(net.collect_params(), 'sgd', {'learning_rate': 0.02})
 
@@ -65,10 +66,10 @@ def _test_backward_template(version: str):
     for batch in train_data:
         # Splits train data into multiple slices along batch_axis
         # and copy each slice into a context.
-        data = gluon.utils.split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
+        data = gluon.utils.split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0, even_split=False)
         # Splits train labels into multiple slices along batch_axis
         # and copy each slice into a context.
-        label = gluon.utils.split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
+        label = gluon.utils.split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0, even_split=False)
         outputs = []
         # Inside training scope
         with ag.record():

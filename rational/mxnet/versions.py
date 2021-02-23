@@ -2,6 +2,7 @@
 This file contains the mathematical implementations of the rational activation function versions
 a,b,c and d.
 """
+from mxnet import current_context
 
 
 def _get_xps_num(F, x, weights_len):
@@ -223,7 +224,8 @@ def _version_d(F, x, numerator_weights, denominator_weights, training, num_len, 
 
     # COMPUTE P
     # apply noise to numerator weights
-    noise = F.uniform(low=1 - random_deviation, high=1 + random_deviation, shape=num_len)
+    noise = F.uniform(low=1 - random_deviation, high=1 + random_deviation, shape=num_len,
+                      ctx=current_context())
     numerator_weights = F.elemwise_mul(numerator_weights, noise)
 
     p = _compute_p(F, x, num_len, numerator_weights)
@@ -233,7 +235,8 @@ def _version_d(F, x, numerator_weights, denominator_weights, training, num_len, 
     xps_den = F.flatten(_get_xps_denom(F, x, denom_len))
 
     # apply noise to denominator weights
-    noise = F.uniform(low=1 - random_deviation, high=1 + random_deviation, shape=denom_len)
+    noise = F.uniform(low=1 - random_deviation, high=1 + random_deviation, shape=denom_len,
+                      ctx=current_context())
     denominator_weights = F.elemwise_mul(denominator_weights, noise)
     # expand dimension of denominator_weights
     denominator_weights = F.expand_dims(denominator_weights, axis=1)
