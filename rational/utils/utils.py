@@ -1,7 +1,3 @@
-"""
-Utils of utils module of rational functions
-===========================================
-"""
 import warnings
 import numpy as np
 from numpy import zeros, inf
@@ -78,6 +74,14 @@ def _curve_fit(f, xdata, ydata, degrees, version, p0=None, absolute_sigma=False,
         return popt, pcov, infodict, errmsg, ier
     else:
         return popt, pcov
+
+
+def fit_rational_to_base_function(rational_func, ref_func, x, degrees=(5, 4), version="A"):
+    y = ref_func(x)
+    final_params = _curve_fit(rational_func, x, y, degrees=degrees, version=version,
+                              maxfev=10000000)[0]
+    return np.array(final_params[:degrees[0]+1]), np.array(final_params[degrees[0]+1:])
+
 
 def find_closest_equivalent(rational_func, new_func, x):
     """

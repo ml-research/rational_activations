@@ -84,6 +84,7 @@ def find_weights(function, function_name=None, degrees=None, bounds=None,
     Finds the weights of the numerator and the denominator of the rational function.
     Beside `function`, all parameters can be left to the default ``None``. \n
     In this case, user is asked to provide the params interactively.
+    
     Arguments:
             function (callable):
                 The function to approximate (e.g. from torch.functional).\n
