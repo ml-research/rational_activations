@@ -3,3 +3,5 @@ scipy
 matplotlib
 torch>=1.5.0
 # tensorflow>=2.0.0
+tensorflow
+mxnet
