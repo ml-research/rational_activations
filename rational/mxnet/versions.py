@@ -39,7 +39,7 @@ def _get_xps_denom(F, x, weights_len):
      of scalars)
     """
     #  create an array containing x
-    xps = F.expand_dims(F.elemwise_mul(x, F.ones_like(x)), axis=0)
+    xps = F.expand_dims(x, axis=0)
 
     # append arrays containing x^2, ... x^{n+1} to the list
     for i in range(weights_len - 1):
@@ -68,24 +68,36 @@ def _version_a(F, x, numerator_weights, denominator_weights, training, num_len, 
     :param training: (NOT IN USE) whether the call is in inference mode or training mode
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
-    # get powers of x for numerator weights
-    xps_num = _get_xps_num(F, x, num_len)
+    # COMPUTE P
+    # get powers of x for numerator weights, flatten (relevant if x is multidimensional)
+    xps_num = F.flatten(_get_xps_num(F, x, num_len))
+    # expand dimension of numerator_weights
+    numerator_weights = F.expand_dims(numerator_weights, axis=1)
+    # multiply numerator_weights with the powers of x
+    prod = F.broadcast_mul(xps_num, numerator_weights)
+    # compute the sum over the product
+    p = F.sum(prod, axis=0)
 
-    # multiply numerator weights with xps values, then sum them up
-    numerator = F.sum(
-        F.broadcast_mul(xps_num, F.expand_dims(numerator_weights, axis=1)), axis=0)
+    # COMPUTE Q
+    # flatten xps (relevant if multidimensional)
+    xps_den = F.flatten(_get_xps_denom(F, x, denom_len))
+    # expand dimension of denominator_weights
+    denominator_weights = F.expand_dims(denominator_weights, axis=1)
+    # multiply denominator_weights with the powers of x
+    prod = F.broadcast_mul(xps_den, denominator_weights)
+    # compute the absolute value
+    abs_prod = F.abs(prod)
+    # compute the sum
+    sum_abs_prod = F.sum(abs_prod, axis=0)
+    # add one to each element
+    ones = F.ones_like(sum_abs_prod)
 
-    # get powers of x for denominator weights
-    xps_den = _get_xps_denom(F, x, denom_len)
+    q = F.elemwise_add(ones, sum_abs_prod)
 
-    # in accordance with the formula (see docstring), a one-vector is added to the sum
-    ones = F.ones_like(x)
-    # multiply denominator weights with xps values calculate absolute value,
-    # then sum them up and add the ones vector
-    denominator = F.elemwise_add(ones, F.sum(F.abs(
-        F.broadcast_mul(xps_den, F.expand_dims(denominator_weights, axis=1))), axis=0))
-
-    return F.elemwise_div(numerator, denominator)
+    # compute p / q
+    result_flat = F.elemwise_div(p, q)
+    # reshape to original shape of x (relevant if multidimensional)
+    return F.reshape_like(result_flat, x)
 
 
 def _version_b(F, x, numerator_weights, denominator_weights, training, num_len, denom_len):
