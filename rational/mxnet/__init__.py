@@ -1,4 +1,4 @@
 """
-TODO explain what this file is doing
+This file imports code into the rational.mxnet package
 """
-from .rationals import Rational
+from rationals import Rational
