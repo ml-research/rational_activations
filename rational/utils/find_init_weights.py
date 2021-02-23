@@ -80,6 +80,40 @@ FUNCTION = None
 
 def find_weights(function, function_name=None, degrees=None, bounds=None,
                  version=None, plot=None, save=None, overwrite=None):
+    """
+    Finds the weights of the numerator and the denominator of the rational function.
+    Beside `function`, all parameters can be left to the default ``None``. \n
+    In this case, user is asked to provide the params interactively.
+    Arguments:
+            function (callable):
+                The function to approximate (e.g. from torch.functional).\n
+            function_name (str):
+                The name of this function (used at Rational initialisation)\n
+            degrees (tuple of int):
+                The degrees of the numerator (P) and denominator (Q).\n
+                Default ``None``
+            bounds (tuple of int):
+                The bounds to approximate on (e.g. (-3,3)).\n
+                Default ``None``
+            version (str):
+                Version of Rational to use. Rational(x) = P(x)/Q(x)\n
+                `A`: Q(x) = 1 + \|b_1.x\| + \|b_2.x\| + ... + \|b_n.x\|\n
+                `B`: Q(x) = 1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
+                `C`: Q(x) = 0.1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
+                `D`: like `B` with noise\n
+            plot (bool):
+                If True, plots the fitted and target functions.
+                Default ``None``
+            save (bool):
+                If True, saves the weights in the config file.
+                Default ``None``
+            save (bool):
+                If True, if weights already exist for this configuration, they are overwritten.
+                Default ``None``
+    Returns:
+        tuple: (numerator, denominator) if not `save`, otherwise `None` \n
+
+    """
     # To be changed by the function you want to approximate
     if function_name is None:
         function_name = input("approximated function name: ")
