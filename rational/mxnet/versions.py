@@ -221,29 +221,34 @@ def _version_d(F, x, numerator_weights, denominator_weights, training, num_len, 
         # do not add noise
         return _version_b(F, x, numerator_weights, denominator_weights, False, num_len, denom_len)
 
-    # get powers of x for numerator weights
-    xps_num = _get_xps_num(F, x, num_len)
-
+    # COMPUTE P
     # apply noise to numerator weights
     noise = F.uniform(low=1 - random_deviation, high=1 + random_deviation, shape=num_len)
     numerator_weights = F.elemwise_mul(numerator_weights, noise)
 
-    # multiply numerator weights with xps values, then sum them up
-    numerator = F.sum(
-        F.broadcast_mul(xps_num, F.expand_dims(numerator_weights, axis=1)), axis=0)
+    p = _compute_p(F, x, num_len, numerator_weights)
 
-    # get powers of x for denominator weights
-    xps_den = _get_xps_denom(F, x, denom_len)
+    # COMPUTE Q
+    # get powers of x for denominator weights, flatten (relevant if x is multidimensional)
+    xps_den = F.flatten(_get_xps_denom(F, x, denom_len))
 
     # apply noise to denominator weights
     noise = F.uniform(low=1 - random_deviation, high=1 + random_deviation, shape=denom_len)
     denominator_weights = F.elemwise_mul(denominator_weights, noise)
+    # expand dimension of denominator_weights
+    denominator_weights = F.expand_dims(denominator_weights, axis=1)
+    # multiply denominator_weights with powers of x
+    prod = F.broadcast_mul(xps_den, denominator_weights)
+    # compute the sum
+    sum_prod = F.sum(prod, axis=0)
+    # compute the absolute value
+    abs_sum_prod = F.abs(sum_prod)
+    # add one to each element
+    ones = F.ones_like(abs_sum_prod)
 
-    # in accordance with the formula (see docstring), a one-vector is added to the sum
-    ones = F.ones_like(x)
-    # multiply denominator weights with xps values calculate absolute value,
-    # then sum them up and add the ones vector
-    denominator = F.elemwise_add(ones, F.abs(F.sum(
-        F.broadcast_mul(xps_den, F.expand_dims(denominator_weights, axis=1)), axis=0)))
+    q = F.elemwise_add(ones, abs_sum_prod)
 
-    return F.elemwise_div(numerator, denominator)
+    # compute p / q
+    result_flat = F.elemwise_div(p, q)
+    # reshape to original shape of x (relevant if multidimensional)
+    return F.reshape_like(result_flat, x)
