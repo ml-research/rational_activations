@@ -165,28 +165,32 @@ def _version_c(F, x, numerator_weights, denominator_weights, training, num_len, 
     :param training: (NOT IN USE) whether the call is in inference mode or training mode
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
-    # get powers of x for numerator weights
-    xps_num = _get_xps_num(F, x, num_len)
+    # COMPUTE P
+    p = _compute_p(F, x, num_len, numerator_weights)
 
-    # multiply numerator weights with xps values, then sum them up
-    numerator = F.sum(
-        F.broadcast_mul(xps_num, F.expand_dims(numerator_weights, axis=1)), axis=0)
+    # COMPUTE Q
+    # get powers of x for denominator weights, flatten (relevant if x is multidimensional)
+    xps_den = F.flatten(_get_xps_num(F, x, denom_len))
+    # expand dimensions of denominator_weights
+    denominator_weights = F.expand_dims(denominator_weights, axis=1)
+    # multiply denominator_weights with powers of x
+    prod = F.broadcast_mul(xps_den, denominator_weights)
+    # compute the sum
+    sum_prod = F.sum(prod, axis=0)
+    # compute the absolute value
+    abs_sum_prod = F.abs(sum_prod)
 
-    # get powers of x for denominator weights
-    xps_den = _get_xps_num(F, x, denom_len)
-
-    # in accordance with the formula (see docstring), an epsilon-vector is added to the sum
-    # here: epsilon = 0.1
-    ones = F.ones_like(x)
+    # add epsilon (here 0.1) to each element
+    ones = F.ones_like(abs_sum_prod)
     factor = F.sum(F.ones(shape=(1, 10)))
     epsilons = F.broadcast_div(ones, factor)
 
-    # multiply denominator weights with xps values calculate absolute value,
-    # then sum them up and add the ones vector
-    denominator = F.elemwise_add(epsilons, F.abs(F.sum(
-        F.broadcast_mul(xps_den, F.expand_dims(denominator_weights, axis=1)), axis=0)))
+    q = F.elemwise_add(epsilons, abs_sum_prod)
 
-    return F.elemwise_div(numerator, denominator)
+    # compute p / q
+    result_flat = F.elemwise_div(p, q)
+    # reshape to original shape of x (relevant if multidimensional)
+    return F.reshape_like(result_flat, x)
 
 
 def _version_d(F, x, numerator_weights, denominator_weights, training, num_len, denom_len,
