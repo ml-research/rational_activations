@@ -1,9 +1,9 @@
 """
-Padé Activation Units - Rational Activation Functions for pytorch
-=================================================================
+Rational Activation Functions for Pytorch
+=========================================
 
-This module allows you to create Rational Neural Networks using Padé Activation
-Units - Learnabe Rational activation functions.
+This module allows you to create Rational Neural Networks using Learnable
+Rational activation functions with Pytorch networks.
 """
 import torch.nn as nn
 from torch.cuda import is_available as torch_cuda_available
@@ -29,7 +29,7 @@ class RecurrentRational():
                 The name of the approximated function for initialisation. \
                 The different initialable functions are available in \
                 `rational.rationals_config.json`. \n
-                Default ``leaky_relu``.
+                Default ``leaky_relu``
             degrees (tuple of int):
                 The degrees of the numerator (P) and denominator (Q).\n
                 Default ``(5, 4)``
@@ -274,6 +274,13 @@ class Rational(nn.Module):
         self.denominator = nn.Parameter(self.denominator.to(self.device))
 
     def to(self, device):
+        """
+        Moves the rational function to its specific device. \n
+
+        Arguments:
+                device (torch device):
+                    The device for the rational
+        """
         if "cpu" in str(device):
             self.cpu()
         elif "cuda" in str(device):

@@ -1,5 +1,9 @@
 """
-This file contains the Rational class, the anchor class of the mxnet package
+Rational Activation Functions for MXNET
+=======================================
+
+This module allows you to create Rational Neural Networks using Learnable
+Rational activation functions with MXNET networks.
 """
 import mxnet as mx
 from mxnet import initializer
