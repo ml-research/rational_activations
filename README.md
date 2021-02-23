@@ -88,7 +88,7 @@ Rational can be integrated in the same way as any other common activation functi
 
 ~~~~
 import torch
-from rational_torch import Rational
+from rational.torch import Rational
 
 model = torch.nn.Sequential(
     torch.nn.Linear(D_in, H),
