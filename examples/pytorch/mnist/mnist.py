@@ -17,6 +17,7 @@ from rational.torch import Rational, RecurrentRational
 from torchvision import datasets, transforms
 from torch.utils.tensorboard import SummaryWriter
 
+
 font = {'family': 'normal',
         'weight': 'bold',
         'size': 22}
@@ -31,7 +32,7 @@ cnt = 0
 actfvs = dict()
 
 
-actfvs["pau"] = Rational
+actfvs["rn"] = Rational
 actfvs["relu"] = nn.ReLU
 
 #_rational = Rational()
@@ -39,7 +40,7 @@ actfvs["relu"] = nn.ReLU
 #    return RecurrentRational(_rational)
 
 
-actfvs["recurrent_pau"] = RecurrentRational()
+actfvs["rrn"] = RecurrentRational()
 
 
 def vgg_block(num_convs, in_channels, num_channels, actv_function):
@@ -132,7 +133,8 @@ def train(args, model, device, train_loader, optimizer, optimizer_activation, pa
     model.train()
     # l1_loss_target = torch.zeros_like(model.actv1.weight_denominator)
     # l2_denominator_crit = nn.L1Loss()
-    running_loss = 0.
+    train_loss = 0.
+    correct = 0
     for batch_idx, (data, target) in enumerate(train_loader):
         # print(cnt)
         # if cnt == 13:
@@ -145,6 +147,8 @@ def train(args, model, device, train_loader, optimizer, optimizer_activation, pa
         output = model(data)
         loss = F.nll_loss(output, target)  # + 10*l2_denominator_crit(model.actv1.weight_denominator, l1_loss_target)
         loss.backward()
+        pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
+        correct += pred.eq(target.view_as(pred)).sum().item()
         clip_grad_norm_(model.parameters(), 5., norm_type=2)
         # clip_grad_value_(params_activation, .5)
         optimizer.step()
@@ -152,12 +156,15 @@ def train(args, model, device, train_loader, optimizer, optimizer_activation, pa
             optimizer_activation.step()
 
         # print statistics
-        running_loss += loss.item()
+        train_loss += loss.item()
         cnt += 1
-        if ((batch_idx + 1) % (args.log_interval)) == 0:
-            losses.append(running_loss / args.log_interval)
 
-            writer.add_scalar('train/loss', loss.item(), cnt)
+    train_loss /= len(train_loader.dataset)
+    train_acc = 100. * correct / len(train_loader.dataset)
+
+    return train_loss, train_acc
+
+            # writer.add_scalar('train/loss', loss.item(), cnt)
 
             # print("Epoch {}, {:d}% \t train_loss: {:.2f} took: {:.2f}s".format(
             #      epoch + 1, int(100 * (i + 1) / n_minibatches), running_loss / print_every,
@@ -166,7 +173,7 @@ def train(args, model, device, train_loader, optimizer, optimizer_activation, pa
             # print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
             #    epoch, batch_idx * len(data), len(train_loader.dataset),
             #           100. * batch_idx / len(train_loader), loss.item()))
-    writer.add_scalar('train/loss_epoch', running_loss / len(train_loader.dataset), epoch)
+    # writer.add_scalar('train/loss_epoch', running_loss / len(train_loader.dataset), epoch)
 
 
 def test(args, model, device, test_loader, epoch):
@@ -183,13 +190,14 @@ def test(args, model, device, test_loader, epoch):
 
     test_loss /= len(test_loader.dataset)
     acc = 100. * correct / len(test_loader.dataset)
-    writer.add_scalar('test/loss', test_loss, epoch)
-    writer.add_scalar('test/accuracy', acc, epoch)
+    # writer.add_scalar('test/loss', test_loss, epoch)
+    # writer.add_scalar('test/accuracy', acc, epoch)
 
-    print('\nTest set: Epoch: {}, Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(epoch, test_loss,
+    print('\nTest set: Epoch: {}, Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)'.format(epoch, test_loss,
                                                                                             correct,
                                                                                             len(test_loader.dataset),
                                                                                             acc))
+    return test_loss, acc
 
 
 def init_weights(m):
@@ -213,8 +221,8 @@ def main():
                         help='SGD momentum (default: 0.5)')
     parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='disables CUDA training')
-    parser.add_argument('--seed', type=int, default=17, metavar='S',
-                        help='random seed (default: 1)')
+    parser.add_argument('--seed', type=int, metavar='S',
+                        help='random seed')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
     parser.add_argument('--dataset', type=str, default='mnist',
@@ -226,6 +234,11 @@ def main():
     parser.add_argument('--init', type=str, default="", choices=["", "xavier", "he"])
 
     args = parser.parse_args()
+    scores = {}
+    scores["train_loss"] = []
+    scores["test_loss"] = []
+    scores["train_acc"] = []
+    scores["test_acc"] = []
 
     networks = dict({
         "vgg": VGG,
@@ -237,17 +250,18 @@ def main():
     global writer
     global cnt
     for activation_function_key in actfvs.keys():
-        print("---" * 42)
+        print("---" * 25)
         print("Starting with dataset: {}, activation function: {}".format(args.dataset, activation_function_key))
-        print("---" * 42)
+        print("---" * 25)
         # writer = SummaryWriter(comment=activation_function_key)
-        save_path = 'examples/runs/mnist/paper_{}_{}_{}_init_{}_seed{}/'.format(args.dataset, args.arch, args.optimizer, args.init,
+        save_path = 'examples/runs/mnist/paper_{}_{}_{}{}_seed{}/'.format(args.dataset, args.arch, args.optimizer,
+                                                                          "_init_{}".format(args.init) if args.init != "" else "",
                                                              args.seed) + activation_function_key
-        writer = SummaryWriter(save_path)
-
-        writer.add_scalar('configuration/batch size', args.batch_size)
-        writer.add_scalar('configuration/learning rate', args.lr)
-        writer.add_scalar('configuration/seed', args.seed)
+        # writer = SummaryWriter(save_path)
+        #
+        # writer.add_scalar('configuration/batch size', args.batch_size)
+        # writer.add_scalar('configuration/learning rate', args.lr)
+        # writer.add_scalar('configuration/seed', args.seed)
 
         cnt = 0
 
@@ -343,23 +357,33 @@ def main():
 
         losses = []
 
-        test(args, model, device, test_loader, 0)
+        # test(args, model, device, test_loader, 0)
         for epoch in range(1, args.epochs + 1):
-            if args.save_model:
-                torch.save(model.state_dict(), os.path.join(save_path, "model_{}.pt".format(epoch)))
+            # if args.save_model:
+            #     torch.save(model.state_dict(), os.path.join(save_path, "model_{}.pt".format(epoch)))
 
-            train(args, model, device, train_loader, optimizer, optimizer_activation, None, epoch, losses)
-            test(args, model, device, test_loader, epoch)
+            train_loss, train_acc = train(args, model, device, train_loader, optimizer, optimizer_activation, None, epoch, losses)
+            test_loss, test_acc = test(args, model, device, test_loader, epoch)
+            scores["train_loss"].append(train_loss)
+            scores["train_acc"].append(train_acc)
+            scores["test_loss"].append(test_loss)
+            scores["test_acc"].append(test_acc)
+            # if epoch % 10 == 0:
+            #     import ipdb; ipdb.set_trace()
 
             for current_scheduler in schedulers:
                 current_scheduler.step()
 
 
 
-        writer.close()
+        # writer.close()
+        import pickle
+        pickle.dump(scores, open(f"scores/scores_{args.arch}_{activation_function_key}_{args.seed}.pkl", "wb"))
 
         if args.save_model:
-            torch.save(model.state_dict(), os.path.join(save_path, "model_final.pt"))
+            os.makedirs(save_path, exist_ok=True)
+            torch.save(model.state_dict(), os.path.join(save_path, f"model_final_{args.arch}_{activation_function_key}_{args.seed}.pt"))
+            print(f"Saved in {save_path}")
 
 
 if __name__ == '__main__':

@@ -1,7 +1,6 @@
-numpy~=1.19.5
+numpy
 scipy
-matplotlib~=3.3.3
+matplotlib
 torch>=1.5.0
-tensorflow>=2.0.0
-mxnet>=1.7.0.post1
-setuptools>=51.3.3
+# tensorflow>=2.0.0
+
