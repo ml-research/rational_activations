@@ -1,3 +1,10 @@
+"""
+Rational Activation Functions for MXNET
+=======================================
+
+This module allows you to create Rational Neural Networks using Learnable
+Rational activation functions with MXNET networks.
+"""
 from rational.utils.get_weights import get_parameters
 from mxnet.gluon.block import HybridBlock
 from mxnet import initializer, cpu, gpu

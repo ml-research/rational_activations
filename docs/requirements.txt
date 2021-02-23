@@ -7,5 +7,3 @@ sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.4
 numpy
 rational_activations
-tensorflow
-mxnet
