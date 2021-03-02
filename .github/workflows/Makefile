@@ -17,7 +17,7 @@ docker-test-run-zsh:
 	PATH=/usr/local/cuda-$(CUDA)/bin:$$PATH && nvcc --version && \
      CUDA_HOME=/usr/local/cuda-$(CUDA)/ && echo CUDA_HOME: $$CUDA_HOME && \
      cd $(REPO_ROOT) && \
-	 python setup.py develop --user && \
-	 python -m pytest
+	 python$(Python) setup.py develop --user && \
+	 python$(Python) -m pytest
 
 
