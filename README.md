@@ -122,9 +122,8 @@ model = torch.nn.Sequential(
 ## 5. To be implemented
 - [X] Make a documentation
 - [X] Create tutorial in the doc
-- [ ] Tensorflow working version
-- [ ] Automatically find initial approx weights for function list
-- [ ] Repair + enhance Automatic manylinux production script.
+- [X] Tensorflow working version
+- [X] Repair + enhance Automatic manylinux production script.
 - [ ] Add python3.9 support
-- [ ] Make an CUDA 11.0 compatible version
-- [ ] Repair the tox test and have them checking before commit
+- [X] Make an CUDA 11.0 compatible version
+- [X] Repair the tox test and have them checking before commit
