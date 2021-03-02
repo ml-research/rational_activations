@@ -8,7 +8,7 @@ REPO_ROOT = ../../
 
 
 .PHONY: docker-test-run-zsh
-docker-test-run-zsh: export PATH = /usr/local/cuda/cuda-$(CUDA)/bin:$PATH
+docker-test-run-zsh:
 	docker run -i --gpus device=all --rm --name rat_manylinux_$(CUDA)_$(Python) rational_manylinux
 	python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
 	python -c "import sys; print('Python version:', sys.version)"
@@ -19,7 +19,8 @@ docker-test-run-zsh: export PATH = /usr/local/cuda/cuda-$(CUDA)/bin:$PATH
 	ls /usr/local/
 	cd /usr/local/cuda/ && ls -l && ls
 	nvidia-smi
-	cd $(REPO_ROOT) && \
+	PATH = /usr/local/cuda/cuda-$(CUDA)/bin:$PATH && nvcc --version && \
+	 cd $(REPO_ROOT) && \
 	 python setup.py develop --user && \
 	 python -m pytest
 
