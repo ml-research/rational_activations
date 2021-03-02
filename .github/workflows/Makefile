@@ -16,8 +16,8 @@ docker-test-run-zsh:
 	nvcc --version
 	echo CUDA_HOME: $$CUDA_HOME
 	echo PATH: $$PATH
-	ls /usr/local/
-	cd /usr/local/cuda/ && ls -l && ls
+	cd /usr/local/ && ls -l
+	cd /usr/local/cuda/ && ls -l
 	nvidia-smi
 	PATH=/usr/local/cuda/cuda-$(CUDA)/bin:$$PATH && nvcc --version && \
 	 cd $(REPO_ROOT) && \
