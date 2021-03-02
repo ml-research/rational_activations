@@ -19,7 +19,7 @@ docker-test-run-zsh:
 	ls /usr/local/
 	cd /usr/local/cuda/ && ls -l && ls
 	nvidia-smi
-	PATH = /usr/local/cuda/cuda-$(CUDA)/bin:$PATH && nvcc --version && \
+	PATH=/usr/local/cuda/cuda-$(CUDA)/bin:$$PATH && nvcc --version && \
 	 cd $(REPO_ROOT) && \
 	 python setup.py develop --user && \
 	 python -m pytest
