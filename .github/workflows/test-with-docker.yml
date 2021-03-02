@@ -2,7 +2,7 @@
 name: Python test
 on:
   push:
-    branches: [ master ]
+    branches: [ ci-cd ]
 jobs:
   gpu_checks:
     name: Tests (Cuda, Python) =
