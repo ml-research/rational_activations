@@ -54,20 +54,40 @@ For **your** corresponding version of CUDA, please use one of the following comm
 ##### Python3.6
 
        pip3 install -U pip wheel
-       pip3 install torch==1.7.1+cu101
-       pip3 install https://iron.aiml.informatik.tu-darmstadt.de/wheelhouse/cuda-10.1/rational_activations-0.0.19-cp36-cp36m-manylinux2014_x86_64.whl
+       pip3 install torch==1.7.1+cu101 -f https://download.pytorch.org/whl/torch_stable.html
+       pip3 install https://github.com/ml-research/rational_activations/blob/master/wheelhouse/cuda-10.1/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl\?raw\=true 
 
 ##### Python3.7
 
        pip3 install -U pip wheel
-       pip3 install torch==1.7.1+cu101
-       pip3 install https://iron.aiml.informatik.tu-darmstadt.de/wheelhouse/cuda-10.1/rational_activations-0.0.19-cp37-cp37m-manylinux2014_x86_64.whl
+       pip3 install torch==1.7.1+cu101 -f https://download.pytorch.org/whl/torch_stable.html
+       pip3 install https://github.com/ml-research/rational_activations/blob/master/wheelhouse/cuda-10.1/rational_activations-0.1.0-cp37-cp37m-manylinux2014_x86_64.whl\?raw\=true 
 
 ##### Python3.8
 
          pip3 install -U pip wheel
-         pip3 install torch==1.7.1+cu101
-         pip3 install https://iron.aiml.informatik.tu-darmstadt.de/wheelhouse/cuda-10.1/rational_activations-0.0.19-cp38-cp38-manylinux2014_x86_64.whl
+         pip3 install torch==1.7.1+cu101 -f https://download.pytorch.org/whl/torch_stable.html
+         pip3 install https://github.com/ml-research/rational_activations/blob/master/wheelhouse/cuda-10.1/rational_activations-0.1.0-cp38-cp38-manylinux2014_x86_64.whl\?raw\=true
+         
+         
+#### CUDA 11.0
+##### Python3.6
+
+       pip3 install -U pip wheel
+       pip3 install torch==1.7.1+cu110 -f https://download.pytorch.org/whl/torch_stable.html
+       pip3 install https://github.com/ml-research/rational_activations/blob/master/wheelhouse/cuda-11.0/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl\?raw\=true 
+
+##### Python3.7
+
+       pip3 install -U pip wheel
+       pip3 install torch==1.7.1+cu110 -f https://download.pytorch.org/whl/torch_stable.html
+       pip3 install https://github.com/ml-research/rational_activations/blob/master/wheelhouse/cuda-11.0/rational_activations-0.1.0-cp37-cp37m-manylinux2014_x86_64.whl\?raw\=true
+
+##### Python3.8
+
+         pip3 install -U pip wheel
+         pip3 install torch==1.7.1+cu110 -f https://download.pytorch.org/whl/torch_stable.html
+         pip3 install https://github.com/ml-research/rational_activations/blob/master/wheelhouse/cuda-11.0/rational_activations-0.1.0-cp38-cp38-manylinux2014_x86_64.whl\?raw\=true
 
 
 #### Other CUDA/Pytorch</h3>
@@ -88,7 +108,7 @@ Rational can be integrated in the same way as any other common activation functi
 
 ~~~~
 import torch
-from rational_torch import Rational
+from rational.torch import Rational
 
 model = torch.nn.Sequential(
     torch.nn.Linear(D_in, H),
