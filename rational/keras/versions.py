@@ -31,14 +31,14 @@ def _version_a(in_tensor, numerator_weights, denominator_weights, training):
     version a of rational activation function
 
     f(x) = p(x) / q(x) = (a_0 + a_1 * x + a_2 * x^2 + ... + a_n * x^n) /
-                (1 + |b_1 * x| + | b_2 * x^2| + ... + | b_m * x^m|)
+                (1 + |b_0 * x| + | b_1 * x^2| + ... + | b_m * x^{m+1}|)
 
     note: q(x) contains m absolute value terms here
 
     :param in_tensor: input tensor
     :param numerator_weights: vector containing the weights a_0, ... a_n
     :param denominator_weights: vector containing the weights b_0, ... b_m
-    :param training: whether the call is in inference mode or training mode
+    :param training: (NOT IN USE) whether the call is in inference mode or training mode
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
 
@@ -62,14 +62,14 @@ def _version_b(in_tensor, numerator_weights, denominator_weights, training):
     version b of rational activation function
 
     f(x) = p(x) / q(x) = (a_0 + a_1 * x + a_2 * x^2 + ... + a_n * x^n) /
-                (1 + |b_1 * x + b_2 * x^2 + ... + b_m * x^m|)
+                (1 + |b_0 * x + b_1 * x^2 + ... + b_m * x^{m + 1}|)
 
     note: q(x) contains only one absolute value term here
 
     :param in_tensor: input tensor
     :param numerator_weights: vector containing the weights a_0, ... a_n
     :param denominator_weights: vector containing the weights b_0, ... b_m
-    :param training: whether the call is in inference mode or training mode
+    :param training: (NOT IN USE) whether the call is in inference mode or training mode
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
 
@@ -93,14 +93,14 @@ def _version_c(in_tensor, numerator_weights, denominator_weights, training):
     version c of rational activation function
 
     f(x) = p(x) / q(x) = (a_0 + a_1 * x + a_2 * x^2 + ... + a_n * x^n) /
-                (epsilon + |b_0 + b_1 * x + b_2 * x^2 + ... + b_m * x^m|)
+                (0.1 + |b_0 + b_1 * x + b_2 * x^2 + ... + b_m * x^m|)
 
     note: q(x) contains a variable term (epsilon) here, and also a b_0 term
 
     :param in_tensor: input tensor
     :param numerator_weights: vector containing the weights a_0, ... a_n
     :param denominator_weights: vector containing the weights b_0, ... b_m
-    :param training: whether the call is in inference mode or training mode
+    :param training: (NOT IN USE) whether the call is in inference mode or training mode
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
     """
 
@@ -125,7 +125,7 @@ def _version_d(in_tensor, numerator_weights, denominator_weights, training, rand
 
     f(x) = p(x) / q(x) =
     (noised(a_0) + noised(a_1) * x + noised(a_2) * x^2 + ... + noised(a_n) * x^n) /
-                (1 + |noised(b_1) * x + noised(b_2) * x^2 + ... + noised(b_m) * X^m|)
+                (1 + |noised(b_0) * x + noised(b_1) * x^2 + ... + noised(b_m) * X^{m+1}|)
 
     Noised parameters have uniform noise to be in range
     [(1-random_deviation)*parameter,(1+random_deviation)*parameter].
@@ -133,7 +133,7 @@ def _version_d(in_tensor, numerator_weights, denominator_weights, training, rand
     :param in_tensor: input tensor
     :param numerator_weights: vector containing the weights a_0, ... a_n
     :param denominator_weights: vector containing the weights b_0, ... b_m
-    :param training: whether the call is in inference mode or training mode
+    :param training: (NOT IN USE) whether the call is in inference mode or training mode
     :param random_deviation: random deviation
     :return: f(x), i.e. the input tensor with the rational activation function applied to it
 
@@ -165,6 +165,6 @@ def _version_d(in_tensor, numerator_weights, denominator_weights, training, rand
         noise = tf.random.uniform(shape=input_shape, minval=1 - random_deviation,
                                   maxval=1+random_deviation, dtype=tf.dtypes.float32)
         w_d_noised = denominator_weights[j] * noise
-        denominator = denominator + w_d_noised * xps[j]
+        denominator = denominator + w_d_noised * xps[j + 1]
 
     return numerator / (1 + tf.abs(denominator))

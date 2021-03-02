@@ -33,6 +33,16 @@ do
   CUDA_V=${CUDA_list[$j]}
   CUDA_LIB="/usr/local/$CUDA_V/lib64/"
   export CUDA_HOME="/usr/local/$CUDA_V"
+  CUDA_P="/usr/local/cuda"
+  if [[ -L "$CUDA_P" ]]
+  then
+     echo "$CUDA_P is a symlink to a directory, changing it to correspond to $CUDA_V"
+     rm -f $CUDA_P
+  else
+     echo "Could not create symlink for $CUDA_HOME -> $CUDA_P"
+  fi
+  ln -s $CUDA_HOME $CUDA_P
+
 
   printf "Checking if python versions are correctly accessible and path to torch lib packages\n"
   for i in 0 1 2

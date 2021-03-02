@@ -1,75 +1,97 @@
+"""
+Rational Activation Functions for MXNET
+=======================================
+
+This module allows you to create Rational Neural Networks using Learnable
+Rational activation functions with MXNET networks.
+"""
+import mxnet as mx
+from mxnet import initializer
+from mxnet.gluon import HybridBlock
+
 from rational.utils.get_weights import get_parameters
-from mxnet.gluon.block import HybridBlock
-from mxnet import initializer, cpu, gpu
-from rational.mxnet.rational_mxnet_functions import Rational_MXNET_A_F, Rational_MXNET_B_F, Rational_MXNET_C_F, Rational_MXNET_D_F
+from rational.mxnet.versions import _version_a, _version_b, _version_c, _version_d
 
 
 class Rational(HybridBlock):
     """
-    Rational activation function inherited from mxnet.gluon ``HybridBlock``
-
-    Arguments:
-            approx_func (str):
-                The name of the approximated function for initialisation. \
-                The different initialable functions are available in \
-                `rational.rationals_config.json`. \n
-                Default ``leaky_relu``.
-            degrees (tuple of int):
-                The degrees of the numerator (P) and denominator (Q).\n
-                Default ``(5, 4)``
-            cuda (bool):
-                Use GPU version. \n
-                If ``None``, use cuda if available on the machine\n
-                Default ``None``
-            version (str):
-                Version of Rational to use. Rational(x) = P(x)/Q(x)\n
-                `A`: Q(x) = 1 + \|b_1.x\| + \|b_2.x\| + ... + \|b_n.x\|\n
-                `B`: Q(x) = 1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
-                `C`: Q(x) = 0.1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
-                `D`: like `B` with noise\n
-                Default ``A``
-            trainable (bool):
-                If the weights are trainable, i.e, if they are updated during \
-                backward pass\n
-                Default ``True``
-    Returns:
-        Module: Rational module
+    This class implements rational activation functions for MxNet, inheriting from
+    mxnet.gluon.HybridBlock.
     """
-    def __init__(self, approx_func='leaky_relu', degrees=(5, 4), cuda=False,
-                 version="A", trainable=True, train_numerator=True,
-                 train_denominator=True):
-        super(Rational, self).__init__()
-        w_numerator, w_denominator = get_parameters(version, degrees, approx_func)
-        self.device = gpu() if cuda else cpu()
 
+    def __init__(self, approx_func='leaky_relu', degrees=(5, 4), cuda=False,
+                 version='A', trainable=True, train_numerator=True,
+                 train_denominator=True, **kwargs):
+        """
+        Initializes this custom HybridBlock, which implements a Rational Activation Function.
+        Sets the initial configuration of weights, according to the specified version and
+        approximated function, makes the weights trainable or not, specifies on which device
+        to execute (cpu or gpu) etc.
+        :param approx_func: The name of the approximated function for initialisation.
+        The different functions are available in `rational.rationals_config.json`.
+        Default ``leaky_relu``.
+        :param degrees: The degrees of the numerator (P) and denominator (Q).
+        Default ``(5, 4)``
+        :param cuda: whether to execute on cuda device. NOTE: THIS PARAMETER IS CURRENTLY NOT
+        CONSIDERED
+        :param version: Version of Rational to use. Rational(x) = P(x)/Q(x)
+        `A`: Q(x) = 1 + |b_1.x| + |b_2.x| + ... + |b_n.x|
+        `B`: Q(x) = 1 + |b_1.x + b_2.x + ... + b_n.x|
+        `C`: Q(x) = 0.1 + |b_1.x + b_2.x + ... + b_n.x|
+        `D`: like `B` with noise
+        Default ``A``
+        :param trainable: If the weights are trainable, i.e, if they are updated during
+        backward pass.
+        Default ``True``
+        :param train_numerator: whether numerator coefficients are trainable
+        :param train_denominator: whether denominator coefficients are trainable
+        """
+        super(Rational, self).__init__(**kwargs)
+
+        # read initial parameter configuration from external files
+        w_numerator, w_denominator = get_parameters(
+            version, degrees, approx_func)
+
+        # convert w_numerator and w_denominator to mxnet arrays
+        w_numerator = mx.nd.array(w_numerator)
+        w_denominator = mx.nd.array(w_denominator)
+
+        # register the amount of weights in numerator and denominator, since we need them during
+        # symbolic execution, but are unable to retrieve them at later stages
+        self.numerator_length = len(w_numerator)
+        self.denominator_length = len(w_denominator)
+
+        # set specified context (currently not happening, since unclear, how and why helpful)
+        # self.device = gpu() if cuda else cpu()
+
+        # register and configure weights (numerator and denominator coefficients)
         with self.name_scope():
             self.numerator = self.params.get(name='w_numerator', shape=(len(w_numerator),),
-                                             init=initializer.Constant(w_numerator),
-                                             grad_req='write' if train_numerator and trainable else 'null')
+                                             init=initializer.Constant(
+                                                 w_numerator),
+                                             grad_req='write' if train_numerator and trainable
+                                             else 'null',
+                                             differentiable=train_numerator and trainable)
             self.denominator = self.params.get(name='w_denominator', shape=(len(w_denominator),),
-                                               init=initializer.Constant(w_denominator),
-                                               grad_req='write' if train_denominator and trainable else 'null')
+                                               init=initializer.Constant(
+                                                   w_denominator),
+                                               grad_req='write' if train_denominator and trainable
+                                               else 'null',
+                                               differentiable=train_denominator and trainable)
 
-        self.degrees = degrees
-        self.version = version
+        # register whether function is trainable, since this information needs to be passed to
+        # version D
         self.training = trainable
 
         self.init_approximation = approx_func
 
-        if version == "A":
-            rational_func = Rational_MXNET_A_F
-        elif version == "B":
-            rational_func = Rational_MXNET_B_F
-        elif version == "C":
-            rational_func = Rational_MXNET_C_F
-        elif version == "D":
-            rational_func = Rational_MXNET_D_F
-        else:
-            raise ValueError("version %s not implemented" % version)
+        # set rational activation function version
+        self.rational_func = {'A': _version_a, 'B': _version_b, 'C': _version_c, 'D': _version_d} \
+            .get(version)
+        if self.rational_func is None:
+            raise ValueError(
+                "rational activation function version %s not implemented" % version)
 
-        self.activation_function = rational_func
-
-    def hybrid_forward(self, F, x, *args, **kwargs):
-        out = self.activation_function(x, self.numerator.data(self.device),
-                                       self.denominator.data(self.device), self.training)
-        return out
+    def hybrid_forward(self, F, x, numerator, denominator):
+        return self.rational_func(F, x, numerator, denominator, self.training,
+                                  self.numerator_length, self.denominator_length)

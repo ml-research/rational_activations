@@ -15,8 +15,8 @@ src/dist
 dist
 .tox
 .ipynb_checkpoints
-*.pyc
+venv
+.pytest_cache
 .coverage
 .eggs/
 examples/pytorch/data/
-wheelhouse/

@@ -84,6 +84,26 @@ def fit_rational_to_base_function(rational_func, ref_func, x, degrees=(5, 4), ve
 
 
 def find_closest_equivalent(rational_func, new_func, x):
+    """
+    Compute the parameters a, b, c, and d that minimizes distance between the
+    rational function and the other function on the range `x`
+
+    Arguments:
+            rational_func (callable):
+                The rational function to consider.\n
+            new_func (callable):
+                The function you want to fit to rational.\n
+            x (array):
+                The range on which the curves of the functions are fitted
+                together.\n
+                Default ``True``
+    Returns:
+        tuple: ((a, b, c, d), dist) with: \n
+        a, b, c, d: the parameters to adjust the function \
+            (vertical and horizontal scales and bias) \n
+        dist: The final distance between the rational function and the \
+        fitted one
+    """
     initials = np.array([1., 0., 1., 0.]) # a, b, c, d
     y = rational_func(x)
     from scipy.optimize import curve_fit
