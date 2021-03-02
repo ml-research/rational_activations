@@ -1,3 +1,4 @@
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/recurrent-rational-networks/atari-games-on-atari-2600-tennis)](https://paperswithcode.com/sota/atari-games-on-atari-2600-tennis?p=recurrent-rational-networks)
 ![Logo](./images/rationals_logo_colored.png)
 # Rational Activations - Learnable Rational Activation Functions
 First introduce as PAU in Padé Activation Units: End-to-end Learning of Activation Functions in Deep Neural Network.
