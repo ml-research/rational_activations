@@ -9,28 +9,31 @@ import copy
 activations = {nn.ReLU: 'relu', nn.LeakyReLU: 'leaky_relu', nn.Tanh: 'tanh', nn.Sigmoid: 'sigmoid', nn.GELU: 'gelu', nn.Hardswish: 'swish'}
 
 
-def convert_pytorch_model_to_rational(model, rational_version='A', rational_cuda=False):
+def convert_pytorch_model_to_rational(model, rational_version='A', rational_cuda=False, approx_func=None):
     m = copy.deepcopy(model)
     for n_l, l in m.named_children():
-        is_activation = _convert_pytorch_model_to_rational(l, rational_version, rational_cuda)
+        is_activation = _convert_pytorch_model_to_rational(l, rational_version, rational_cuda, approx_func)
         if is_activation:
-            m._modules[n_l] = _convert_pytorch_layer(l, version=rational_version, cuda=rational_cuda)
+            m._modules[n_l] = _convert_pytorch_layer(l, version=rational_version, cuda=rational_cuda, approx_func=approx_func)
     return m
 
 
-def _convert_pytorch_model_to_rational(m, version, cuda):
+def _convert_pytorch_model_to_rational(m, version, cuda, approx_func):
     for n_c, c in m.named_children():
-        is_activation = _convert_pytorch_model_to_rational(c, version, cuda)
+        is_activation = _convert_pytorch_model_to_rational(c, version, cuda, approx_func)
         if is_activation:
-            m._modules[n_c] = _convert_pytorch_layer(c, version=version, cuda=cuda)
+            m._modules[n_c] = _convert_pytorch_layer(c, version=version, cuda=cuda, approx_func=approx_func)
     return isinstance(m, tuple(activations.keys()))
 
 
-def _convert_pytorch_layer(layer, version, cuda):
-    for activation in activations:
-        if isinstance(layer, activation):
-            return RationalPyTorch(version=version, approx_func=activations[activation], cuda=cuda)
-    raise ValueError("activation function not supported")
+def _convert_pytorch_layer(layer, version, cuda, approx_func):
+    if approx_func in activations.values():
+          return RationalPyTorch(version=version, approx_func=approx_func, cuda=cuda)
+    else:
+        for activation in activations:
+            if isinstance(layer, activation):
+                return RationalPyTorch(version=version, approx_func=activations[activation], cuda=cuda)
+        raise ValueError('activation function not supported')
 
 
 def replace_pytorch_activation_functions(model, new_activation_layer):

@@ -16,59 +16,51 @@ def plot(data, title, figsize=(10, 4), ylim=(0, 1), legend=True):
     plt.show()
 
 
-def plot_grid(data, acc_ylim=(0.95, 1), loss_ylim=(0, 0.1), legend=True, size=(14, 8)):
-    x = range(len(data['relu']['accuracy']))
+def plot_grid(data, train_acc_ylim=(0.95, 1.01), train_loss_ylim=(-0.05, 0.1), valid_acc_ylim=(0.95, 1.01),
+              valid_loss_ylim=(-0.05, 0.1), legend=True, size=(14, 8), linewidth=2, title='Training and Validation Metrics'):
     fig = plt.figure(figsize=size)
     gs = fig.add_gridspec(2, 2, hspace=0.08, wspace=0.03)
-    axs = gs.subplots(sharex='col', sharey='row')
+    axs = gs.subplots(sharex='col')
     (ax1, ax2), (ax3, ax4) = axs
     ax11, ax22 = axs
-    fig.suptitle('Training and Validation Metrics')
+    fig.suptitle(title)
 
-    if 'rational' in data:
-        ax1.plot(x, data['rational']['accuracy'], label='rational')
-        ax2.plot(x, data['rational']['val_accuracy'], label='rational')
-        ax3.plot(x, data['rational']['loss'], label='rational')
-        ax4.plot(x, data['rational']['val_loss'], label='rational')
-
-    if 'relu' in data:
-        ax1.plot(x, data['relu']['accuracy'], label='relu')
-        ax2.plot(x, data['relu']['val_accuracy'], label='relu')
-        ax3.plot(x, data['relu']['loss'], label='relu')
-        ax4.plot(x, data['relu']['val_loss'], label='relu')
-
-    if 'mish' in data:
-        ax1.plot(x, data['mish']['accuracy'], label='mish')
-        ax2.plot(x, data['mish']['val_accuracy'], label='mish')
-        ax3.plot(x, data['mish']['loss'], label='mish')
-        ax4.plot(x, data['mish']['val_loss'], label='mish')
+    for key in data:
+        ax1.plot(range(len(data[key]['accuracy'])), data[key]['accuracy'], label=key, linewidth=linewidth)
+        #ax2.plot(range(len(data[key]['val_accuracy'])), data[key]['val_accuracy'], label=key, linewidth=linewidth)
+        ax3.plot(range(len(data[key]['loss'])), data[key]['loss'], label=key, linewidth=linewidth)
+        #ax4.plot(range(len(data[key]['val_loss'])), data[key]['val_loss'], label=key, linewidth=linewidth)
+        
+        ax2.plot(range(len(data[key]['test_accuracy'])), data[key]['test_accuracy'], label=key, linewidth=linewidth)
+        ax4.plot(range(len(data[key]['test_loss'])), data[key]['test_loss'], label=key, linewidth=linewidth)
 
     ax1.set_ylabel('Accuracy')
-    ax1.set_ylim(acc_ylim)
-    ax2.set_ylim(acc_ylim)
+    ax1.set_ylim(train_acc_ylim)
+    ax2.yaxis.tick_right()
+    ax2.set_ylim(valid_acc_ylim)
     ax3.set_xlabel('Training')
     ax3.set_ylabel('Loss')
-    ax3.set_ylim(loss_ylim)
-    ax4.set_xlabel('Validation')
-    ax4.set_ylim(loss_ylim)
+    ax3.set_ylim(train_loss_ylim)
+    ax4.set_xlabel('Test')
+    ax4.set_ylim(valid_loss_ylim)
+    ax4.yaxis.tick_right()
     
-    for ax in axs.flat:
-        ax.label_outer()
-    plt.legend()
+    #for ax in axs.flat:
+    #    ax.label_outer()
+    if legend:
+        plt.legend()
     plt.show()
 
 
-def plot_rational_functions(model, include_custom_func=None):
+def plot_rational_functions(model, input_range=None, include_custom_func=None):
     rationals = _collect_rational_functions(model, rationals=[])
     plots = []
     for act in rationals:
-        fig = act.show(display=False, input_range=None)
-        if include_custom_func is not None:
+        fig = act.show(display=False, input_range=input_range)
+        if include_custom_func is not None and input_range is not None:
                 axes = fig.axes[0]
-                ylim = axes.get_ylim()
-                input_range = np.arange(ylim[0], ylim[1], 1)
-                points = include_custom_func(torch.tensor(input_range).float()).numpy()
-                axes.plot(input_range, points, color='red')
+                points = include_custom_func(input_range.cpu()).numpy()
+                axes.plot(input_range.cpu().numpy(), points, color='red')
         plt.show()
 
 
