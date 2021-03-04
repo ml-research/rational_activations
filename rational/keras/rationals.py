@@ -14,33 +14,43 @@ from rational.utils.get_weights import get_parameters
 
 class Rational(Layer):
     """
-    Inherited from tensorflow.keras.layers.Layer
-
-    Defines custom layer attributes, and creates layer state variables that do not depend on
-    input shapes, using ``add_weight()``
+    Rational Activation Functions, inheriting from ``tensorflow.keras.layers.Layer``.
 
     Arguments:
             approx_func (str):
-                The name of the approximated function for initialisation. \
-                The different functions are available in `rational.rationals_config.json`. \n
-                Default ``leaky_relu``
+                The name of the approximated function for initialisation.
+                The different functions are available in `rational.rationals_config.json`.
+                Default: ``leaky_relu``
+
             degrees (tuple of int):
-                The degrees of the numerator (P) and denominator (Q).\n
+                The degrees of the numerator (P) and denominator (Q).
                 Default ``(5, 4)``
+
             cuda (bool):
-                whether to execute on cuda device. NOTE: CURRENTLY NOT USED, i.e. \
-                function always executes on cuda device if available.
+                whether to execute on cuda device.
+                NOTE: THIS PARAMETER IS CURRENTLY NOT CONSIDERED.
+                CUDA GPUS ARE USED WHEN IT IS POSSIBLE
+
             version (str):
-                Version of Rational to use. Rational(x) = P(x)/Q(x)\n
-                `A`: Q(x) = 1 + \|b_1.x\| + \|b_2.x\| + ... + \|b_n.x\|\n
-                `B`: Q(x) = 1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
-                `C`: Q(x) = 0.1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
-                `D`: like `B` with noise\n
+                Version of Rational to use. Rational(x) = P(x)/Q(x),
+                where
+                P(x) = (a_0 + a_1 * x + a_2 * x^2 + ... + a_n * x^n) and
+
+                `A`: Q(x) = (1 + |b_0 * x| + | b_1 * x^2| + ... + | b_m * x^{m+1}|)
+                `B`: Q(x) = (1 + |b_0 * x + b_1 * x^2 + ... + b_m * x^{m + 1}|)
+                `C`: Q(x) = (0.1 + |b_0 + b_1 * x + b_2 * x^2 + ... + b_m * x^m|)
+                `D`: like `B` with noised coefficients b_i
+
                 Default ``A``
+
             trainable (bool):
-                If the weights are trainable, i.e, if they are updated during \
-                backward pass. \n
+                Whether the weights are trainable, i.e, if they are updated during
+                backward pass.
                 Default ``True``
+
+    Returns:
+        Layer:
+            Rational layer
     """
     def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=False, version="A",
                  trainable=True):
@@ -69,7 +79,7 @@ class Rational(Layer):
 
     def build(self, input_shape):
         """
-        Inherited from tensorflow.keras.layers.Layer
+        Inherited from ``tensorflow.keras.layers.Layer``
 
         This method can be used to create weights that depend on the shape(s) of the input(s),
         using ``add_weight()``. ``__call__()`` will automatically build the layer (if it has not
@@ -77,14 +87,14 @@ class Rational(Layer):
 
         Arguments:
             input_shape (TensorShape):
-                or list of instances of `TensorShape` if
+                one or a list of instances of `TensorShape` if
                 the layer expects a list of inputs (one instance per input).
         """
         super(Rational, self).build(input_shape)
 
     def call(self, inputs, **kwargs):
         """
-        Inherited from tensorflow.keras.layers.Layer
+        Inherited from ``tensorflow.keras.layers.Layer``
 
         Called in ``__call__`` after making sure ``build()`` has been called. ``call()`` performs
         the logic of applying the layer to the input tensors (which should be passed in as
@@ -97,6 +107,6 @@ class Rational(Layer):
                 inputs:
                     Input tensorflow tensor
         Returns:
-                output tensor, with the respective rational activation function applied to it
+                output tensor, with the Rational Activation Function applied to it
         """
         return self.rational_func(inputs, self.numerator, self.denominator, self.training)
