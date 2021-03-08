@@ -74,7 +74,7 @@ def train_pytorch_model(model, train_loader, test_loader, device=0, epochs=40, v
             print(f'[Epoch {epoch + 1:3d}] Model runtime: {time.time() - start:6.3f}s')
         
     return {'accuracy':train_acc, 'loss':train_loss,
-            'val_accuracy':test_acc, 'val_loss':test_loss}
+            'test_accuracy':test_acc, 'test_loss':test_loss}
 
 
 def prepare_data_pytorch(batch_size):
