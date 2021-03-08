@@ -78,4 +78,4 @@ def train_model_mxnet(model, train_data, test_data, device, epochs=40, vis_mod=1
             print(f'Model runtime: {time.time() - start:6.3f}s')
     
     return {'accuracy':train_acc, 'loss':train_loss,
-            'val_accuracy':test_acc, 'val_loss':test_loss}
+            'test_accuracy':test_acc, 'test_loss':test_loss}
