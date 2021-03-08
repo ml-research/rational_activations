@@ -27,12 +27,12 @@ def plot_grid(data, train_acc_ylim=(0.95, 1.01), train_loss_ylim=(-0.05, 0.1), v
 
     for key in data:
         ax1.plot(range(len(data[key]['accuracy'])), data[key]['accuracy'], label=key, linewidth=linewidth)
-        ax2.plot(range(len(data[key]['val_accuracy'])), data[key]['val_accuracy'], label=key, linewidth=linewidth)
+        #ax2.plot(range(len(data[key]['val_accuracy'])), data[key]['val_accuracy'], label=key, linewidth=linewidth)
         ax3.plot(range(len(data[key]['loss'])), data[key]['loss'], label=key, linewidth=linewidth)
-        ax4.plot(range(len(data[key]['val_loss'])), data[key]['val_loss'], label=key, linewidth=linewidth)
+        #ax4.plot(range(len(data[key]['val_loss'])), data[key]['val_loss'], label=key, linewidth=linewidth)
         
-        #ax2.plot(range(len(data[key]['test_accuracy'])), data[key]['test_accuracy'], label=key, linewidth=linewidth)
-        #ax4.plot(range(len(data[key]['test_loss'])), data[key]['test_loss'], label=key, linewidth=linewidth)
+        ax2.plot(range(len(data[key]['test_accuracy'])), data[key]['test_accuracy'], label=key, linewidth=linewidth)
+        ax4.plot(range(len(data[key]['test_loss'])), data[key]['test_loss'], label=key, linewidth=linewidth)
 
     ax1.set_ylabel('Accuracy')
     ax1.set_ylim(train_acc_ylim)
