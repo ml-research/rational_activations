@@ -122,6 +122,14 @@ model = torch.nn.Sequential(
 
 ## 5. Cite Us in your paper
 ```
+@inproceedings{molina2019pade,
+  title={Pad{\'e} Activation Units: End-to-end Learning of Flexible Activation Functions in Deep Networks},
+  author={Molina, Alejandro and Schramowski, Patrick and Kersting, Kristian},
+  booktitle={International Conference on Learning Representations},
+  year={2019}
+}
+
+
 @article{delfosse2020rationals,
   title={Rational Activation functions},
   author={Delfosse, Quentin and Schramowski, Patrick and Molina, Alejandro and Beck, Nils and Hsu, Ting-Yu and Kashef, Yasien and Rüling-Cachay, Salva and Zimmermann, Julius},
