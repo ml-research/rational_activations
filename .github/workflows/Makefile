@@ -13,11 +13,10 @@ docker-test-run-zsh:
 	python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
 	python -c "import sys; print('Python version:', sys.version)"
 	python -c "import torch; print('Number of GPUs available:', torch.cuda.device_count(), 'CUDA version:', torch.version.cuda)"
-	nvcc --version
 	echo CUDA_HOME: $$CUDA_HOME
-	echo PATH: $$PATH
 	nvidia-smi
-	cd $(REPO_ROOT) && \
+	PATH=/usr/local/cuda-$(CUDA)/bin:$$PATH && nvcc --version && \
+	 cd $(REPO_ROOT) && \
 	 pip install --upgrade pip && \
 	 pip install -r requirements.txt && \
 	 python setup.py develop --user && \

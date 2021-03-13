@@ -19,7 +19,8 @@ jobs:
     - name: Run GPU tests CUDA=${{ matrix.cuda-version }} & Python${{ matrix.python-version }}
       run: |
         cd .github/workflows
-        make docker-test-run-zsh CUDA=${{ matrix.cuda-version }} Python=${{ matrix.python-version }}
+        CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }}/ \
+          make docker-test-run-zsh CUDA=${{ matrix.cuda-version }} Python=${{ matrix.python-version }}
 
 
 # run: |
