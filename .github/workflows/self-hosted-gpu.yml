@@ -39,7 +39,6 @@ jobs:
         run: |
           python -m venv .env
           source .env/bin/activate
-          which python
           python --version
           pip --version
       - name: Install dependencies
