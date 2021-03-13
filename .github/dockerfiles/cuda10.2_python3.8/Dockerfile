@@ -35,8 +35,7 @@ RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-py38
  && conda clean -ya
 
 # CUDA 10.2-specific steps
-RUN conda install -y -c pytorch \
-    cudatoolkit=10.2 \
+RUN conda install -y -c pytorch cudatoolkit=10.2 \
  && conda clean -ya
 
 # Set the default command to python3

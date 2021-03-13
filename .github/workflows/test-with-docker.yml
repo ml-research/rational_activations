@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         cuda-version: ['10.2']
-        python-version: ['3.7', '3.8']
+        python-version: ['3.8']
     steps:
     - uses: actions/checkout@v2
       with:
@@ -18,30 +18,22 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Run GPU tests CUDA=${{ matrix.cuda-version }} & Python${{ matrix.python-version }}
       run: |
-        cd .github/workflows
-        CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }}/ \
-          make docker-test-run-zsh CUDA=${{ matrix.cuda-version }} Python=${{ matrix.python-version }}
+        docker run -i --gpus device=all --rm --name cuda102py38_container cuda102py38
+        python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
+        python -c "import sys; print('Python version:', sys.version)"
+        python -c "import torch; print('Number of GPUs available:', torch.cuda.device_count(), 'CUDA version:', torch.version.cuda)"
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
+        nvcc --version
+        echo CUDA_HOME: $$CUDA_HOME
+        echo PATH: $$PATH
+
+        nvidia-smi
+        python setup.py develop --user
+        python -m pytest
 
 
-  #    - name: Install package
-#      run: |
-#        echo "TORCH_LIB=/usr/lib64/python3.6/site-packages/torch/lib:$TORCH_LIB" >> $GITHUB_ENV
-#        docker run -i --gpus device=all --name rat_manylinux -v $(pwd):/rational_activations df31f4268b9b zsh
-#        python setup.py install
-#        python -m pytest
 # run: |
 #        echo "CUDA_HOME=/usr/local/cuda-10.2/" >> $GITHUB_ENV
 #        echo "PATH=/usr/local/cuda-10.2/bin:$PATH" >> $GITHUB_ENV
-#        make docker-test-run-zsh
-#    - name: Remove container
-#      if: ${{ always() }}
-#      run: |
-#        docker ps -a | grep Exit | cut -d ' ' -f 1 | xargs docker rm
-#steps:
-  #    - uses: actions/checkout@v2
-  #    - name: Build test image
-  #      run: |
-  #        make docker-test-image
-  #    - name: Run GPU tests
-  #      run: |
-  #        make docker-test-run
