@@ -10,17 +10,16 @@ REPO_ROOT = ../../
 .PHONY: docker-test-run-zsh
 docker-test-run-zsh:
 	docker run -i --gpus device=all --rm --name rationals_cicd_cuda$(CUDA)py$(Python) cuda$(CUDA)py$(Python)
-	python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
-	python -c "import sys; print('Python version:', sys.version)"
-	python -c "import torch; print('Number of GPUs available:', torch.cuda.device_count(), 'CUDA version:', torch.version.cuda)"
+	python$(Python) -c "import torch; print('Cuda available:', torch.cuda.is_available())"
+	python$(Python) -c "import sys; print('Python version:', sys.version)"
+	python$(Python) -c "import torch; print('Number of GPUs available:', torch.cuda.device_count(), 'CUDA version:', torch.version.cuda)"
 	echo CUDA_HOME: $$CUDA_HOME
-	nvidia-smi
 	PATH=/usr/local/cuda-$(CUDA)/bin:$$PATH && nvcc --version && \
 	 cd $(REPO_ROOT) && \
-	 pip install --upgrade pip && \
-	 pip install -r requirements.txt && \
-	 python setup.py develop --user && \
-	 python -m pytest
+	 pip3 install --upgrade pip && \
+	 pip3 install -r requirements.txt && \
+	 python$(Python) setup.py develop --user && \
+	 python$(Python) -m pytest
 
 
 
