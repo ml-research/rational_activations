@@ -1,4 +1,4 @@
-FROM nvidia/cuda:10.2-base-ubuntu18.04
+FROM nvidia/cuda:10.1-base-ubuntu18.04
 
 # Install some basic utilities
 RUN apt-get update && apt-get install -y \
@@ -31,12 +31,12 @@ RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.7.
  && chmod +x ~/miniconda.sh \
  && ~/miniconda.sh -b -p ~/miniconda \
  && rm ~/miniconda.sh \
- && conda install -y python==3.6.9 \
+ && conda install -y python==3.8 \
  && conda clean -ya
 
-# CUDA 10.2-specific steps
-RUN conda install -y -c pytorch cudatoolkit=10.2 \
+# CUDA 10.1-specific steps
+RUN conda install -y -c pytorch cudatoolkit=10.1 \
  && conda clean -ya
 
 # Set the default command to python3
-CMD ["python3.6"]
+CMD ["python3.8"]
