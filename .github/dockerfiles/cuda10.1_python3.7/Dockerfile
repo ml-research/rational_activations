@@ -30,13 +30,13 @@ ENV PATH=/home/user/miniconda/bin:$PATH
 RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh \
  && chmod +x ~/miniconda.sh \
  && ~/miniconda.sh -b -p ~/miniconda \
- && rm ~/miniconda.sh \
- && conda install -y python==3.7 \
- && conda clean -ya
+ && rm ~/miniconda.sh
 
-# CUDA 10.1-specific steps
-RUN conda install -y -c pytorch cudatoolkit=10.1 \
- && conda clean -ya
+RUN conda create -y -n cicd_env_cuda10.1py3.7 python=3.7
+# Make RUN commands use the new environment:
+SHELL ["conda", "run", "-n", "cicd_env_cuda10.1py3.7", "/bin/bash", "-c"]
+# make conda activate command available from /bin/bash --interative shells
+RUN conda install -y -c pytorch cudatoolkit=10.1
 
 # Set the default command to python3
 CMD ["python3.7"]
