@@ -31,7 +31,7 @@ RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.7.
  && chmod +x ~/miniconda.sh \
  && ~/miniconda.sh -b -p ~/miniconda \
  && rm ~/miniconda.sh \
- && conda install -y python==3.6 \
+ && conda install -y python==3.6.9 \
  && conda clean -ya
 
 # CUDA 10.1-specific steps
