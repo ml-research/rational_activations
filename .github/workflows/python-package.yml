@@ -62,12 +62,11 @@ jobs:
         source .env/bin/activate
         python -m pytest
   build-and-test-cuda102:
-    name: Tests Cuda 10.2, Python =
+    name: Tests Cuda 11.1, Python =
     runs-on: self-hosted
     strategy:
       matrix:
         python-version: [ '3.8']
-
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
@@ -85,7 +84,8 @@ jobs:
         run: |
           source .env/bin/activate
           pip install --upgrade pip
-          pip install airspeed flake8 matplotlib pytest scipy torch==1.7.1
+          pip install airspeed flake8 matplotlib pytest scipy
+          pip install torch==1.8.0+cu111 -f https://download.pytorch.org/whl/torch_stable.html
           # We need to export correct pointers for CUDA_HOME and nvcc that corresond to the correct CUDA version.
           echo "CUDA_HOME=/usr/local/cuda-11.1/" >> $GITHUB_ENV
           echo "PATH=/usr/local/cuda-11.1/bin:$PATH" >> $GITHUB_ENV  # instead of alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
