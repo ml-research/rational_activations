@@ -13,13 +13,10 @@ RUN wget \
     && rm -f Miniconda3-latest-Linux-x86_64.sh
 RUN conda --version
 
-RUN conda create -y -n cicd_env_cuda10.1py3.7 python=3.7
-RUN conda init bash
+RUN conda create -n cicd_env_cuda10.1py3.7  -y python=3.7 cudatoolkit=10.1 pytorch
 # Make RUN commands use the new environment (better than to use conda activate, see https://pythonspeed.com/articles/activate-conda-dockerfile/):
-SHELL ["conda", "run", "-n", "cicd_env_cuda10.1py3.7", "/bin/bash", "-c"]
+# SHELL ["conda", "run", "-n", "cicd_env_cuda10.1py3.7", "/bin/bash", "-c"]
 # make conda activate command available from /bin/bash --interative sqhells
-RUN conda install -y -c pytorch cudatoolkit=10.1
-RUN conda install -c conda-forge cartopy
 RUN pwd
 RUN ls -l
 # Copies your code file from your action repository to the filesystem path `/` of the container
