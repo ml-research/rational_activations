@@ -13,7 +13,6 @@ RUN wget \
     && rm -f Miniconda3-latest-Linux-x86_64.sh
 RUN conda --version
 
-USER 1000:1000
 RUN conda create -y -n cicd_env_cuda10.1py3.7 python=3.7
 RUN conda init bash
 # Make RUN commands use the new environment (better than to use conda activate, see https://pythonspeed.com/articles/activate-conda-dockerfile/):
