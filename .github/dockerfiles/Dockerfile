@@ -32,6 +32,20 @@ RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.7.
  && ~/miniconda.sh -b -p ~/miniconda \
  && rm ~/miniconda.sh
 
+#ENV PATH="/root/miniconda3/bin:${PATH}"
+ #ARG PATH="/root/miniconda3/bin:${PATH}"
+ #RUN apt-get update
+ #
+ #RUN apt-get install -y wget && rm -rf /var/lib/apt/lists/*
+ #
+ #RUN wget \
+ #    https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+ #    && mkdir /root/.conda \
+ #    && bash Miniconda3-latest-Linux-x86_64.sh -b \
+ #    && rm -f Miniconda3-latest-Linux-x86_64.sh
+ #RUN conda --version
+
+
 RUN conda create -y -n cicd_env_cuda10.1py3.7 python=3.7
 RUN conda init bash
 # Make RUN commands use the new environment (better than to use conda activate, see https://pythonspeed.com/articles/activate-conda-dockerfile/):
