@@ -11,15 +11,13 @@ REPO_ROOT = ../../
 docker-test-run-zsh:
 	docker run -i --gpus device=all --rm --name rationals_cicd_cuda$(CUDA)py$(Python) cuda$(CUDA)py$(Python) bash && \
 	 echo CUDA_HOME: $$CUDA_HOME && \
-	 python -c "import cartopy; print('YEEEEEEEEEEEEE')" && \
 	 PATH=/usr/local/cuda-$(CUDA)/bin:$$PATH && nvcc --version && \
 	 cd $(REPO_ROOT) && \
-	 python -c "import sys; print('Python version:', sys.version)" && \
-	 python -c "import torch; print('CUDA version:', torch.version.cuda)" && \
-	 pip3 install --upgrade pip && \
-	 pip3 install -r requirements.txt && \
-	 python setup.py develop --user && \
-	 python-m pytest
+	 python$(Python) -c "import sys; print('Python version:', sys.version)" && \
+	 python$(Python) -c "import torch; print('CUDA version:', torch.version.cuda)" && \
+	 pip$(Python) install -r requirements.txt && \
+	 python$(Python) setup.py develop --user && \
+	 python$(Python) -m pytest
 
 
 
