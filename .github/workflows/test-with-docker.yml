@@ -22,6 +22,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
         cuda-version: ${{ matrix.cuda-version }}
 
+
 # run: |
 #        echo "CUDA_HOME=/usr/local/cuda-10.2/" >> $GITHUB_ENV
 #        echo "PATH=/usr/local/cuda-10.2/bin:$PATH" >> $GITHUB_ENV
