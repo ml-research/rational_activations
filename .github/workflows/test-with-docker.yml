@@ -16,6 +16,7 @@ jobs:
       uses: actions/checkout@v2
     - name: Run GPU tests CUDA=${{ matrix.cuda-version }} & Python${{ matrix.python-version }}
       uses: ml-research/rational_activations@ci-cd
+      options: --user 1000
       with:
         python-version: ${{ matrix.python-version }}
         cuda-version: ${{ matrix.cuda-version }}
