@@ -23,6 +23,7 @@ RUN echo "**** Installing Python ****" && \
 
 RUN pip3.7 install torch networkx snorkel
 # Copies your code file from your action repository to the filesystem path `/` of the container
+RUN ["chmod", "+x", ".github/workflows/entrypoint.sh"]
 COPY .github/workflows/entrypoint.sh /entrypoint.sh
 RUN ["chmod", "+x", "/entrypoint.sh"]
 # Code file to execute when the docker container starts up (`entrypoint.sh`)
