@@ -11,6 +11,7 @@ REPO_ROOT = ../../
 docker-test-run-zsh:
 	docker run -i --gpus device=all --rm --name rationals_cicd_cuda$(CUDA)py$(Python) cuda$(CUDA)py$(Python) && \
 	 echo CUDA_HOME: $$CUDA_HOME && \
+	 python -c "import cartopy; print('YEEEEEEEEEEEEE')" && \
 	 PATH=/usr/local/cuda-$(CUDA)/bin:$$PATH && nvcc --version && \
 	 cd $(REPO_ROOT) && \
 	 python -c "import sys; print('Python version:', sys.version)" && \
