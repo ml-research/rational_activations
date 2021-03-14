@@ -1,6 +1,5 @@
 FROM nvidia/cuda:10.1-base-ubuntu18.04
 
-USER 1000:1000
 # Install some basic utilities
 RUN apt-get update && apt-get install -y \
     curl \
