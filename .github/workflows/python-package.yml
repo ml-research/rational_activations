@@ -8,7 +8,7 @@ on:
     branches: [ ci-cd ]
 
 jobs:
-  build-and-test-cuda10.1:
+  build-and-test-cuda101:
     name: Tests Cuda 10.1, Python =
     runs-on: self-hosted
     strategy:
@@ -61,7 +61,7 @@ jobs:
       run: |
         source .env/bin/activate
         python -m pytest
-  build-and-test-cuda10.2:
+  build-and-test-cuda102:
     name: Tests Cuda 10.2, Python =
     runs-on: self-hosted
     strategy:
