@@ -6,7 +6,7 @@ RUN apt-get update
 
 RUN apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 
-USER 1000:1000
+USER root
 RUN wget \
     https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
     && mkdir /root/.conda \
