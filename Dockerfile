@@ -38,7 +38,7 @@ RUN conda init bash
 SHELL ["conda", "run", "-n", "cicd_env_cuda10.1py3.7", "/bin/bash", "-c"]
 # make conda activate command available from /bin/bash --interative shells
 RUN conda install -y -c pytorch cudatoolkit=10.1
-RUN conda install airspeed pytest
+RUN pip3.7 install airspeed pytest
 RUN conda install -c conda-forge cartopy
 RUN pip3.7 install -r requirements.txt
 # Copies your code file from your action repository to the filesystem path `/` of the container
