@@ -6,7 +6,6 @@ name: Python package
 on:
   push:
     branches: [ ci-cd ]
-
 jobs:
   build-and-test-cuda101:
     name: Tests Cuda 10.1, Python =
