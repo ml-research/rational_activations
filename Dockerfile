@@ -39,6 +39,8 @@ SHELL ["conda", "run", "-n", "cicd_env_cuda10.1py3.7", "/bin/bash", "-c"]
 # make conda activate command available from /bin/bash --interative shells
 RUN conda install -y -c pytorch cudatoolkit=10.1
 RUN conda install -c conda-forge cartopy
+RUN pwd
+RUN ls -l
 # Copies your code file from your action repository to the filesystem path `/` of the container
 COPY .github/workflows/docker-entrypoint.sh /docker-entrypoint.sh
 # RUN ["chmod", "+x", "/docker-entrypoint.sh"]
