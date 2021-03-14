@@ -9,13 +9,15 @@ on:
 
 jobs:
   build-and-test-cuda101:
-    name: Tests Cuda 10.1, PythonY =
+    name: Tests Cuda 10.1, Python =
     runs-on: self-hosted
     strategy:
       matrix:
         python-version: ['3.7', '3.8']
     steps:
     - uses: actions/checkout@v2
+    - name: Set Python environment variable
+      run: echo '::set-env name=LD_LIBRARY_PATH::/tmp/runner/work/_tool/Python/${{ matrix.python-version }}/x64/lib'
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
