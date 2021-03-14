@@ -26,4 +26,4 @@ RUN pip3.7 install torch networkx snorkel
 COPY .github/workflows/entrypoint.sh /entrypoint.sh
 
 # Code file to execute when the docker container starts up (`entrypoint.sh`)
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["bash", "/entrypoint.sh"]
