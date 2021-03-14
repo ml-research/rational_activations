@@ -39,5 +39,4 @@ SHELL ["conda", "run", "-n", "cicd_env_cuda10.1py3.7", "/bin/bash", "-c"]
 # make conda activate command available from /bin/bash --interative shells
 RUN conda install -y -c pytorch cudatoolkit=10.1
 
-# Set the default command to python3
-CMD ["python3.7"]
+ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "cicd_env_cuda10.1py3.7", "python3.7"]
