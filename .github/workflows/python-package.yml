@@ -66,7 +66,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        python-version: ['3.7']
+        python-version: [ '3.8']
 
     steps:
       - uses: actions/checkout@v2
@@ -87,8 +87,8 @@ jobs:
           pip install --upgrade pip
           pip install airspeed flake8 matplotlib pytest scipy torch==1.7.1
           # We need to export correct pointers for CUDA_HOME and nvcc that corresond to the correct CUDA version.
-          echo "CUDA_HOME=/usr/local/cuda-10.2/" >> $GITHUB_ENV
-          echo "PATH=/usr/local/cuda-10.2/bin:$PATH" >> $GITHUB_ENV  # instead of alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
+          echo "CUDA_HOME=/usr/local/cuda-11.1/" >> $GITHUB_ENV
+          echo "PATH=/usr/local/cuda-11.1/bin:$PATH" >> $GITHUB_ENV  # instead of alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
       - name: Check Python and CUDA versions
         run: |
           source .env/bin/activate
