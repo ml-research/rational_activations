@@ -1,24 +1,28 @@
 FROM nvidia/cuda:10.1-base-ubuntu18.04
 
-ENV PATH="/root/miniconda3/bin:${PATH}"
-ARG PATH="/root/miniconda3/bin:${PATH}"
-RUN apt-get update
+# Install some basic utilities
+RUN apt-get update && apt-get install -y \
+    curl \
+    ca-certificates \
+    sudo \
+    git \
+    bzip2 \
+    libx11-6 \
+ && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get install -y wget && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends software-properties-common \
+    libsm6 libxext6 libxrender-dev curl \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN wget \
-    https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
-    && mkdir /root/.conda \
-    && bash Miniconda3-latest-Linux-x86_64.sh -b \
-    && rm -f Miniconda3-latest-Linux-x86_64.sh
-RUN conda --version
+RUN echo "**** Installing Python ****" && \
+    add-apt-repository ppa:deadsnakes/ppa &&  \
+    apt-get install -y build-essential python3.7 python3.7-dev python3-pip && \
+    curl -O https://bootstrap.pypa.io/get-pip.py && \
+    python3.7 get-pip.py && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN conda create -n cicd_env_cuda10.1py3.7  -y python=3.7 cudatoolkit=10.1 pytorch
-# Make RUN commands use the new environment (better than to use conda activate, see https://pythonspeed.com/articles/activate-conda-dockerfile/):
-# SHELL ["conda", "run", "-n", "cicd_env_cuda10.1py3.7", "/bin/bash", "-c"]
-# make conda activate command available from /bin/bash --interative sqhells
-RUN pwd
-RUN ls -l
+RUN pip3.7 install torch airspeed pytest
+RUN pip3.7 install -r requirements.txt
 # Copies your code file from your action repository to the filesystem path `/` of the container
 COPY .github/workflows/docker-entrypoint.sh /docker-entrypoint.sh
 RUN ["chmod", "+x", "/docker-entrypoint.sh"]
