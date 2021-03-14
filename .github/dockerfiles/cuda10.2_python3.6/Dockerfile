@@ -35,6 +35,7 @@ RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.7.
  && conda clean -ya
 
 # CUDA 10.2-specific steps
+RUN conda create -y -n cicd_env_cuda102py36 python=3.6 anaconda && \
 RUN conda install -y -c pytorch cudatoolkit=10.2 \
  && conda clean -ya
 
