@@ -96,6 +96,8 @@ jobs:
           python -c "import torch; print('CUDA version used by PyTorch:', torch.version.cuda)"
           nvcc --version
           echo CUDA_HOME: $CUDA_HOME
+      - name: Set Python environment variable
+        run: echo "LD_LIBRARY_PATH=/tmp/runner/work/_tool/Python/${{ matrix.python-version }}/x64/lib" >> $GITHUB_ENV
       - name: Install package
         run: |
           source .env/bin/activate
