@@ -43,7 +43,7 @@ jobs:
         python --version
         python -c "import sys; print('Python version:', sys.version)"
         python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
-        python -c "import torch; print('CUDA version:', torch.version.cuda)"
+        python -c "import torch; print('CUDA version used by PyTorch:', torch.version.cuda)"
         nvcc --version
         echo CUDA_HOME: $CUDA_HOME
 # conda install pytorch=1.7.0 torchvision torchaudio cudatoolkit=10.2 -c pytorch
@@ -66,7 +66,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        python-version: ['3.6', '3.8']
+        python-version: ['3.6', '3.7', '3.8']
 
     steps:
       - uses: actions/checkout@v2
@@ -95,7 +95,7 @@ jobs:
           python --version
           python -c "import sys; print('Python version:', sys.version)"
           python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
-          python -c "import torch; print('CUDA version:', torch.version.cuda)"
+          python -c "import torch; print('CUDA version used by PyTorch:', torch.version.cuda)"
           nvcc --version
           echo CUDA_HOME: $CUDA_HOME
       - name: Install package
