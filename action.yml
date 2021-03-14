@@ -13,6 +13,7 @@ inputs:
 runs:
   using: 'docker'
   image: 'Dockerfile'
+  options: --user 1000
   args:
     - ${{ inputs.python-version }}
     - ${{ inputs.cuda-version }}
