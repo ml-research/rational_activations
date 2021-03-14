@@ -9,9 +9,9 @@ REPO_ROOT = ../../
 
 .PHONY: docker-test-run-zsh
 docker-test-run-zsh:
-	docker run -i --gpus device=all --rm --name rationals_cicd_cuda$(CUDA)py$(Python) cuda$(CUDA)py$(Python)
-	echo CUDA_HOME: $$CUDA_HOME
-	PATH=/usr/local/cuda-$(CUDA)/bin:$$PATH && nvcc --version && \
+	docker run -i --gpus device=all --rm --name rationals_cicd_cuda$(CUDA)py$(Python) cuda$(CUDA)py$(Python) && \
+	 echo CUDA_HOME: $$CUDA_HOME && \
+	 PATH=/usr/local/cuda-$(CUDA)/bin:$$PATH && nvcc --version && \
 	 cd $(REPO_ROOT) && \
 	 python -c "import sys; print('Python version:', sys.version)" && \
 	 python -c "import torch; print('CUDA version:', torch.version.cuda)" && \
