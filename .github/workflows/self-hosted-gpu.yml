@@ -5,18 +5,11 @@ on:
   push:
     branches:
      - ci-cdxx
-  # paths:
-  #    - "src/**"
-  #    - "tests/**"
-  #   - ".github/**"
-  #    - "templates/**"
-  # pull_request:
-  # repository_dispatch:
 
 
 jobs:
   run_tests_torch_gpu:
-    runs-on: [self-hosted, gpu] #, single-gpu]
+    runs-on: [self-hosted, gpu]
     steps:
       - uses: actions/checkout@v2
       - name: Python version
@@ -45,21 +38,13 @@ jobs:
         run: |
           source .env/bin/activate
           pip install --upgrade pip
-          pip install -U wheel setuptools
-          pip install .[torch,testing]
+          pip install torch==1.7.1+cu101 -f https://download.pytorch.org/whl/torch_stable.html
+          pip install airspeed pytest
       - name: Are GPUs recognized by our DL frameworks
         run: |
           source .env/bin/activate
           python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
-          python -c "import torch; print('Number of GPUs available:', torch.cuda.device_count())"
-#      - name: Create model files
-#        run: |
-#          source .env/bin/activate
-#          transformers-cli add-new-model --testing --testing_file=templates/adding_a_new_model/tests/encoder-bert-tokenizer.json --path=templates/adding_a_new_model
-#          transformers-cli add-new-model --testing --testing_file=templates/adding_a_new_model/tests/pt-encoder-bert-tokenizer.json --path=templates/adding_a_new_model
-#          transformers-cli add-new-model --testing --testing_file=templates/adding_a_new_model/tests/standalone.json --path=templates/adding_a_new_model
-#          transformers-cli add-new-model --testing --testing_file=templates/adding_a_new_model/tests/tf-encoder-bert-tokenizer.json --path=templates/adding_a_new_model
-
+          python -c "import torch; print('CUDA version:', torch.version.cuda)"
       - name: Run all non-slow tests on GPU
         env:
           OMP_NUM_THREADS: 1
