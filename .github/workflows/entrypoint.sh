@@ -1,7 +1,7 @@
 #!/bin/sh -l
 
 echo CUDA_HOME: $$CUDA_HOME
-cd ../..
+pwd
 python -c "import sys; print('Python version:', sys.version)"
 python -c "import torch; print('CUDA version:', torch.version.cuda)"
 python3.7 -c "import sys; print('Python version:', sys.version)"

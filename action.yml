@@ -1,0 +1,18 @@
+# action.yml
+name: 'Hello World'
+description: 'Greet someone and record the time'
+inputs:
+  python-version:  # id of input
+    description: 'Python version'
+    required: true
+    default: '3.7'
+  cuda-version:  # id of input
+    description: 'CUDA version'
+    required: true
+    default: '10.2'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.python-version }}
+    - ${{ inputs.cuda-version }}
