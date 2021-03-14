@@ -10,18 +10,23 @@ RUN apt-get update && apt-get install -y \
     libx11-6 \
  && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get install -y --no-install-recommends software-properties-common \
-    libsm6 libxext6 libxrender-dev curl \
-    && rm -rf /var/lib/apt/lists/*
+# Install Miniconda and Python 3.6
+ENV CONDA_AUTO_UPDATE_CONDA=false
+ENV PATH=/home/user/miniconda/bin:$PATH
+RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh \
+ && chmod +x ~/miniconda.sh \
+ && ~/miniconda.sh -b -p ~/miniconda \
+ && rm ~/miniconda.sh
 
-RUN echo "**** Installing Python ****" && \
-    add-apt-repository ppa:deadsnakes/ppa &&  \
-    apt-get install -y build-essential python3.7 python3.7-dev python3-pip && \
-    curl -O https://bootstrap.pypa.io/get-pip.py && \
-    python3.7 get-pip.py && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN pip3.7 install torch airspeed pytest
+RUN conda create -y -n cicd_env_cuda10.1py3.7 python=3.7
+RUN conda init bash
+# Make RUN commands use the new environment (better than to use conda activate, see https://pythonspeed.com/articles/activate-conda-dockerfile/):
+SHELL ["conda", "run", "-n", "cicd_env_cuda10.1py3.7", "/bin/bash", "-c"]
+# make conda activate command available from /bin/bash --interative shells
+RUN conda install -y -c pytorch cudatoolkit=10.1
+RUN conda install airspeed pytest
+RUN conda install -c conda-forge cartopy
+RUN pip3.7 install -r requirements.txt
 # Copies your code file from your action repository to the filesystem path `/` of the container
 COPY .github/workflows/docker-entrypoint.sh /docker-entrypoint.sh
 RUN ["chmod", "+x", "/docker-entrypoint.sh"]
