@@ -13,8 +13,8 @@ docker-test-run-zsh:
 	echo CUDA_HOME: $$CUDA_HOME
 	PATH=/usr/local/cuda-$(CUDA)/bin:$$PATH && nvcc --version && \
 	 cd $(REPO_ROOT) && \
-	 python -c "import sys; print('Python version:', sys.version)"
-	 python -c "import torch; print('CUDA version:', torch.version.cuda)"
+	 python -c "import sys; print('Python version:', sys.version)" && \
+	 python -c "import torch; print('CUDA version:', torch.version.cuda)" && \
 	 pip3 install --upgrade pip && \
 	 pip3 install -r requirements.txt && \
 	 python setup.py develop --user && \
