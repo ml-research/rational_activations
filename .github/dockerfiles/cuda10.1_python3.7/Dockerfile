@@ -10,9 +10,6 @@ RUN apt-get update && apt-get install -y \
     libx11-6 \
  && rm -rf /var/lib/apt/lists/*
 
-# Create a working directory
-USER root
-
 RUN apt-get update && apt-get install -y --no-install-recommends software-properties-common \
     libsm6 libxext6 libxrender-dev curl \
     && rm -rf /var/lib/apt/lists/*
@@ -25,4 +22,8 @@ RUN echo "**** Installing Python ****" && \
     rm -rf /var/lib/apt/lists/*
 
 RUN pip3.7 install torch networkx snorkel
-CMD ["python3.7"]
+# Copies your code file from your action repository to the filesystem path `/` of the container
+COPY .github/workflows/entrypoint.sh /entrypoint.sh
+
+# Code file to execute when the docker container starts up (`entrypoint.sh`)
+ENTRYPOINT ["/entrypoint.sh"]
