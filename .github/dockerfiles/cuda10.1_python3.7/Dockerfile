@@ -24,5 +24,5 @@ RUN echo "**** Installing Python ****" && \
     python3.7 get-pip.py && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip3.7 install torch networkx
+RUN pip3.7 install torch networkx snorkel
 CMD ["python3.7"]
