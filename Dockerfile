@@ -21,7 +21,7 @@ RUN echo "**** Installing Python ****" && \
     python3.7 get-pip.py && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip3.7 install torch networkx snorkel
+RUN pip3.7 install torch airspeed pytest
 # Copies your code file from your action repository to the filesystem path `/` of the container
 COPY .github/workflows/docker-entrypoint.sh /docker-entrypoint.sh
 RUN ["chmod", "+x", "/docker-entrypoint.sh"]
