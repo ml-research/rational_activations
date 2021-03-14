@@ -9,7 +9,7 @@ on:
 
 jobs:
   build-and-test-cuda101:
-    name: Tests Cuda 10.1, Python =
+    name: Tests Cuda 10.1, PythonY =
     runs-on: self-hosted
     strategy:
       matrix:
