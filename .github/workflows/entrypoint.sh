@@ -1,4 +1,4 @@
-#!/bin/sh -l
+#!/bin/bash
 
 echo CUDA_HOME: $$CUDA_HOME
 pwd
