@@ -46,7 +46,8 @@ jobs:
         python -c "import torch; print('CUDA version used by PyTorch:', torch.version.cuda)"
         nvcc --version
         echo CUDA_HOME: $CUDA_HOME
-#     - name: Lint with flake8
+        echo $LD_LIBRARY_PATH
+      #     - name: Lint with flake8
 #      run: |dd
 #        # stop the build if there are Python syntax errors or undefined nameshb
 #        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
@@ -73,7 +74,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Current dir
-        run: pwd
+        run: |
+          pwd
+          echo $LD_LIBRARY_PATH
       - run: nvidia-smi
       - name: Create new python env (on self-hosted runners we have to handle isolation ourselves)
         run: |
@@ -101,6 +104,7 @@ jobs:
       - name: Install package
         run: |
           source .env/bin/activate
+          echo $LD_LIBRARY_PATH
           python setup.py develop
       - name: Test
         run: |
