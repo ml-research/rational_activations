@@ -21,18 +21,25 @@ jobs:
       - name: Install python version
         uses: gabrielfalcao/pyenv-action@v7
         with:
-          default: 3.7.3
-          command: |
+          default: 3.7.2
+          versions: 3.6.8
+      - name: Create virtualenv for python 3.5.7
+        run: pyenv local 3.7.2 && python3 -mvenv .venv372
+      - name: Create virtualenv for python 3.6.8
+        run: pyenv local 3.6.8 && python3 -mvenv .venv365
+
+      - name: Install dependencies
+        run: |
+            pyenv activate .venv372
             pip install -U pip  # upgrade pip after installing python
             pip install airspeed flake8 matplotlib pytest scipy
             pip install torch==1.7.1
             # We need to export correct pointers for CUDA_HOME and nvcc that corresond to the correct CUDA version.
             echo "CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }}/" >> $GITHUB_ENV
             echo "PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$PATH" >> $GITHUB_ENV
-      - name: create environment
-        run: pyenv local 3.7.3 && python -mvenv .venv373
       - name: Check Python and CUDA versions
         run: |
+          pyenv activate .venv372
           python --version
           python -c "import sys; print('Python version:', sys.version)"
           python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
@@ -41,9 +48,11 @@ jobs:
           echo CUDA_HOME: $CUDA_HOME
       - name: Install package
         run: |
+          pyenv activate .venv372
           python setup.py develop
       - name: Test
         run: |
+          pyenv activate .venv372
           python -m pytest
 
 # - name: Set Python environment variable
