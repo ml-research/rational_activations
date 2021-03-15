@@ -31,6 +31,9 @@ And, therefore relieves the network designer of having to commit to a potentiall
  :octocat: See [rational_rl](https://github.com/ml-research/rational_rl) github repo
 
 ## 2. Dependencies
+We support ***MxNet, Keras, and PyTorch***. Instructions for MxNet can be found [here](rational/mxnet). Instructions for Keras [here](rational/keras). 
+The following README instructions **assume that you want to use rational activations in PyTorch.**
+
     PyTorch>=1.4.0
     CUDA>=10.1
 
