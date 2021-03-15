@@ -8,4 +8,5 @@ matplotlib
 # tensorflow
 # mxnet
 pytest
+setuptools>=42.0.0
 wheel
