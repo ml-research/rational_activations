@@ -39,12 +39,12 @@ jobs:
         pip install --upgrade pip
         pip install -r .github/workflows/dev-requirements.txt
         pip install mxnet-cu101 torch==1.7.1+cu101 -f https://download.pytorch.org/whl/torch_stable.html
-    - if: ${{ matrix.python-version }} == 3.6
+    - if: ${{ matrix.python-version }} == '3.6'
       run: |
         source .env/bin/activate
         echo Installing tf for py3.6
         pip install https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-2.4.0-cp36-cp36m-manylinux2010_x86_64.whl
-    - if: ${{ matrix.python-version }} == 3.8
+    - if: ${{ matrix.python-version }} == '3.8'
       run: |
         source .env/bin/activate
         echo Installing tf for py3.8
@@ -106,11 +106,11 @@ jobs:
           pip install --upgrade pip
           pip install -r .github/workflows/dev-requirements.txt
           pip install mxnet-cu102 torch==1.7.1
-      - if: ${{ matrix.python-version }} == 3.6
+      - if: ${{ matrix.python-version }} == '3.6'
         run: |
           source .env/bin/activate
           pip install https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-2.4.0-cp36-cp36m-manylinux2010_x86_64.whl
-      - if: ${{ matrix.python-version }} == 3.8
+      - if: ${{ matrix.python-version }} == '3.8'
         run: |
           source .env/bin/activate
           pip install https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-2.4.0-cp38-cp38-manylinux2010_x86_64.whl
