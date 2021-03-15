@@ -23,20 +23,20 @@ jobs:
         with:
           default: "${{ matrix.python-version }}"
           command: |
-          pip install -U pip  # upgrade pip after installing python
-          pip install airspeed flake8 matplotlib pytest scipy
-          pip install torch==1.7.1
-          # We need to export correct pointers for CUDA_HOME and nvcc that corresond to the correct CUDA version.
-          echo "CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }}/" >> $GITHUB_ENV
-          echo "PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$PATH" >> $GITHUB_ENV
-          python --version
-          python -c "import sys; print('Python version:', sys.version)"
-          python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
-          python -c "import torch; print('CUDA version used by PyTorch:', torch.version.cuda)"
-          nvcc --version
-          echo CUDA_HOME: $CUDA_HOME
-          python setup.py develop
-          python -m pytest
+            pip install -U pip  # upgrade pip after installing python
+            pip install airspeed flake8 matplotlib pytest scipy
+            pip install torch==1.7.1
+            # We need to export correct pointers for CUDA_HOME and nvcc that corresond to the correct CUDA version.
+            echo "CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }}/" >> $GITHUB_ENV
+            echo "PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$PATH" >> $GITHUB_ENV
+            python --version
+            python -c "import sys; print('Python version:', sys.version)"
+            python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
+            python -c "import torch; print('CUDA version used by PyTorch:', torch.version.cuda)"
+            nvcc --version
+            echo CUDA_HOME: $CUDA_HOME
+            python setup.py develop
+            python -m pytest
 
 # - name: Set Python environment variable
 #      run: echo "LD_LIBRARY_PATH=/tmp/runner/work/_tool/Python/${{ matrix.python-version }}/x64/lib" >> $GITHUB_ENV
