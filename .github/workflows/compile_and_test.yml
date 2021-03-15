@@ -59,7 +59,7 @@ jobs:
     - name: Test
       run: |
         source .env/bin/activate
-        python -m pytest --ignore=rational/mxnet/tests --ignore=rational/keras/tests -k rational/torch/tests
+        python -m pytest --ignore=rational/mxnet/tests --ignore=rational/keras/tests/ -k rational/torch/tests/
 
   build-and-test-cuda102:
     name: Tests Cuda 10.2, Python =
@@ -105,4 +105,4 @@ jobs:
       - name: Test
         run: |
           source .env/bin/activate
-          python -m pytest --ignore=rational/mxnet/tests --ignore=rational/keras/tests -k rational/torch/tests
+          python -m pytest --ignore=rational/mxnet/tests/ --ignore=rational/keras/tests/ -k rational/torch/tests/
