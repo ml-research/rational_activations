@@ -59,7 +59,8 @@ jobs:
     - name: Test
       run: |
         source .env/bin/activate
-        python -m pytest
+        python -m pytest --ignore=rational/mxnet/tests --ignore=rational/keras/tests
+
   build-and-test-cuda102:
     name: Tests Cuda 10.2, Python =
     runs-on: self-hosted
@@ -103,4 +104,4 @@ jobs:
       - name: Test
         run: |
           source .env/bin/activate
-          python -m pytest
+          python -m pytest --ignore=rational/mxnet/tests --ignore=rational/keras/tests
