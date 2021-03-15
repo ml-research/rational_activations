@@ -1,5 +1,6 @@
 airspeed
 flake8
+h5py
 numpy
 scipy
 matplotlib
