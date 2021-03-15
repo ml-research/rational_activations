@@ -18,16 +18,16 @@ jobs:
         cuda-version: ['10.1', '10.2']
     steps:
       - uses: actions/checkout@v2
+      - name: Envs
+        run: |
+          echo "CFLAGS=-I$(brew --prefix openssl)/include" >> $GITHUB_ENV
+          echo "LDFLAGS=-L$(brew --prefix openssl)/lib" >> $GITHUB_ENV
       - name: Install python version
         uses: gabrielfalcao/pyenv-action@v7
         with:
           default: 3.7.2
-          versions: 3.6.8
-      - name: Create virtualenv for python 3.5.7
+      - name: Create virtualenv for python 3.7.2
         run: pyenv local 3.7.2 && python3 -mvenv .venv372
-      - name: Create virtualenv for python 3.6.8
-        run: pyenv local 3.6.8 && python3 -mvenv .venv365
-
       - name: Install dependencies
         run: |
             pyenv activate .venv372
