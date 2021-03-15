@@ -5,7 +5,7 @@ name: Python package
 
 on:
   push:
-    branches: [ ci-cd ]
+    branches: [ master ]
 
 jobs:
   build-and-test-cuda101:
@@ -61,7 +61,7 @@ jobs:
     - name: Test
       run: |
         source .env/bin/activate
-        python -m pytest --ignore=rational/mxnet/tests --ignore=rational/keras/tests/ -k rational/torch/tests/
+        python -m pytest
 
   build-and-test-cuda102:
     name: Tests Cuda 10.2, Python =
@@ -109,4 +109,4 @@ jobs:
       - name: Test
         run: |
           source .env/bin/activate
-          python -m pytest --ignore=rational/mxnet/tests/ --ignore=rational/keras/tests/ -k rational/torch/tests/
+          python -m pytest
