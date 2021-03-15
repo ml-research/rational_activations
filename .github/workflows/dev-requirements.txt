@@ -4,7 +4,7 @@ numpy
 scipy
 matplotlib
 # tensorflow>=2.0.0
-tensorflow
-mxnet
+# tensorflow
+# mxnet
 pytest
 wheel
