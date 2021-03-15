@@ -1,3 +1,4 @@
+[![ArXiv Badge](https://img.shields.io/badge/Paper-arXiv-blue.svg)](https://arxiv.org/abs/2102.09407)
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/recurrent-rational-networks/atari-games-on-atari-2600-tennis)](https://paperswithcode.com/sota/atari-games-on-atari-2600-tennis?p=recurrent-rational-networks)
 
 ![Logo](./images/rationals_logo_colored.png)
@@ -119,11 +120,21 @@ model = torch.nn.Sequential(
 )
 ~~~~
 
-## 5. To be implemented
-- [X] Make a documentation
-- [X] Create tutorial in the doc
-- [X] Tensorflow working version
-- [X] Repair + enhance Automatic manylinux production script.
-- [ ] Add python3.9 support
-- [X] Make an CUDA 11.0 compatible version
-- [X] Repair the tox test and have them checking before commit
+## 5. Cite Us in your paper
+```
+@inproceedings{molina2019pade,
+  title={Pad{\'e} Activation Units: End-to-end Learning of Flexible Activation Functions in Deep Networks},
+  author={Molina, Alejandro and Schramowski, Patrick and Kersting, Kristian},
+  booktitle={International Conference on Learning Representations},
+  year={2019}
+}
+
+
+@article{delfosse2020rationals,
+  title={Rational Activation functions},
+  author={Delfosse, Quentin and Schramowski, Patrick and Molina, Alejandro and Beck, Nils and Hsu, Ting-Yu and Kashef, Yasien and Rüling-Cachay, Salva and Zimmermann, Julius},
+  journal={arXiv preprint arXiv:2102.09407},
+  year={2020}
+  howpublished={\url{https://github.com/ml-research/rational_activations}}
+}
+```

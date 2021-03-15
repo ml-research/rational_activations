@@ -15,37 +15,48 @@ from rational.mxnet.versions import _version_a, _version_b, _version_c, _version
 
 class Rational(HybridBlock):
     """
-    This class implements rational activation functions for MxNet, inheriting from
-    mxnet.gluon.HybridBlock.
+    Rational Activation Function, inheriting from ``mxnet.gluon.HybridBlock``.
+
+    Arguments:
+            approx_func (str):
+                The name of the approximated function for initialisation.
+                The different functions are available in `rational.rationals_config.json`.
+                Default: ``leaky_relu``
+
+            degrees (tuple of int):
+                The degrees of the numerator (P) and denominator (Q).
+                Default ``(5, 4)``
+
+            cuda (bool):
+                whether to execute on cuda device.
+                NOTE: THIS PARAMETER IS CURRENTLY NOT CONSIDERED.
+                CUDA GPUS ARE USED WHEN IT IS POSSIBLE
+
+            version (str):
+                Version of Rational to use. Rational(x) = P(x)/Q(x),
+                where
+                P(x) = (a_0 + a_1 * x + a_2 * x^2 + ... + a_n * x^n) and
+
+                `A`: Q(x) = (1 + |b_0 * x| + | b_1 * x^2| + ... + | b_m * x^{m+1}|)
+                `B`: Q(x) = (1 + |b_0 * x + b_1 * x^2 + ... + b_m * x^{m + 1}|)
+                `C`: Q(x) = (0.1 + |b_0 + b_1 * x + b_2 * x^2 + ... + b_m * x^m|)
+                `D`: like `B` with noised coefficients b_i
+
+                Default ``A``
+
+            trainable (bool):
+                Whether the weights are trainable, i.e, if they are updated during
+                backward pass.
+                Default ``True``
+
+    Returns:
+        HybridBlock:
+            Rational hybrid block
     """
 
     def __init__(self, approx_func='leaky_relu', degrees=(5, 4), cuda=False,
                  version='A', trainable=True, train_numerator=True,
                  train_denominator=True, **kwargs):
-        """
-        Initializes this custom HybridBlock, which implements a Rational Activation Function.
-        Sets the initial configuration of weights, according to the specified version and
-        approximated function, makes the weights trainable or not, specifies on which device
-        to execute (cpu or gpu) etc.
-        :param approx_func: The name of the approximated function for initialisation.
-        The different functions are available in `rational.rationals_config.json`.
-        Default ``leaky_relu``.
-        :param degrees: The degrees of the numerator (P) and denominator (Q).
-        Default ``(5, 4)``
-        :param cuda: whether to execute on cuda device. NOTE: THIS PARAMETER IS CURRENTLY NOT
-        CONSIDERED
-        :param version: Version of Rational to use. Rational(x) = P(x)/Q(x)
-        `A`: Q(x) = 1 + |b_1.x| + |b_2.x| + ... + |b_n.x|
-        `B`: Q(x) = 1 + |b_1.x + b_2.x + ... + b_n.x|
-        `C`: Q(x) = 0.1 + |b_1.x + b_2.x + ... + b_n.x|
-        `D`: like `B` with noise
-        Default ``A``
-        :param trainable: If the weights are trainable, i.e, if they are updated during
-        backward pass.
-        Default ``True``
-        :param train_numerator: whether numerator coefficients are trainable
-        :param train_denominator: whether denominator coefficients are trainable
-        """
         super(Rational, self).__init__(**kwargs)
 
         # read initial parameter configuration from external files
