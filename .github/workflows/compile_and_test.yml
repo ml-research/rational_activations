@@ -49,7 +49,7 @@ jobs:
         python -c "import sys; print('Python version:', sys.version)"
         python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
         python -c "import torch; print('CUDA version used by PyTorch:', torch.version.cuda)"
-        python -c "import tensorflow as tf; print('tf: GPU?', tf.test.is_gpu_available())"
+        python -c "import tensorflow as tf; print('tf: GPUs', tf.config.experimental.list_physical_devices('GPU'))"
         python -c "import tensorflow as tf; print('CUDA version used by Tensorflow:', tf.sysconfig.get_build_info()['cuda_version'])"
         nvcc --version
         echo CUDA_HOME: $CUDA_HOME
@@ -110,7 +110,7 @@ jobs:
           python -c "import sys; print('Python version:', sys.version)"
           python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
           python -c "import torch; print('CUDA version used by PyTorch:', torch.version.cuda)"
-          python -c "import tensorflow as tf; print('tf: GPU?', tf.test.is_gpu_available())"
+          python -c "import tensorflow as tf; print('tf: GPUs', tf.config.experimental.list_physical_devices('GPU'))"
           python -c "import tensorflow as tf; print('CUDA version used by Tensorflow:', tf.sysconfig.get_build_info()['cuda_version'])"
           nvcc --version
           echo CUDA_HOME: $CUDA_HOME
