@@ -10,7 +10,7 @@ on:
 jobs:
   build-and-test-cuda101:
     name: Tests Cuda 10.1, Python =
-    runs-on: self-hosted
+    runs-on: ml4
     strategy:
       matrix:
         python-version: ['3.6', '3.8']
