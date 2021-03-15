@@ -31,7 +31,7 @@ jobs:
       run: |
         source .env/bin/activate
         pip install --upgrade pip
-        pip install airspeed flake8 matplotlib pytest scipy wheel
+        pip install -r .github/workflows/dev-requirements.txt
         pip install torch==1.7.1+cu101 -f https://download.pytorch.org/whl/torch_stable.html
         # We need to export correct pointers for CUDA_HOME and nvcc that corresond to the correct CUDA version.
         echo "CUDA_HOME=/usr/local/cuda-10.1/" >> $GITHUB_ENV
@@ -84,7 +84,8 @@ jobs:
         run: |
           source .env/bin/activate
           pip install --upgrade pip
-          pip install airspeed flake8 matplotlib pytest scipy torch==1.7.1 opencv-python wheel
+          pip install -r .github/workflows/dev-requirements.txt
+          pip install torch==1.7.1
           # We need to export correct pointers for CUDA_HOME and nvcc that corresond to the correct CUDA version.
           echo "CUDA_HOME=/usr/local/cuda-10.2/" >> $GITHUB_ENV
           echo "PATH=/usr/local/cuda-10.2/bin:$PATH" >> $GITHUB_ENV  # instead of alias nvcc="/usr/local/cuda-10.2/bin/nvcc"

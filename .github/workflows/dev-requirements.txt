@@ -1,0 +1,10 @@
+airspeed
+flake8
+numpy
+scipy
+matplotlib
+# tensorflow>=2.0.0
+tensorflow
+mxnet
+pytest
+wheel
