@@ -62,6 +62,7 @@ jobs:
         source .env/bin/activate
         python -m pytest
 
+
   build-and-test-cuda102:
     name: Tests Cuda 10.2, Python =
     runs-on: GPU4
@@ -111,17 +112,11 @@ jobs:
         run: |
           source .env/bin/activate
           python setup.py develop
+      - name: Lint with flake8
+          run: |
+            flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+#        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
       - name: Test
         run: |
           source .env/bin/activate
           python -m pytest
-
-  lint:
-    name: Lint with Pylint
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v2
-      - name: Lint with flake8
-        run: |
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-#        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
