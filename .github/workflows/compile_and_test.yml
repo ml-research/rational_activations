@@ -55,7 +55,7 @@ jobs:
     - name: Install package
       run: |
         source .env/bin/activate
-        python setup.py bdist_wheel
+        python setup.py develop --user
     - name: Test
       run: |
         source .env/bin/activate
@@ -101,7 +101,7 @@ jobs:
       - name: Install package
         run: |
           source .env/bin/activate
-          python setup.py bdist_wheel
+          python setup.py develop
       - name: Test
         run: |
           source .env/bin/activate
