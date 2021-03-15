@@ -30,6 +30,7 @@ jobs:
     - name: Set CUDA related environment variables
       run: |
         # We need to export correct pointers for CUDA_HOME and nvcc that corresond to the correct CUDA version.
+        source .env/bin/activate
         echo "CUDA_HOME=/usr/local/cuda-10.1/" >> $GITHUB_ENV
         echo "PATH=/usr/local/cuda-10.1/bin:$PATH" >> $GITHUB_ENV  # instead of alias nvcc="/usr/local/cuda-10.1/bin/nvcc"
         echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-10.1/targets/x86_64-linux/lib" >> $GITHUB_ENV
@@ -90,6 +91,7 @@ jobs:
       - name: Set CUDA related environment variables
         run: |
           # We need to export correct pointers for CUDA_HOME and nvcc that corresond to the correct CUDA version.
+          source .env/bin/activate
           echo "CUDA_HOME=/usr/local/cuda-10.2/" >> $GITHUB_ENV
           echo "PATH=/usr/local/cuda-10.2/bin:$PATH" >> $GITHUB_ENV  # instead of alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
           echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-10.2/targets/x86_64-linux/lib" >> $GITHUB_ENV
