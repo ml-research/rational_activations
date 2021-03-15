@@ -21,7 +21,7 @@ jobs:
       - name: Install python version
         uses: gabrielfalcao/pyenv-action@v7
         with:
-          default: 3.7
+          default: ${{ matrix.python-version }}
           command: |
             pip install -U pip  # upgrade pip after installing python
             pip install airspeed flake8 matplotlib pytest scipy
@@ -29,6 +29,8 @@ jobs:
             # We need to export correct pointers for CUDA_HOME and nvcc that corresond to the correct CUDA version.
             echo "CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }}/" >> $GITHUB_ENV
             echo "PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$PATH" >> $GITHUB_ENV
+      - name: create environment
+        run: pyenv local ${{ matrix.python-version }} && python -mvenv .venv${{ matrix.python-version }}
       - name: Check Python and CUDA versions
         run: |
           python --version
