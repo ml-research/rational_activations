@@ -12,7 +12,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        python-version: ['3.7.6', '3.8']
+        python-version: ['3.8']
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -101,6 +101,41 @@ jobs:
       - name: Test
         run: |
           source .env/bin/activate
+          python -m pytest
+  build-and-test-python37:
+    name: Tests Python, CUDA  =
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        python-version: ['3.7']
+        cuda-version: ['10.1', '10.2']
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install python version
+        uses: gabrielfalcao/pyenv-action@v5
+        with:
+          default: "${{ matrix.python-version }}"
+          command: pip install -U pip  # upgrade pip after installing python
+      - name: Install dependencies
+        run: |
+          pip install airspeed flake8 matplotlib pytest scipy
+          pip install torch==1.7.1
+          # We need to export correct pointers for CUDA_HOME and nvcc that corresond to the correct CUDA version.
+          echo "CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }}/" >> $GITHUB_ENV
+          echo "PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$PATH" >> $GITHUB_ENV
+      - name: Check Python and CUDA versions
+        run: |
+          python --version
+          python -c "import sys; print('Python version:', sys.version)"
+          python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
+          python -c "import torch; print('CUDA version used by PyTorch:', torch.version.cuda)"
+          nvcc --version
+          echo CUDA_HOME: $CUDA_HOME
+      - name: Install package
+        run: |
+          python setup.py develop
+      - name: Test
+        run: |
           python -m pytest
 
 # - name: Set Python environment variable
