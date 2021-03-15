@@ -19,9 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install python version
-        uses: gabrielfalcao/pyenv-action@v5
-        env:
-          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        uses: gabrielfalcao/pyenv-action@v7
         with:
           default: "${{ matrix.python-version }}"
           command: pip install -U pip  # upgrade pip after installing python
