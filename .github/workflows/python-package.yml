@@ -20,8 +20,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Envs
         run: |
-          echo "CFLAGS=-I/usr/include/openssl " >> $GITHUB_ENV
-          echo "LDFLAGS=-L/usr/lib64 >> $GITHUB_ENV
+          echo "CFLAGS=-I/usr/include/openssl" >> $GITHUB_ENV
+          echo "LDFLAGS=-L/usr/lib64" >> $GITHUB_ENV
       - name: Install python version
         uses: gabrielfalcao/pyenv-action@v7
         with:
