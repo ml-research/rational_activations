@@ -20,6 +20,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install python version
         uses: gabrielfalcao/pyenv-action@v7
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         with:
           default: "${{ matrix.python-version }}"
           command: pip install -U pip  # upgrade pip after installing python
