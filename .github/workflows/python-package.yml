@@ -12,11 +12,9 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        python-version: ['3.7', '3.8']
+        python-version: ['3.7.6', '3.8']
     steps:
     - uses: actions/checkout@v2
-    - name: Set Python environment variable
-      run: echo "LD_LIBRARY_PATH=/tmp/runner/work/_tool/Python/${{ matrix.python-version }}/x64/lib" >> $GITHUB_ENV
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
@@ -46,8 +44,7 @@ jobs:
         python -c "import torch; print('CUDA version used by PyTorch:', torch.version.cuda)"
         nvcc --version
         echo CUDA_HOME: $CUDA_HOME
-        echo $LD_LIBRARY_PATH
-      #     - name: Lint with flake8
+#     - name: Lint with flake8
 #      run: |dd
 #        # stop the build if there are Python syntax errors or undefined nameshb
 #        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
@@ -66,7 +63,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        python-version: ['3.6', '3.7']
+        python-version: ['3.6', '3.7.6']
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
@@ -74,9 +71,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Current dir
-        run: |
-          pwd
-          echo $LD_LIBRARY_PATH
+        run: pwd
       - run: nvidia-smi
       - name: Create new python env (on self-hosted runners we have to handle isolation ourselves)
         run: |
@@ -99,14 +94,14 @@ jobs:
           python -c "import torch; print('CUDA version used by PyTorch:', torch.version.cuda)"
           nvcc --version
           echo CUDA_HOME: $CUDA_HOME
-      - name: Set Python environment variable
-        run: echo "LD_LIBRARY_PATH=/tmp/runner/work/_tool/Python/${{ matrix.python-version }}/x64/lib" >> $GITHUB_ENV
       - name: Install package
         run: |
           source .env/bin/activate
-          echo $LD_LIBRARY_PATH
           python setup.py develop
       - name: Test
         run: |
           source .env/bin/activate
           python -m pytest
+
+# - name: Set Python environment variable
+#      run: echo "LD_LIBRARY_PATH=/tmp/runner/work/_tool/Python/${{ matrix.python-version }}/x64/lib" >> $GITHUB_ENV
