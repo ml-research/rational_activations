@@ -19,11 +19,6 @@ jobs:
     - name: Install wheels
       run: |
         ls -l
-        docker exec rat_manylinux bash -c 'pwd && cd rational_activations'
-        docker exec rat_manylinux bash -c 'pwd && ./pypi_build_scripts/make_manylinux.sh'
+        docker exec rat_manylinux bash < .github/workflows/compile_and_test.sh
         pwd
-        ls /
-        ls wheelhouse
-        cd rational_activations
-        ls wheelhouse
-        ls dist
+        ls
