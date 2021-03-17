@@ -1,11 +1,11 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
+#         python -m pytest --ignore=rational/mxnet/tests --ignore=rational/keras/tests/ -k rational/torch/tests/
 name: Python package
 
 on:
   push:
-    branches: [ master ]
+    branches: [ xyz ]
 
 jobs:
   build-and-test-cuda101:
@@ -36,6 +36,8 @@ jobs:
         # We need to export correct pointers for CUDA_HOME and nvcc that corresond to the correct CUDA version.
         echo "CUDA_HOME=/usr/local/cuda-10.1/" >> $GITHUB_ENV
         echo "PATH=/usr/local/cuda-10.1/bin:$PATH" >> $GITHUB_ENV  # instead of alias nvcc="/usr/local/cuda-10.1/bin/nvcc"
+        echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-10.1/targets/x86_64-linux/lib" >> $GITHUB_ENV
+        echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-10.1/extras/CUPTI/lib64" >> $GITHUB_ENV
     - name: Check Python and CUDA versions
       run: |
         source .env/bin/activate
@@ -87,6 +89,8 @@ jobs:
           # We need to export correct pointers for CUDA_HOME and nvcc that corresond to the correct CUDA version.
           echo "CUDA_HOME=/usr/local/cuda-10.2/" >> $GITHUB_ENV
           echo "PATH=/usr/local/cuda-10.2/bin:$PATH" >> $GITHUB_ENV  # instead of alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
+          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-10.2/targets/x86_64-linux/lib" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-10.2/extras/CUPTI/lib64" >> $GITHUB_ENV
       - name: Check Python and CUDA versions
         run: |
           source .env/bin/activate
