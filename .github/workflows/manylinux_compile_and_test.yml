@@ -21,5 +21,9 @@ jobs:
         ls -l
         ls pypi_build_scripts
         docker exec rat_manylinux bash -c 'cd rational_activations && ./pypi_build_scripts/make_manylinux.sh'
+        pwd
+        ls /
+        ls wheelhouse
+        cd rational_activations
         ls wheelhouse
         ls dist
