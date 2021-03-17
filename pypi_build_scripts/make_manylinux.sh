@@ -11,6 +11,12 @@ do
   esac
 done
 
+if [ -d "wheelhouse" ]; then
+  printf "wheelhouse folder found, moving it: wheelhouse -> wheelhouse_save"
+  rm -rf wheelhouse_save
+  mv wheelhouse wheelhouse_save
+fi
+
 CUDA_list=("cuda-10.1" "cuda-10.2" "cuda-11.0")
 
 ######### CHECKING ###############
