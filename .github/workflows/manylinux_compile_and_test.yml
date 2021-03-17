@@ -20,7 +20,12 @@ jobs:
       run: |
         ls -l
         ls pypi_build_scripts
-        docker exec rat_manylinux bash -c 'cd rational_activations && ./pypi_build_scripts/make_manylinux.sh'
+        docker run -i --gpus device=all --rm --name rationals_cicd_cuda$(CUDA)py$(Python) cuda$(CUDA)py$(Python) bash
+        pwd
+        cd rational_activations
+        pwd
+        ls -l
+        ./pypi_build_scripts/make_manylinux.sh
         pwd
         ls /
         ls wheelhouse
