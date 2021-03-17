@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo Startin Manylinux....
 cd rational_activations
 git pull origin master
 ./pypi_build_scripts/make_manylinux.sh
