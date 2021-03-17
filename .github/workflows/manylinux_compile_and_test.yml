@@ -19,13 +19,8 @@ jobs:
     - name: Install wheels
       run: |
         ls -l
-        ls pypi_build_scripts
-        docker run -i --gpus device=all --rm --name rationals_cicd_cuda$(CUDA)py$(Python) cuda$(CUDA)py$(Python) bash
-        pwd
-        cd rational_activations
-        pwd
-        ls -l
-        ./pypi_build_scripts/make_manylinux.sh
+        docker exec rat_manylinux bash -c 'pwd && cd rational_activations'
+        docker exec rat_manylinux bash -c 'pwd && ./pypi_build_scripts/make_manylinux.sh'
         pwd
         ls /
         ls wheelhouse
