@@ -20,7 +20,7 @@ jobs:
     - run: nvidia-smi
     - name: Install wheels
       run: |
-        docker exec rat_manylinux bash -c 'cd rational_activations && git pull origin master && ./pypi_build_scripts/make_manylinux.sh && ls wheelhouse'
+        docker exec rat_manylinux bash -c 'cd rational_activations && ./pypi_build_scripts/make_manylinux.sh && ls wheelhouse'
         docker exec rat_manylinux bash -c 'cd rational_activations && ls wheelhouse'
         docker exec rat_manylinux bash -c 'cd rational_activations && python3.6 -m pip install wheelhouse/cuda10.2/rational_activations-0.1.0-cp38-cp38-manylinux2014_x86_64.whl'
         docker exec rat_manylinux bash -c 'cd rational_activations && python -c "import sys; print('Python version:', sys.version)"'
