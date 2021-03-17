@@ -20,5 +20,3 @@ jobs:
       run: |
         ls -l
         docker exec rat_manylinux bash < .github/workflows/compile_and_test.sh
-        pwd
-        ls
