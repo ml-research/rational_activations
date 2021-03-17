@@ -12,7 +12,7 @@ do
 done
 
 if [ -d "wheelhouse" ]; then
-  printf "wheelhouse folder found, moving it: wheelhouse -> wheelhouse_save"
+  printf "wheelhouse folder found, moving it: wheelhouse -> wheelhouse_save \n"
   rm -rf wheelhouse_save
   mv wheelhouse wheelhouse_save
 fi
