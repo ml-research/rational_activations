@@ -18,6 +18,8 @@ jobs:
     - run: nvidia-smi
     - name: Install wheels
       run: |
+        ls -l
+        ls pypi_build_scripts
         docker exec rat_manylinux zsh ./pypi_build_scripts/make_manylinux.sh
         ls wheelhouse
         ls dist
