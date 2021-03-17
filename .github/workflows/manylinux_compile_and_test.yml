@@ -20,6 +20,6 @@ jobs:
       run: |
         ls -l
         ls pypi_build_scripts
-        docker exec rat_manylinux bash ./pypi_build_scripts/make_manylinux.sh
+        docker exec rat_manylinux bash -c './pypi_build_scripts/make_manylinux.sh'
         ls wheelhouse
         ls dist
