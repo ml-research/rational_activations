@@ -10,7 +10,7 @@ on:
 jobs:
   manylinux:
     name: Tests Cuda 10.1, Python
-    runs-on: self-hosted
+    runs-on: GPU4
     steps:
     - uses: actions/checkout@v2
     - name: Current dir
