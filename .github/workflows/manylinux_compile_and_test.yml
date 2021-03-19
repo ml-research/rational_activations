@@ -38,7 +38,7 @@ jobs:
     - name: Run GPU tests CUDA=${{ matrix.cuda-version }} & Python${{ matrix.python-version }}
       run: |
         docker exec rat_manylinux bash -c 'cd rational_activations && \
-          pip uninstall rational_activations torch mxnet tensorflow && \
+          python${{ matrix.python-version }} -m pip uninstall rational_activations torch mxnet tensorflow && \
           export CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }} && \
           export PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$$PATH && \
           python${{ matrix.python-version }} -m pip install mxnet-cu102 torch==1.7.1 tensorflow-gpu && \
