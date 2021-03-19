@@ -5,7 +5,7 @@ name: Python package
 
 on:
   push:
-    branches: [ master ]   # change to whichever branch ought to be tracked by this workflow
+    branches: [ xyz ]   # change to whichever branch ought to be tracked by this workflow
 
 jobs:
   build-and-test-cuda101:
