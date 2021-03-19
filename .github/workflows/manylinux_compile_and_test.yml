@@ -9,7 +9,7 @@ on:
 
 jobs:
   manylinux_compilation:
-    name: Tests Cuda 10.1, Python
+    name: Compile all manylinux wheels
     runs-on: GPU4
     steps:
     - uses: actions/checkout@v2
