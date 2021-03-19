@@ -18,13 +18,6 @@ jobs:
         pwd
         ls -l
     - run: nvidia-smi
-    - name: Install wheels
-      run: |
-        echo Pulling master branch and running manylinux scripts, this will take some time...
-        docker exec rat_manylinux bash -c 'cd rational_activations && git pull ci_repo master && ./pypi_build_scripts/make_manylinux.sh && ls wheelhouse'
-        echo Printing wheelhouse files...
-        docker exec rat_manylinux bash -c 'cd rational_activations && ls wheelhouse && ls wheelhouse/cuda-10.2/ && ls wheelhouse/cuda-10.1/'
-
   test_wheels:
     name: Tests Python, Cuda =
     needs: manylinux_compilation
