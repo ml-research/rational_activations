@@ -24,7 +24,7 @@ jobs:
     runs-on: GPU4
     strategy:
       matrix:
-        python-version: ['3.6'] #, '3.7', '3.8']
+        python-version: ['3.7'] #, '3.7', '3.8']
         cuda-version: ['10.2']
     steps:
     - uses: actions/checkout@v2
@@ -32,9 +32,9 @@ jobs:
       run: |
         echo Available wheels:
         docker exec rat_manylinux zsh -c "ls rational_activations/wheelhouse/cuda-${{ matrix.cuda-version }}"
-        docker exec rat_manylinux zsh -c "python${{ matrix.python-version }} -m pip uninstall -y rational_activations torch mxnet tensorflow"
+        docker exec rat_manylinux zsh -c "python${{ matrix.python-version }} -m pip uninstall -y rational_activations torch mxnet tensorflow mxnet-cu101 mxnet-cu102"
         docker exec rat_manylinux zsh -c "python${{ matrix.python-version }} -m pip install --upgrade pip"
         docker exec rat_manylinux zsh -c "export CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }} && export PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$PATH && nvcc -V && python${{ matrix.python-version }} -m pip install mxnet-cu102 torch==1.7.1 tensorflow-gpu"
-        docker exec rat_manylinux zsh -c "cd rational_activations && export CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }} && export PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$PATH && nvcc -V && python${{ matrix.python-version }} -m pip install wheelhouse/cuda-${{ matrix.cuda-version }}/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl"
-        docker exec rat_manylinux zsh -c "cd /usr/local/lib64/python3.6/site-packages/ && export CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }} && export PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$PATH && python${{ matrix.python-version }} -m pytest rational"
+        docker exec rat_manylinux zsh -c "cd rational_activations && export CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }} && export PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$PATH && nvcc -V && python${{ matrix.python-version }} -m pip install wheelhouse/cuda-${{ matrix.cuda-version }}/rational_activations-0.1.0-cp37-cp37m-manylinux2014_x86_64.whl"
+        docker exec rat_manylinux zsh -c "cd /usr/local/lib64/python${{ matrix.python-version }}/site-packages/ && export CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }} && export PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$PATH && python${{ matrix.python-version }} -m pytest rational"
 
