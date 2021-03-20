@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.2.0-devel
+FROM pytorch/pytorch:1.8.0-cuda11.1-cudnn8-runtime 
 RUN 	apt-get update -y && apt-get install -y python3-pip
 
 RUN	mkdir /.install

@@ -4,7 +4,7 @@ This file tests that cuda calculations produce correct results.
 from tensorflow.nn import leaky_relu
 from tensorflow.math import tanh, sigmoid
 
-from rational.keras.tests import _test_template
+from .helpers import _test_template
 
 # test cuda execution
 CUDA = True

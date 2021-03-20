@@ -23,7 +23,7 @@ rationalD_lrelu_gpu = Rational(version='D', cuda=True, trainable=False)(cuda_inp
 
 # GPU and CPU consistent results
 def test_cpu_equal_gpu_A():
-    assert np.all(rationalA_lrelu_cpu == rationalA_lrelu_gpu)
+    assert np.isclose(rationalA_lrelu_cpu, rationalA_lrelu_gpu).all()
 
 
 def test_cpu_equal_gpu_B():

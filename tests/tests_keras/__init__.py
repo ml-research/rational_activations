@@ -3,4 +3,3 @@ This file imports content into the keras.tests directory, making this a Python p
 E.g.: Only that way can Rational be imported 'directly' in the test files
 """
 from rational.keras import Rational
-from .helpers import _test_template
