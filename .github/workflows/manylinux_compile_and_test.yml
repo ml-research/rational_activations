@@ -33,6 +33,7 @@ jobs:
         nvcc -V
         docker exec rat_manylinux zsh -c "cd rational_activations && python${{ matrix.python-version }} -m pip uninstall -y rational_activations torch mxnet tensorflow"
         docker exec rat_manylinux zsh -c "cd rational_activations && export CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }} && export PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$PATH && nvcc -V && python${{ matrix.python-version }} -m pip install mxnet-cu102 torch==1.7.1 tensorflow-gpu"
+        docker exec rat_manylinux zsh -c "ls rational_activations/wheelhouse/cuda-10.2"
         docker exec rat_manylinux zsh -c "cd rational_activations && export CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }} && export PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$PATH && nvcc -V && python${{ matrix.python-version }} -m pip install wheelhouse/cuda-${{ matrix.cuda-version }}/rational_activations-0.1.0-cp36-cp36-manylinux2014_x86_64.whl"
         docker exec rat_manylinux zsh -c "cd rational_activations && python${{ matrix.python-version }} -m pytest"
 
