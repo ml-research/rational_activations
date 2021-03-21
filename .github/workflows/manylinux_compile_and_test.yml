@@ -5,7 +5,7 @@ name: Python package
 
 on:
   push:
-    branches: [ master ]
+    branches: [ xyz ]
 
 jobs:
   manylinux_compilation:
@@ -26,7 +26,7 @@ jobs:
         docker exec rat_manylinux bash -c 'cd rational_activations && ls wheelhouse && ls wheelhouse/cuda-10.2/ && ls wheelhouse/cuda-10.1/'
 
   test_wheels:
-    name: Tests Python, Cuda =
+    name: Run tests for Python, Cuda =
     needs: manylinux_compilation
     runs-on: GPU4
     strategy:
@@ -37,12 +37,14 @@ jobs:
     - uses: actions/checkout@v2
     - name: Run GPU tests CUDA=${{ matrix.cuda-version }} & Python${{ matrix.python-version }}
       run: |
-        docker exec rat_manylinux bash -c 'cd rational_activations && \
-          pip uninstall rational_activations torch mxnet tensorflow && \
-          export CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }} && \
-          export PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$$PATH && \
-          python${{ matrix.python-version }} -m pip install mxnet-cu102 torch==1.7.1 tensorflow-gpu && \
-          python${{ matrix.python-version }} -m pip install wheelhouse/cuda-${{ matrix.cuda-version }}/rational_activations-0.1.0-cp36-cp36-manylinux2014_x86_64.whl && \
-          python${{ matrix.python-version }} -c "import sys, torch; print('Python, CUDA version:', sys.version, torch.version.cuda) && nvcc -V && \
-          python${{ matrix.python-version }} -m pytest'
+        cat <<EOF | docker exec rat_manylinux bash
+        cd rational_activations
+        pip uninstall rational_activations torch mxnet tensorflow
+        export CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }}
+        export PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$$PATH
+        python${{ matrix.python-version }} -m pip install mxnet-cu102 torch==1.7.1 tensorflow-gpu
+        python${{ matrix.python-version }} -m pip install wheelhouse/cuda-${{ matrix.cuda-version }}/rational_activations-0.1.0-cp36-cp36-manylinux2014_x86_64.whl
+        python${{ matrix.python-version }} -c "import sys, torch; print('Python, CUDA version:', sys.version, torch.version.cuda) && nvcc -V
+        python${{ matrix.python-version }} -m pytest
+        EOF
 
