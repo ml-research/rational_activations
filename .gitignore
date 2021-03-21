@@ -20,3 +20,4 @@ venv
 .coverage
 .eggs/
 examples/pytorch/data/
+data
