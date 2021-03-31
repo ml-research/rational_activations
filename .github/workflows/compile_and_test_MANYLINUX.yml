@@ -13,17 +13,19 @@ jobs:
     runs-on: GPU4
     steps:
       - uses: actions/checkout@v2
-      - name: Current dir and nvidia-smi
+      - name: Current dir & nvidia-smi
         run: |
           pwd
           ls -l
           nvidia-smi
       - name: Pull up-to-date repo
+        run: |
           echo Pulling master branch
           docker exec rat_manylinux bash -c 'cd rational_activations && git pull ci_repo master'
       - name: Install the wheels
         run: |
           echo  Running manylinux script, this will take some time...
+          docker exec rat_manylinux bash -c 'cd rational_activations && ./pypi_build_scripts/make_manylinux.sh'
           echo Printing wheelhouse files...
           docker exec rat_manylinux bash -c 'cd rational_activations && ls wheelhouse && ls wheelhouse/cuda-10.2/ && ls wheelhouse/cuda-10.1/'
       - name: Copy wheels outside of docker container
