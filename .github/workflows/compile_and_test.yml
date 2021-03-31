@@ -133,4 +133,4 @@ jobs:
           pip install tensorflow-gpu # $(python .github/workflows/get_tensorflow_wheel.py | tail -1)
       - name: Lint with PyLint
         run: |
-          pylint .
+          pylint **/*.py
