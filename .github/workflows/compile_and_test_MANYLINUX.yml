@@ -24,15 +24,15 @@ jobs:
         run: |
           pwd
           nvidia-smi
-          mkdir /temp/wheels/
-          ls /temp/wheels/
-          rm -r /temp/wheels
+          mkdir /temp_wheels/
+          ls /temp_wheels/
+          rm -r /temp_wheels
       - name: Create new python env (on self-hosted runners we have to handle isolation ourselves)
         run: |
           python -m venv .env
           source .env/bin/activate
-          ls /temp/wheels/
-          docker cp rat_manyl:wheelhouse/cuda-10.2/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl /temp/wheels/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl
+          ls /temp_wheels
+          docker cp rat_manyl:wheelhouse/cuda-10.2/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl /temp_wheels/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl
       - name: Install dependencies
         run: |
           source .env/bin/activate
@@ -55,7 +55,7 @@ jobs:
       - name: Install package
         run: |
           source .env/bin/activate
-          pip install /temp/wheels/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl
+          pip install /temp_wheels/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl
       - name: Test
         run: |
           source .env/bin/activate
