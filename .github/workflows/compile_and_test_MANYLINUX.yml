@@ -26,7 +26,7 @@ jobs:
           nvidia-smi
           mkdir temp_wheels/
           ls temp_wheels/
-          rm -r temp_wheels
+          rm -rf temp_wheels/*
       - name: Create new python env (on self-hosted runners we have to handle isolation ourselves)
         run: |
           python -m venv .env
