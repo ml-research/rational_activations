@@ -5,7 +5,7 @@ name: CI-CD
 
 on:
   push:
-    branches: [ ci-cd, master ]
+    branches: [ master ]
 
 jobs:
   build-and-test-cuda101:
@@ -22,7 +22,6 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Current dir
       run: pwd
-    - run: nvidia-smi
     - name: Create new python env (on self-hosted runners we have to handle isolation ourselves)
       run: |
         python -m venv .env
@@ -72,7 +71,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Current dir
         run: pwd
-      - run: nvidia-smi
       - name: Create new python env (on self-hosted runners we have to handle isolation ourselves)
         run: |
           python -m venv .env
