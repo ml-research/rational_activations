@@ -17,7 +17,7 @@ jobs:
       run: |
         pwd
         ls -l
-    - run: nvidia-smi
+        nvidia-smi
   test_wheels:
     name: Tests Python, Cuda =
     needs: manylinux_compilation
