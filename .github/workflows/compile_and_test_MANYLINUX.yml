@@ -58,7 +58,6 @@ jobs:
       - name: Test
         run: |
           source .env/bin/activate
-          ls -l
           cd tests
           ls -l
-          python -m pytest
+          python -m pytest tests_torch
