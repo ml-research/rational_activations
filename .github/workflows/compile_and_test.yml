@@ -9,7 +9,7 @@ on:
 
 jobs:
   build-and-test-cuda101:
-    name: Tests Cuda 10.1, Python =
+    name: Cuda 10.1, Python =
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -55,7 +55,7 @@ jobs:
       run: |
         echo Uploaded!
   build-and-test-cuda102:
-    name: Tests Cuda 10.2, Python =
+    name: Cuda 10.2, Python =
     runs-on: ubuntu-latest
     strategy:
       matrix:
