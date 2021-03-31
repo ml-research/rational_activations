@@ -57,8 +57,6 @@ jobs:
       - name: Test
         run: |
           source .env/bin/activate
-          cd .env/lib/python3.6/site-packages/
+          cd tests
           ls -l
-          echo
-          ls -l
-          python -m pytest rational
+          python -m pytest
