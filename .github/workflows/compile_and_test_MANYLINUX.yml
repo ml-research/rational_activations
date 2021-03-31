@@ -36,6 +36,8 @@ jobs:
           source .env/bin/activate
           pip install --upgrade pip
           pip install airspeed matplotlib pytest scipy torch==1.7.1 wheel
+          pip show wheel
+          pip show torch
           # We need to export correct pointers for CUDA_HOME and nvcc that corresond to the correct CUDA version.
           echo "CUDA_HOME=/usr/local/cuda-10.2/" >> $GITHUB_ENV
           echo "PATH=/usr/local/cuda-10.2/bin:$PATH" >> $GITHUB_ENV  # instead of alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
@@ -54,6 +56,7 @@ jobs:
         run: |
           source .env/bin/activate
           pip install temp_wheels/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl
+          pip show rational_activations
       - name: Test
         run: |
           source .env/bin/activate
