@@ -1,9 +1,6 @@
 import warnings
 import numpy as np
 from numpy import zeros, inf
-from scipy.optimize.optimize import OptimizeWarning
-from scipy.optimize._lsq.least_squares import prepare_bounds
-from scipy.optimize.minpack import leastsq, _wrap_jac
 
 # np.random.seed(0)
 
@@ -18,6 +15,9 @@ def _wrap_func(func, xdata, ydata, degrees):
 
 def _curve_fit(f, xdata, ydata, degrees, version, p0=None, absolute_sigma=False,
                method=None, jac=None, **kwargs):
+    from scipy.optimize.optimize import OptimizeWarning
+    from scipy.optimize._lsq.least_squares import prepare_bounds
+    from scipy.optimize.minpack import leastsq, _wrap_jac
     bounds = (-np.inf, np.inf)
     lb, ub = prepare_bounds(bounds, np.sum(degrees))
     if p0 is None:
@@ -34,7 +34,6 @@ def _curve_fit(f, xdata, ydata, degrees, version, p0=None, absolute_sigma=False,
         # non-array_like `xdata`.
         xdata = np.asarray_chkfinite(xdata, float)
 
-    # func = _wrap_func(xdata, ydata, degrees)  # Modification here  !!!
     func = _wrap_func(f, xdata, ydata, degrees)  # Modification here  !!!
     if callable(jac):
         jac = _wrap_jac(jac, xdata, None)
@@ -85,15 +84,35 @@ def fit_rational_to_base_function(rational_func, ref_func, x, degrees=(5, 4), ve
 
 
 def find_closest_equivalent(rational_func, new_func, x):
+    """
+    Compute the parameters a, b, c, and d that minimizes distance between the
+    rational function and the other function on the range `x`
+
+    Arguments:
+            rational_func (callable):
+                The rational function to consider.\n
+            new_func (callable):
+                The function you want to fit to rational.\n
+            x (array):
+                The range on which the curves of the functions are fitted
+                together.\n
+                Default ``True``
+    Returns:
+        tuple: ((a, b, c, d), dist) with: \n
+        a, b, c, d: the parameters to adjust the function \
+            (vertical and horizontal scales and bias) \n
+        dist: The final distance between the rational function and the \
+        fitted one
+    """
     initials = np.array([1., 0., 1., 0.]) # a, b, c, d
     y = rational_func(x)
     from scipy.optimize import curve_fit
     import torch
 
     def equivalent_func(x_array, a, b, c, d):
-        return a * new_func(c * torch.tensor(x_array) + d) + b
-    params = curve_fit(equivalent_func, x, y, initials, bounds=(x.min(), x.max()))
+        return a * new_func(c * x_array + d) + b
+    params = curve_fit(equivalent_func, x, y, initials)
     a, b, c, d = params[0]
     final_func_output = np.array(equivalent_func(x, a, b, c, d))
-    final_distance = ((y - final_func_output)**2).sum()
+    final_distance = np.sqrt(((y - final_func_output)**2).sum())
     return (a, b, c, d), final_distance

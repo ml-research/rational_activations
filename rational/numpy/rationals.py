@@ -1,5 +1,4 @@
 import numpy as np
-from rational.utils.get_weights import get_parameters
 
 
 class Rational():
@@ -26,6 +25,7 @@ class Rational():
         Module: Rational module
     """
     def __init__(self, approx_func="leaky_relu", degrees=(5, 4), version="A"):
+        from rational.utils.get_weights import get_parameters
         w_numerator, w_denominator = get_parameters(version, degrees,
                                                     approx_func)
         self.numerator = w_numerator
@@ -81,7 +81,7 @@ class Rational():
                                           requires_grad=trainable and train_denominator)
         return rtorch
 
-    def fit(self, function, x_range=np.arange(-3., 3., 0.1), show=False):
+    def fit(self, function, x_range=np.arange(-3., 3., 0.1)):
         """
         Compute the parameters a, b, c, and d to have the neurally equivalent \
         function of the provided one as close as possible to this rational \
@@ -109,24 +109,61 @@ class Rational():
         from rational.utils import find_closest_equivalent
         (a, b, c, d), distance = find_closest_equivalent(self, function,
                                                          x_range)
-        if show:
-            import matplotlib.pyplot as plt
-            import torch
-            plt.plot(x_range, self(x_range), label="Rational (self)")
-            if '__name__' in dir(function):
-                func_label = function.__name__
-            else:
-                func_label = str(function)
-            result = a * function(c * torch.tensor(x_range) + d) + b
-            plt.plot(x_range, result, label=f"Fitted {func_label}")
-            plt.legend()
-            plt.show()
         return (a, b, c, d), distance
 
     def __repr__(self):
-        return (f"Rational Activation Function (PYTORCH version "
-                f"{self.version}) of degrees {self.degrees} running on "
-                f"{self.device}")
+        return (f"Rational Activation Function (Numpy version "
+                f"{self.version}) of degrees {self.degrees}")
+
+    def show(self, input_range=None, display=True, distribution=None):
+        """
+        Show the function using `matplotlib`.
+
+        Arguments:
+                input_range (range):
+                    The range to print the function on.\n
+                    Default ``None``
+                display (bool):
+                    If ``True``, displays the graph.
+                    Otherwise, returns it. \n
+                    Default ``True``
+        """
+        import matplotlib.pyplot as plt
+        try:
+            import seaborn as sns
+            sns.set_style("whitegrid")
+        except ImportError as e:
+            print("seaborn not found on computer, install it for better",
+                  "visualisation")
+        ax = plt.gca()
+        if input_range is None:
+            if distribution is None:
+                distribution = self.distribution
+            if distribution is None:
+                input_range = np.arange(-3, 3, 0.01)
+            else:
+                freq, bins = _cleared_arrays(distribution)
+                if freq is None:
+                    input_range = np.arange(-3, 3, 0.01)
+                else:
+                    ax2 = ax.twinx()
+                    ax2.set_yticks([])
+                    grey_color = (0.5, 0.5, 0.5, 0.6)
+
+                    ax2.bar(bins, freq, width=bins[1] - bins[0],
+                            color=grey_color, edgecolor=grey_color)
+                    input_range = np.array(bins).float()
+        else:
+            input_range = np.array(input_range).float()
+        outputs = self.activation_function(input_range, self.numerator,
+                                           self.denominator, False)
+        outputs_np = outputs.detach().cpu().numpy()
+        ax.plot(input_range.detach().cpu().numpy(),
+                outputs_np)
+        if display:
+            plt.show()
+        else:
+            return plt.gcf()
 
 
 def Rational_version_A(x, w_array, d_array):

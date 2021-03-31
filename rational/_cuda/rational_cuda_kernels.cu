@@ -3028,7 +3028,7 @@ std::vector<torch::Tensor> rational_cuda_backward_A_7_6(torch::Tensor grad_outpu
 
 
 
-// P(X)/Q(X) = a_0 + a_1*X + a_2*X^2 + ... + a_n*X^n / 1 + |b_0*X + b_1*X^2 + ... + b_{n-1}*X^n|
+// P(X)/Q(X) = a_0 + a_1*X + a_2*X^2 + ... + a_n*X^n / 1 + |b_1*X + b_2*X^2 + ... + b_n*X^n|
 
 
 
@@ -3299,7 +3299,7 @@ std::vector<torch::Tensor> rational_cuda_backward_B_3_3(torch::Tensor grad_outpu
 
 
 
-// P(X)/Q(X) = a_0 + a_1*X + a_2*X^2 + ... + a_n*X^n / 1 + |b_0*X + b_1*X^2 + ... + b_{n-1}*X^n|
+// P(X)/Q(X) = a_0 + a_1*X + a_2*X^2 + ... + a_n*X^n / 1 + |b_1*X + b_2*X^2 + ... + b_n*X^n|
 
 
 
@@ -3607,7 +3607,7 @@ std::vector<torch::Tensor> rational_cuda_backward_B_4_4(torch::Tensor grad_outpu
 
 
 
-// P(X)/Q(X) = a_0 + a_1*X + a_2*X^2 + ... + a_n*X^n / 1 + |b_0*X + b_1*X^2 + ... + b_{n-1}*X^n|
+// P(X)/Q(X) = a_0 + a_1*X + a_2*X^2 + ... + a_n*X^n / 1 + |b_1*X + b_2*X^2 + ... + b_n*X^n|
 
 
 
@@ -3952,7 +3952,7 @@ std::vector<torch::Tensor> rational_cuda_backward_B_5_5(torch::Tensor grad_outpu
 
 
 
-// P(X)/Q(X) = a_0 + a_1*X + a_2*X^2 + ... + a_n*X^n / 1 + |b_0*X + b_1*X^2 + ... + b_{n-1}*X^n|
+// P(X)/Q(X) = a_0 + a_1*X + a_2*X^2 + ... + a_n*X^n / 1 + |b_1*X + b_2*X^2 + ... + b_n*X^n|
 
 
 
@@ -4334,7 +4334,7 @@ std::vector<torch::Tensor> rational_cuda_backward_B_6_6(torch::Tensor grad_outpu
 
 
 
-// P(X)/Q(X) = a_0 + a_1*X + a_2*X^2 + ... + a_n*X^n / 1 + |b_0*X + b_1*X^2 + ... + b_{n-1}*X^n|
+// P(X)/Q(X) = a_0 + a_1*X + a_2*X^2 + ... + a_n*X^n / 1 + |b_1*X + b_2*X^2 + ... + b_n*X^n|
 
 
 
@@ -4753,7 +4753,7 @@ std::vector<torch::Tensor> rational_cuda_backward_B_7_7(torch::Tensor grad_outpu
 
 
 
-// P(X)/Q(X) = a_0 + a_1*X + a_2*X^2 + ... + a_n*X^n / 1 + |b_0*X + b_1*X^2 + ... + b_{n-1}*X^n|
+// P(X)/Q(X) = a_0 + a_1*X + a_2*X^2 + ... + a_n*X^n / 1 + |b_1*X + b_2*X^2 + ... + b_n*X^n|
 
 
 
@@ -5209,7 +5209,7 @@ std::vector<torch::Tensor> rational_cuda_backward_B_8_8(torch::Tensor grad_outpu
 
 
 
-// P(X)/Q(X) = a_0 + a_1*X + a_2*X^2 + ... + a_n*X^n / 1 + |b_0*X + b_1*X^2 + ... + b_{n-1}*X^n|
+// P(X)/Q(X) = a_0 + a_1*X + a_2*X^2 + ... + a_n*X^n / 1 + |b_1*X + b_2*X^2 + ... + b_n*X^n|
 
 
 
@@ -5538,7 +5538,7 @@ std::vector<torch::Tensor> rational_cuda_backward_B_5_4(torch::Tensor grad_outpu
 
 
 
-// P(X)/Q(X) = a_0 + a_1*X + a_2*X^2 + ... + a_n*X^n / 1 + |b_0*X + b_1*X^2 + ... + b_{n-1}*X^n|
+// P(X)/Q(X) = a_0 + a_1*X + a_2*X^2 + ... + a_n*X^n / 1 + |b_1*X + b_2*X^2 + ... + b_n*X^n|
 
 
 
