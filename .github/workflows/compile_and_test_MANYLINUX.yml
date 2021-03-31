@@ -13,7 +13,7 @@ jobs:
     runs-on: GPU4
     steps:
       - uses: actions/checkout@v2
-      - name: Current dir & nvidia-smi
+      - name: Current dir and nvidia-smi
         run: |
           pwd
           ls -l
