@@ -134,6 +134,8 @@ jobs:
       - name: Lint Keras with PyLint
         run: |
           pylint rational/keras/versions.py
+          pylint rational/keras/rationals.py
       - name: Lint MxNet with PyLint
         run: |
+          pylint rational/mxnet/versions.py
           pylint rational/mxnet/rationals.py
