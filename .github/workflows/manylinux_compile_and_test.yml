@@ -5,7 +5,7 @@ name: Python package
 
 on:
   push:
-    branches: [ xyz ]
+    branches: [ xys ]
 
 jobs:
   manylinux_compilation:
