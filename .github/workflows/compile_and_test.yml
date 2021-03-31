@@ -5,7 +5,7 @@ name: Python package
 
 on:
   push:
-    branches: [ ci-cd ]
+    branches: [ ci-cdx ]
 
 jobs:
   build-and-test-cuda101:
