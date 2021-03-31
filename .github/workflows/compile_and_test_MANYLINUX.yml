@@ -30,7 +30,8 @@ jobs:
         run: |
           python -m venv .env
           source .env/bin/activate
-          docker cp rat_manylinux:/rational_activations/wheelhouse/cuda-10.2/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl temp_wheels/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl
+          docker cp rat_manylinux:/rational_activations/wheelhouse/cuda-10.2/ temp_wheels/
+          ls -l temp_wheels/
       - name: Install dependencies
         run: |
           source .env/bin/activate
