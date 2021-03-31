@@ -30,6 +30,8 @@ jobs:
           source .env/bin/activate
           mkdir /tmp/wheels/
           rm -rf /tmp/wheels
+          ls /tmp/
+          ls /tmp/wheels/
           docker cp rat_manyl:wheelhouse/cuda-10.2/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl /tmp/wheels/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl
       - name: Install dependencies
         run: |
