@@ -42,9 +42,6 @@ jobs:
         source .env/bin/activate
         python --version
         python -c "import sys; print('Python version:', sys.version)"
-        python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
-        python -c "import torch; print('CUDA version used by PyTorch:', torch.version.cuda)"
-        nvcc --version
         echo CUDA_HOME: $CUDA_HOME
     - name: Install package
       run: |
@@ -90,9 +87,6 @@ jobs:
           source .env/bin/activate
           python --version
           python -c "import sys; print('Python version:', sys.version)"
-          python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
-          python -c "import torch; print('CUDA version used by PyTorch:', torch.version.cuda)"
-          nvcc --version
           echo CUDA_HOME: $CUDA_HOME
       - name: Install package
         run: |
