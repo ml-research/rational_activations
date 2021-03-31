@@ -133,7 +133,7 @@ jobs:
           pip install tensorflow-gpu # $(python .github/workflows/get_tensorflow_wheel.py | tail -1)
       - name: Lint Keras with PyLint
         run: |
-          pylint rational/keras/*.py
+          pylint rational/keras/versions.py
       - name: Lint MxNet with PyLint
         run: |
-          pylint rational/mxnet/*.py
+          pylint rational/mxnet/rationals.py
