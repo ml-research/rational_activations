@@ -24,13 +24,13 @@ jobs:
         run: |
           pwd
           nvidia-smi
+          mkdir /tmp/wheels/
+          ls /tmp/wheels/
+          rm -rf /tmp/wheels
       - name: Create new python env (on self-hosted runners we have to handle isolation ourselves)
         run: |
           python -m venv .env
           source .env/bin/activate
-          mkdir /tmp/wheels/
-          rm -rf /tmp/wheels
-          ls /tmp/
           ls /tmp/wheels/
           docker cp rat_manyl:wheelhouse/cuda-10.2/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl /tmp/wheels/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl
       - name: Install dependencies
