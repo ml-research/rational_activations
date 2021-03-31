@@ -10,7 +10,7 @@ on:
 jobs:
   build-and-test-cuda102:
     name: Tests Cuda 10.2, Python =
-    runs-on: self-hosted
+    runs-on: GPU4
     strategy:
       matrix:
         python-version: ['3.6'] #, '3.8', '3.9']
@@ -30,8 +30,7 @@ jobs:
         run: |
           python -m venv .env
           source .env/bin/activate
-          docker cp rat_manylinux:/rational_activations/wheelhouse/cuda-10.2/ temp_wheels/
-          ls -l temp_wheels/
+          docker cp rat_manylinux:/rational_activations/wheelhouse/cuda-10.2/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl temp_wheels/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl
       - name: Install dependencies
         run: |
           source .env/bin/activate
