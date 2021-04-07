@@ -235,9 +235,10 @@ class Rational(Rational_base, nn.Module):
     def __repr__(self):
         return (f"Rational Activation Function (PYTORCH version "
                 f"{self.version}) of degrees {self.degrees} running on "
-                f"{self.device}")
+                f"{self.device}"
+                f"\n{self.numerator.device}: {hex(id(self.numerator))}")
 
-    def cpu(self):
+    def _cpu(self):
         if self.version == "A":
             rational_func = Rational_PYTORCH_A_F
         elif self.version == "B":
@@ -250,12 +251,8 @@ class Rational(Rational_base, nn.Module):
             raise ValueError("version %s not implemented" % self.version)
         self.activation_function = rational_func
         self.device = "cpu"
-        self.numerator = nn.Parameter(self.numerator.to(self.device))
-        self.denominator = nn.Parameter(self.denominator.to(self.device))
-        self.register_parameter("numerator", self.numerator)
-        self.register_parameter("denominator", self.denominator)
 
-    def cuda(self, device="0"):
+    def _cuda(self, device="0"):
         if self.version == "A":
             rational_func = Rational_CUDA_A_F
         elif self.version == "B":
@@ -271,13 +268,8 @@ class Rational(Rational_base, nn.Module):
         else:
             self.device = f"cuda:{device}"
         self.activation_function = rational_func.apply
-        self.numerator = nn.Parameter(self.numerator.to(self.device))
-        self.denominator = nn.Parameter(self.denominator.to(self.device))
-        self.register_parameter("numerator", self.numerator)
-        self.register_parameter("denominator", self.denominator)
 
-
-    def to(self, device):
+    def _to(self, device):
         """
         Moves the rational function to its specific device. \n
 
@@ -292,15 +284,14 @@ class Rational(Rational_base, nn.Module):
 
     def _apply(self, fn):
         if "Module.cpu" in str(fn):
-            self.cpu()
+            self._cpu()
         elif "Module.cuda" in str(fn):
-            self.cuda()
+            self._cuda()
         elif "Module.to" in str(fn):
             device = fn.__closure__[1].cell_contents
             assert type(device) == torch.device  # otherwise loop on __closure__
-            self.to(device)
-        else:
-            return super._apply(fn)
+            self._to(device)
+        return super()._apply(fn)
 
     def numpy(self):
         """

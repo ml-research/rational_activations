@@ -5,7 +5,7 @@ name: Python package
 
 on:
   push:
-    branches: [ xyz ]
+    branches: [ xys ]
 
 jobs:
   manylinux_compilation:
@@ -39,7 +39,7 @@ jobs:
       run: |
         cat <<EOF | docker exec rat_manylinux bash
         cd rational_activations
-        pip uninstall rational_activations torch mxnet tensorflow
+        pip uninstall rational_activations torch mxnet-cu102 tensorflow-gpu
         export CUDA_HOME=/usr/local/cuda-${{ matrix.cuda-version }}
         export PATH=/usr/local/cuda-${{ matrix.cuda-version }}/bin:$$PATH
         python${{ matrix.python-version }} -m pip install mxnet-cu102 torch==1.7.1 tensorflow-gpu
