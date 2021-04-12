@@ -10,7 +10,7 @@ on:
 jobs:
   manylinux_compilation:
     name: Compile all manylinux wheels
-    runs-on: GPU4
+    runs-on: k4ntz
     steps:
       - uses: actions/checkout@v2
       - name: Current dir & nvidia-smi
