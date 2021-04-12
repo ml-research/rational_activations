@@ -40,10 +40,12 @@ class Rational_base():
         freq = None
         if x is None and self.distribution is None:
             input_range = np.arange(-3, 3, 0.01)
+            x = input_range
         elif self.distribution is not None and len(self.distribution.bins) > 0:
             freq, bins = _cleared_arrays(self.distribution, tolerance)
             if freq is not None:
                 input_range = np.array(bins, dtype=float)
+                x = input_range
         else:
             input_range = np.array(x, dtype=float)
         outputs = np_func(input_range)
