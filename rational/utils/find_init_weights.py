@@ -7,7 +7,6 @@ Finding the weights of the to map an specific activation function
 import json
 import numpy as np
 from .utils import fit_rational_to_base_function
-import matplotlib.pyplot as plt
 import torch
 import os
 from rational.numpy.rationals import Rational_version_A, Rational_version_B, \
@@ -16,6 +15,7 @@ from rational.numpy.rationals import Rational_version_A, Rational_version_B, \
 
 def plot_result(x_array, rational_array, target_array,
                 original_func_name="Original function"):
+    import matplotlib.pyplot as plt
     plt.plot(x_array, rational_array, label="Rational approx")
     plt.plot(x_array, target_array, label=original_func_name)
     plt.legend()

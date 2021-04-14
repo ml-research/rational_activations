@@ -11,24 +11,13 @@ do
   esac
 done
 
-if [ -d "wheelhouse" ]; then
-  printf "wheelhouse folder found, moving it: wheelhouse -> wheelhouse_save \n"
-  rm -rf wheelhouse_save
-  mv wheelhouse wheelhouse_save
-fi
-
 CUDA_list=("cuda-10.2" "cuda-11.0")
 CUDA_COMP_list=("cu102" "cu110")
 ######### CHECKING ###############
 
 
-if [ ! python3.7 -c "" &> /dev/null || ! python3.8 -c "" &> /dev/null ]; then
-  printf "python3.7 and/or python3.8 not installed\n Installing...\n"
-  bash pypi_build_scripts/install_all_python.sh
-fi
-
-
 python_list=(python3.6 python3.7 python3.8)
+py_list=(36 37 38)
 torch_lib_list=(
   "/usr/local/lib64/python3.6/site-packages/torch/lib/"
   "/usr/local/lib/python3.7/site-packages/torch/lib/"
@@ -41,22 +30,21 @@ do
   CUDA_LIB="/usr/local/$CUDA_V/lib64/"
   export CUDA_HOME="/usr/local/$CUDA_V"
   CUDA_P="/usr/local/cuda"
-  if [[ -L "$CUDA_P" ]]
-  then
-     echo "$CUDA_P is a symlink to a directory, changing it to correspond to $CUDA_V"
-     rm -f $CUDA_P
-  else
-     echo "Could not create symlink for $CUDA_HOME -> $CUDA_P"
-  fi
-  ln -s $CUDA_HOME $CUDA_P
-  sed -i "s/name='rational-activations'.*/name='rational-activations-$CUDA_CP'/" setup.py
+  #if [[ -L "$CUDA_P" ]]
+  #then
+  #   echo "$CUDA_P is a symlink to a directory, changing it to correspond to $CUDA_V"
+  #   rm -f $CUDA_P
+  #else
+  #   echo "Could not create symlink for $CUDA_HOME -> $CUDA_P"
+  #fi
+  #ln -s $CUDA_HOME $CUDA_P
 
   printf "Checking if python versions are correctly accessible and path to torch lib packages\n"
   for i in 0 1 2
   do
     PYTHON_V=${python_list[$i]}
     TORCH_LIB=${torch_lib_list[$i]}
-    if [[ ! $TORCH_LIB =~ "$PYTHON_V" ]] || [ ! -d "$TORCH_LIB" ]
+    if [[ ! $TORCH_LIB =~ "$PYTHON_V" ]]
     then
       printf "Please provide a valid python torch lib path in \$TORCH_LIB\
               \ne.g. /usr/lib64/python3.6/site-packages/torch/lib/\
@@ -81,15 +69,26 @@ do
   for i in 0 1 2
   do
     PYTHON_V=${python_list[$i]}
+    PY_V=${py_list[$i]}
     TORCH_LIB=${torch_lib_list[$i]}
     export LD_LIBRARY_PATH=/usr/local/lib:$TORCH_LIB:$CUDA_LIB  # for it to be able to find the .so files
-    rm -f /usr/local/cuda
-    ln -s /usr/local/$CUDA_V /usr/local/cuda
-    $PYTHON_V setup.py bdist_wheel
-    set -- "${@:2}"
-    source pypi_build_scripts/complete_wheel_repair.sh
-    $PYTHON_V setup.py clean
+    # rm -f /usr/local/cuda
+    # ln -s /usr/local/$CUDA_V ./cuda_path
+    # $PYTHON_V -m venv testenv
+    # echo "Created environment for $PYTHON_V"
+    # source testenv/bin/activate
+    # $PYTHON_V -m pip install -U pip wheel pytest
+    # $PYTHON_V -m pip install -r pypi_build_scripts/tests_requirements.txt
+    ls wheelhouse/$CUDA_V/rational_activations_$CUDA_CP*$PY_V*.whl
+    $PYTHON_V -m pip install wheelhouse/$CUDA_V/rational_activations_$CUDA_CP*$PY_V*.whl
+    cd tests
+    $PYTHON_V -m pytest tests_keras
+    $PYTHON_V -m pytest tests_mxnet 
+    $PYTHON_V -m pytest tests_torch 
+    
+    exit
+    rm -rf testenv
+    exit
   done
 
-  sed -i "s/name='rational-activations-$CUDA_CP'.*/name='rational-activations'/" setup.py
 done
