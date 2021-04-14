@@ -11,13 +11,13 @@ from rational.utils.get_weights import get_parameters
 from rational._base.rational_base import Rational_base
 
 
-if torch_cuda_available():
-    try:
-        from rational.torch.rational_cuda_functions import *
-    except ImportError as ImpErr:
-        print('\n\nError importing rational_cuda, is cuda not available?\n\n')
-        print(ImpErr)
-        exit(1)
+# if torch_cuda_available():
+#     try:
+#         from rational.torch.rational_cuda_functions import *
+#     except ImportError as ImpErr:
+#         print('\n\nError importing rational_cuda, is cuda not available?\n\n')
+#         print(ImpErr)
+#         exit(1)
 
 from rational.torch.rational_pytorch_functions import *
 
