@@ -9,7 +9,7 @@ from rational import __version__
 import os
 degrees = [(3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (5, 4), (7, 6)]
 # degrees = [(5, 4), (7, 6)]
-name='rational-activations-cu102'
+name='rational-activations-old-cuda'
 
 #import ipdb; ipdb.set_trace()
 #find_packages(where="rational")
@@ -114,17 +114,17 @@ def is_torch_cuda_available():
 #
 #     with open(fname, "w") as text_file:
 #         text_file.write(content)
-
-if is_torch_cuda_available():
-    version_names = []
-    template_contents = ""
-    for template_fname in sorted(glob.glob("rational/_cuda/versions/*.cu")):
-        version_names.append(Path(template_fname).stem)
-        with open(template_fname) as infile:
-            template_contents += infile.read()
-
-    generate_cpp_module(fname='rational/_cuda/rational_cuda.cpp', versions=version_names)
-    generate_cpp_kernels_module(fname='rational/_cuda/rational_cuda_kernels.cu', template_contents=template_contents)
+# 
+# if is_torch_cuda_available():
+#     version_names = []
+#     template_contents = ""
+#     for template_fname in sorted(glob.glob("rational/_cuda/versions/*.cu")):
+#         version_names.append(Path(template_fname).stem)
+#         with open(template_fname) as infile:
+#             template_contents += infile.read()
+# 
+#     generate_cpp_module(fname='rational/_cuda/rational_cuda.cpp', versions=version_names)
+#     generate_cpp_kernels_module(fname='rational/_cuda/rational_cuda_kernels.cu', template_contents=template_contents)
 
 
 with open("README.md", "r") as fh:
