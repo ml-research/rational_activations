@@ -200,20 +200,21 @@ class Rational(Rational_base, nn.Module):
 
         self.init_approximation = approx_func
 
-        if "cuda" in str(device):
-            if version == "A":
-                rational_func = Rational_CUDA_A_F
-            elif version == "B":
-                rational_func = Rational_CUDA_B_F
-            elif version == "C":
-                rational_func = Rational_CUDA_C_F
-            elif version == "D":
-                rational_func = Rational_CUDA_D_F
-            else:
-                raise ValueError("version %s not implemented" % version)
-
-            self.activation_function = rational_func.apply
-        else:
+        # if "cuda" in str(device):
+        #     if version == "A":
+        #         rational_func = Rational_CUDA_A_F
+        #     elif version == "B":
+        #         rational_func = Rational_CUDA_B_F
+        #     elif version == "C":
+        #         rational_func = Rational_CUDA_C_F
+        #     elif version == "D":
+        #         rational_func = Rational_CUDA_D_F
+        #     else:
+        #         raise ValueError("version %s not implemented" % version)
+        #
+        #     self.activation_function = rational_func.apply
+        # else:
+        if True:
             if version == "A":
                 rational_func = Rational_PYTORCH_A_F
             elif version == "B":
@@ -253,21 +254,21 @@ class Rational(Rational_base, nn.Module):
         self.device = "cpu"
 
     def _cuda(self, device="0"):
-        if self.version == "A":
-            rational_func = Rational_CUDA_A_F
-        elif self.version == "B":
-            rational_func = Rational_CUDA_B_F
-        elif self.version == "C":
-            rational_func = Rational_CUDA_C_F
-        elif self.version == "D":
-            rational_func = Rational_CUDA_D_F
-        else:
-            raise ValueError("version %s not implemented" % self.version)
+        # if self.version == "A":
+        #     rational_func = Rational_CUDA_A_F
+        # elif self.version == "B":
+        #     rational_func = Rational_CUDA_B_F
+        # elif self.version == "C":
+        #     rational_func = Rational_CUDA_C_F
+        # elif self.version == "D":
+        #     rational_func = Rational_CUDA_D_F
+        # else:
+        #     raise ValueError("version %s not implemented" % self.version)
+        # self.activation_function = rational_func.apply
         if "cuda" in str(device):
             self.device = f"{device}"
         else:
             self.device = f"cuda:{device}"
-        self.activation_function = rational_func.apply
 
     def _to(self, device):
         """
