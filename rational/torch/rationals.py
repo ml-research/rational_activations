@@ -231,7 +231,7 @@ class Rational(Rational_base, nn.Module):
 
     def forward(self, x):
         return self.activation_function(x, self.numerator, self.denominator,
-                                        self.training)
+                                        self.training, self.device)
 
     def __repr__(self):
         return (f"Rational Activation Function (PYTORCH version "
@@ -481,5 +481,5 @@ class AugmentedRational(nn.Module):
     def forward(self, x):
         x = self.horizontal_scale * x + self.in_bias
         out = self.activation_function(x, self.numerator, self.denominator,
-                                       self.training)
+                                       self.training, self.device)
         return self.vertical_scale * out + self.out_bias

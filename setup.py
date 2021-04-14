@@ -9,7 +9,7 @@ from rational import __version__
 import os
 degrees = [(3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (5, 4), (7, 6)]
 # degrees = [(5, 4), (7, 6)]
-name='rational-activations-old-cuda'
+name='rational-activations'
 
 #import ipdb; ipdb.set_trace()
 #find_packages(where="rational")

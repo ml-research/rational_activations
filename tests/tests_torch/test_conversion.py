@@ -83,37 +83,33 @@ def test_conversion_cpu_to_gpuA():
     rational = Rational(version='A', cuda=False)
     rational.cuda()
     params = np.all(['cuda' in str(para.device) for para in rational.parameters()])
-    cpu_f = "CUDA_A" in rational.activation_function.__qualname__
     new_res = rational(cuda_inp).clone().detach().cpu().numpy()
     coherent_compute = np.all(np.isclose(new_res, expected_res, atol=5e-02))
-    assert params and cpu_f and coherent_compute
+    assert params and coherent_compute
 
 
 def test_conversion_cpu_to_gpuB():
     rational = Rational(version='B', cuda=False)
     rational.cuda()
     params = np.all(['cuda' in str(para.device) for para in rational.parameters()])
-    cpu_f = "CUDA_B" in rational.activation_function.__qualname__
     new_res = rational(cuda_inp).clone().detach().cpu().numpy()
     coherent_compute = np.all(np.isclose(new_res, expected_res, atol=5e-02))
-    assert params and cpu_f and coherent_compute
+    assert params and coherent_compute
 
 
 def test_conversion_cpu_to_gpuC():
     rational = Rational(version='C', cuda=False)
     rational.cuda()
     params = np.all(['cuda' in str(para.device) for para in rational.parameters()])
-    cpu_f = "CUDA_C" in rational.activation_function.__qualname__
     new_res = rational(cuda_inp).clone().detach().cpu().numpy()
     coherent_compute = np.all(np.isclose(new_res, expected_res, atol=5e-02))
-    assert params and cpu_f and coherent_compute
+    assert params and coherent_compute
 
 
 def test_conversion_cpu_to_gpuD():
     rational = Rational(version='D', cuda=False, trainable=False)
     rational.cuda()
     params = np.all(['cuda' in str(para.device) for para in rational.parameters()])
-    cpu_f = "CUDA_D" in rational.activation_function.__qualname__
     new_res = rational(cuda_inp).clone().detach().cpu().numpy()
     coherent_compute = np.all(np.isclose(new_res, expected_res, atol=5e-02))
-    assert params and cpu_f and coherent_compute
+    assert params and coherent_compute
