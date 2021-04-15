@@ -2,12 +2,17 @@ import numpy as np
 
 
 class Rational_base():
+    count = 0
+    list = []
+
     def __init__(self):
         super().__init__()
         self._handle_retrieve_mode = None
         self.distribution = None
         self.best_fitted_function = None
         self.best_fitted_function_params = None
+        Rational_base.count += 1
+        Rational_base.list.append(self)
 
     def show(self, x=None, fitted_function=True, display=True,
              other_func=None, tolerance=0.001, exclude_zero=False):
