@@ -1,4 +1,5 @@
 import numpy as np
+from termcolor import colored
 
 
 class Rational_base():
@@ -11,15 +12,53 @@ class Rational_base():
         self.distribution = None
         self.best_fitted_function = None
         self.best_fitted_function_params = None
+        self.snapshot_list = list()
+        self._verbose = False
         Rational_base.count += 1
         Rational_base.list.append(self)
 
-    def show(self, x=None, fitted_function=True, display=True,
-             other_func=None, tolerance=0.001, exclude_zero=False):
+    def show(self, x=None, fitted_function=True, other_func=None, display=True,
+             tolerance=0.001, title=None):
+        snap = self.snapshot(returns=True)
+        snap.histogram = self.distribution
+        snap.show(x, fitted_function, other_func, display, tolerance, title)
+        return
+        np_func = self.numpy()
+        freq = None
+        if x is None and self.distribution is None:
+            input_range = np.arange(-3, 3, 0.01)
+            x = input_range
+        elif self.distribution is not None and len(self.distribution.bins) > 0:
+            freq, bins = _cleared_arrays(self.distribution, tolerance)
+            if freq is not None:
+                input_range = np.array(bins, dtype=float)
+                x = input_range
+        else:
+            input_range = np.array(x, dtype=float)
+        outputs = np_func(input_range)
+        for func, func_output in other_funcs_dict.items():
+            ax.plot(input_range, func_output, label=func)
+        if self.best_fitted_function is not None and other_func is None:
+            if '__name__' in dir(self.best_fitted_function):
+                func_label = self.best_fitted_function.__name__
+            else:
+                func_label = str(self.best_fitted_function)
+            a, b, c, d = self.best_fitted_function_params
+            result = a * self.best_fitted_function(c * input_range + d) + b
+            ax.plot(input_range, result, "r-", label=f"Fitted {func_label}")
+        ax.legend()
+        plt.show()
+
+    def snapshot(self, name="snapshot_0", x=None, fitted_function=True,
+                 other_func=None, returns=False):
         """
-        Show the function using `matplotlib`.
+        Saves a snapshot of the rational functions and related in the
+        snapshot_list variable (or returns it if ``returns=True``).
 
         Arguments:
+                name (str):
+                    Name of the snapshot.\n
+                    Default ``snapshot_0``
                 x (range):
                     The range to print the function on.\n
                     Default ``None``
@@ -27,20 +66,28 @@ class Rational_base():
                     If ``True``, displays the best fitted function if searched.
                     Otherwise, returns it. \n
                     Default ``True``
-                display (bool):
-                    If ``True``, displays the graph.
-                    Otherwise, returns a dictionary with functions informations. \n
-                    Default ``True``
                 other_funcs (callable):
                     another function to be plotted or a list of other callable
                     functions or a dictionary with the function name as key
                     and the callable as value.
-                tolerance (float):
-                    Tolerance the bins frequency.
-                    If tolerance is 0.001, every frequency smaller than 0.001. will be cutted out of the histogram.\n
-                    Default ``True``
-                other_func
+                returns (bool):
+                    If ``True``, returns the snapshot dict.
+                    Otherwise, saves it in self.snapshot_dict \n
+                    Default ``False``
         """
+        if name in [snst.name for snst in self.snapshot_list]:
+            print("Name for the snapshot already used, incrementing:")
+            new_name = _increment_string(name)
+            print(f"\t{name} -> {new_name} in snapshot_dict")
+            name = new_name
+        from copy import deepcopy
+        snapshot = Snapshot(name, deepcopy(self))
+        if self.distribution:
+            snapshot.histogram = self.distribution
+        if returns:
+            return snapshot
+        self.snapshot_list.append(snapshot)
+        return
         np_func = self.numpy()
         freq = None
         if x is None and self.distribution is None:
@@ -68,55 +115,24 @@ class Rational_base():
                     else:
                         func_label = str(func)
                     other_funcs_dict[func_label] = func(x)
-        if display:
-            import matplotlib.pyplot as plt
-            try:
-                import seaborn as sns
-                sns.set_style("whitegrid")
-            except ImportError:
-                print("Seaborn not found on computer, install it for better",
-                      "visualisation")
-            ax = plt.gca()
-            if freq is not None:
-                ax2 = ax.twinx()
-                ax2.set_yticks([])
-                grey_color = (0.5, 0.5, 0.5, 0.6)
-                if exclude_zero:
-                    bins = bins[1:]
-                    freq = freq[1:]
-                ax2.bar(bins, freq, width=bins[1] - bins[0],
-                        color=grey_color, edgecolor=grey_color)
-            ax.plot(input_range, outputs, label="Rational (self)")
-            for func, func_output in other_funcs_dict.items():
-                ax.plot(input_range, func_output, label=func)
-            if self.best_fitted_function is not None and other_func is None:
-                if '__name__' in dir(self.best_fitted_function):
-                    func_label = self.best_fitted_function.__name__
-                else:
-                    func_label = str(self.best_fitted_function)
-                a, b, c, d = self.best_fitted_function_params
-                result = a * self.best_fitted_function(c * input_range + d) + b
-                ax.plot(input_range, result, "r-", label=f"Fitted {func_label}")
-            ax.legend()
-            plt.show()
+        if freq is None:
+            hist_dict = None
         else:
-            if freq is None:
-                hist_dict = None
-            else:
-                hist_dict = {"bins": bins, "freq": freq,
-                             "width": bins[1] - bins[0]}
-            if "best_fitted_function" not in dir(self) or self.best_fitted_function is None:
-                fitted_function = None
-            else:
-                a, b, c, d = self.best_fitted_function_params
-                result = a * self.best_fitted_function(c * input_range + d) + b
-                fitted_function = {"function": self.best_fitted_function,
-                                   "params": (a, b, c, d),
-                                   "y": result}
-            return {"hist": hist_dict,
-                    "line": {"x": input_range, "y": outputs},
-                    "fitted_function": fitted_function,
-                    "other_func": other_funcs_dict}
+            hist_dict = {"bins": bins, "freq": freq,
+                         "width": bins[1] - bins[0]}
+        if "best_fitted_function" not in dir(self) or self.best_fitted_function is None:
+            fitted_function = None
+        else:
+            a, b, c, d = self.best_fitted_function_params
+            result = a * self.best_fitted_function(c * input_range + d) + b
+            fitted_function = {"function": self.best_fitted_function,
+                               "params": (a, b, c, d),
+                               "y": result}
+
+        # {"hist": hist_dict,
+        #  "line": {"x": input_range, "y": outputs},
+        #  "fitted_function": fitted_function,
+        #  "other_func": other_funcs_dict}
 
     def fit(self, function, x=None, show=False):
         """
@@ -197,6 +213,124 @@ class Rational_base():
         raise NotImplementedError("the numpy method is not implemented for",
                                   " this class, only for the mother class")
 
+    def __repr__(self):
+        if self._verbose:
+            return (f"Rational Activation Function "
+                    f"{self.version}) of degrees {self.degrees} running on "
+                    f"{self.device}"
+                    f"\n{self.numerator.device}: {hex(id(self.numerator))}")
+        else:
+            return (f"Rational Activation Function "
+                    f"{self.version}) of degrees {self.degrees} running on "
+                    f"{self.device}")
+
+class Snapshot():
+    """
+    Snapshot to display rational functions
+
+    Arguments:
+            name (str):
+                The name of Snapshot.
+            rational (Rational):
+                A rational function to save
+    Returns:
+        Module: Rational module
+    """
+    def __init__(self, name, rational, other_func=None):
+        self.name = name
+        self.rational = rational.numpy()
+        self.range = None
+        self.histogram = None
+        self.best_fitted_function = None
+        self.other_func = other_func
+
+    def show(self, x=None, fitted_function=True, other_func=None,
+             display=True, tolerance=0.001, title=None, force_range=False):
+        """
+        Show the function using `matplotlib`.
+
+        Arguments:
+                x (range):
+                    The range to print the function on.\n
+                    Default ``None``
+                fitted_function (bool):
+                    If ``True``, displays the best fitted function if searched.
+                    Otherwise, returns it. \n
+                    Default ``True``
+                display (bool):
+                    If ``True``, displays the graph.
+                    Otherwise, returns a dictionary with functions informations. \n
+                    Default ``True``
+                other_func (callable):
+                    another function to be plotted or a list of other callable
+                    functions or a dictionary with the function name as key
+                    and the callable as value.
+                tolerance (float):
+                    Tolerance the bins frequency.
+                    If tolerance is 0.001, every frequency smaller than 0.001. will be cutted out of the histogram.\n
+                    Default ``True``
+                force_range (bool):
+                    Use `range` provided
+                    Default ``False``
+        """
+        if self.histogram is None or force_range:
+            if x is None:
+                x = np.arange(-3, 3, 0.01)
+            elif x.dtype != float:
+                x = x.astype(float)
+        else:
+            if range is not None:
+                msg = "Using histogram range, use force_range to " + \
+                      "use given range"
+                print(msg)
+            x = np.array(self.histogram.bins, dtype=float)
+        y_rat = self.rational(x)
+        import matplotlib.pyplot as plt
+        try:
+            import seaborn as sns
+            sns.set_style("whitegrid")
+        except ImportError:
+            print("Seaborn not found on computer, install it for better",
+                  "visualisation")
+        #  Rational
+        ax = plt.gca()
+        ax.plot(x, y_rat, label="Rational (self)")
+        #  Histogram
+        if self.histogram is not None:
+            freq, bins = _cleared_arrays(self.histogram, tolerance)
+            ax2 = ax.twinx()
+            ax2.set_yticks([])
+            grey_color = (0.5, 0.5, 0.5, 0.6)
+            ax2.bar(bins, freq, width=bins[1] - bins[0],
+                    color=grey_color, edgecolor=grey_color)
+        # Other funcs
+        other_funcs_dict = {}
+        if other_func is not None:
+            if type(other_func) is dict:
+                for func_label, func in other_func.items():
+                    ax.plot(x, func(x), label=func)
+            else:
+                if type(other_func) is not list:
+                    other_func = [other_func]
+                for func in other_func:
+                    if '__name__' in dir(func):
+                        func_label = func.__name__
+                    else:
+                        func_label = str(func)
+                    ax.plot(x, func(x), label=func_label)
+        if title is None:
+            ax.set_title(self.name)
+        else:
+            ax.set_title(f"{title}")
+        if display:
+            plt.legend()
+            plt.show()
+
+
+
+    def __repr__(self):
+        return f"Snapshot ({self.name})"
+
 
 def _cleared_arrays(hist, tolerance=0.001):
     freq, bins = hist.normalize()
@@ -205,3 +339,12 @@ def _cleared_arrays(hist, tolerance=0.001):
     if last == 0:
         return freq[first:], bins[first:]
     return freq[first:last], bins[first:last]
+
+
+def _increment_string(string):
+    if string[-1] in [str(i) for i in range(10)]:
+        import re
+        last_number = re.findall(r'\d+', string)[-1]
+        return string[:-len(last_number)] + str(int(last_number) + 1)
+    else:
+        return string + "_2"

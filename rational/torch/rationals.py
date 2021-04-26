@@ -5,6 +5,7 @@ Rational Activation Functions for Pytorch
 This module allows you to create Rational Neural Networks using Learnable
 Rational activation functions with Pytorch networks.
 """
+import torch
 import torch.nn as nn
 from torch.cuda import is_available as torch_cuda_available
 from rational.utils.get_weights import get_parameters
@@ -13,13 +14,15 @@ from rational._base.rational_base import Rational_base
 
 if torch_cuda_available():
     try:
-        from rational.torch.rational_cuda_functions import *
+        from rational.torch.rational_cuda_functions import Rational_CUDA_A_F, \
+            Rational_CUDA_B_F, Rational_CUDA_C_F, Rational_CUDA_D_F
     except ImportError as ImpErr:
         print('\n\nError importing rational_cuda, is cuda not available?\n\n')
         print(ImpErr)
         exit(1)
 
-from rational.torch.rational_pytorch_functions import *
+from rational.torch.rational_pytorch_functions import Rational_PYTORCH_A_F, \
+    Rational_PYTORCH_B_F, Rational_PYTORCH_C_F, Rational_PYTORCH_D_F
 
 
 class RecurrentRational():
@@ -232,12 +235,6 @@ class Rational(Rational_base, nn.Module):
         return self.activation_function(x, self.numerator, self.denominator,
                                         self.training)
 
-    def __repr__(self):
-        return (f"Rational Activation Function (PYTORCH version "
-                f"{self.version}) of degrees {self.degrees} running on "
-                f"{self.device}"
-                f"\n{self.numerator.device}: {hex(id(self.numerator))}")
-
     def _cpu(self):
         if self.version == "A":
             rational_func = Rational_PYTORCH_A_F
@@ -400,11 +397,11 @@ class Rational(Rational_base, nn.Module):
         if self._handle_retrieve_mode is not None:
             print("Already in retrieve mode")
             return
-        from rational.utils.histograms_cupy import Histogram as hist1
-        self.distribution = hist1(bin_width)
-        # from physt import h1 as hist1
-        # self.distribution = hist1(None, "fixed_width", bin_width=bin_width,
-        #                           adaptive=True)
+        if "cuda" in self.device:
+            from rational.utils.histograms_cupy import Histogram
+        else:
+            from rational.utils.histograms_numpy import Histogram
+        self.distribution = Histogram(bin_width)
         print("Retrieving input from now on.")
         if auto_stop:
             self.inputs_saved = 0
@@ -412,9 +409,16 @@ class Rational(Rational_base, nn.Module):
             self._max_saves = max_saves
         else:
             self._handle_retrieve_mode = self.register_forward_hook(_save_input)
-        self.forward(torch.tensor([1., 2.]).cuda())
-        self(torch.tensor([1., 2.]).cuda())
 
+    def clear_hist(self):
+        self.inputs_saved = 0
+        bin_width = self.distribution.bin_size
+        if "cuda" in self.device:
+            from rational.utils.histograms_cupy import Histogram
+        else:
+            from rational.utils.histograms_numpy import Histogram
+        self.distribution = Histogram(bin_width)
+        print("_cleared_arrays")
 
     def training_mode(self):
         """

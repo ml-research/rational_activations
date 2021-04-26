@@ -115,6 +115,9 @@ class Rational():
         return (f"Rational Activation Function (Numpy version "
                 f"{self.version}) of degrees {self.degrees}")
 
+    def numpy(self):
+        return self
+
     def show(self, input_range=None, display=True, distribution=None):
         """
         Show the function using `matplotlib`.

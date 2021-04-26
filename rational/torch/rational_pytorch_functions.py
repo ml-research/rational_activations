@@ -1,5 +1,6 @@
 import torch
 
+
 def _get_xps(z, len_numerator, len_denominator):
     xps = list()
     xps.append(z)
