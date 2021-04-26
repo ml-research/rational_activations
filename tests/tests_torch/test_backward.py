@@ -32,10 +32,7 @@ def backward_test(cuda, version, recurrent_rat):
 
 
 def backward_test_hist(cuda, version, recurrent_rat):
-    inp = torch.arange(-4.05, 4., 0.1)
-    if cuda:
-        inp = inp.cuda()
-    exp = torch.sigmoid(inp)
+    r1, r2 = -4., 4.
     rat = Rational(cuda=cuda)
     rat.input_retrieve_mode()
     if recurrent_rat:
@@ -46,8 +43,10 @@ def backward_test_hist(cuda, version, recurrent_rat):
     loss_fn = MSELoss()
     optimizer = torch.optim.SGD(rat.parameters(), lr=0.05, momentum=0.9)
     for i in range(201):
-        if i in vizu_epochs:
-            rat.clear_hist()
+        inp = (r1 - r2) * torch.rand(400) + r2
+        if cuda:
+            inp = inp.cuda()
+        exp = torch.sigmoid(inp)
         out = rat_func(inp)
         optimizer.zero_grad()
         loss = loss_fn(out, exp)
@@ -55,9 +54,11 @@ def backward_test_hist(cuda, version, recurrent_rat):
         optimizer.step()
         if i in vizu_epochs:
             rat.snapshot(f"Epoch {i}", other_func=sigmoid_np)
-    for snap in rat.snapshot_list:
-        snap.show(other_func=sigmoid_np)
-    import ipdb; ipdb.set_trace()
+
+    # for snap in rat.snapshot_list:
+    #     snap.show(other_func=sigmoid_np)
+
+    rat.to_gif()
 
 # for cuda in [True, False]:
 #     for version in ["A", "B", "C", "D"]:

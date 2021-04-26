@@ -11,6 +11,7 @@ class Histogram():
         self.bin_size = bin_size
         self._empty = True
         self._rd = int(np.log10(1./bin_size).item())
+        self._verbose = False
 
     def fill_n(self, input):
         self._update_hist(input.numpy())
@@ -29,12 +30,24 @@ class Histogram():
                                                    weights, bins[:-1],
                                                    self.bin_size, self._rd)
 
+    @property
+    def empty(self):
+        return self._empty
+
     def __repr__(self):
         if self._empty:
-            return "Empty Histogram"
-        return f"Histogram on range {self.bins[0]}, {self.bins[-1]}, of " + \
-               f"bin_size {self.bin_size}, with {self.weights.sum()} total" + \
-               f"elements"
+            rtrn = "Empty Histogram"
+        else:
+            rtrn = f"Histogram on range {self.bins[0]}, {self.bins[-1]}, of " + \
+                   f"bin_size {self.bin_size}, with {self.weights.sum()} total" + \
+                   f"elements"
+        if self._verbose:
+            rtrn += f" {hex(id(self))}"
+        return rtrn
+
+    @property
+    def total(self):
+        return self.weights.sum()
 
     def normalize(self, numpy=True):
             return self.weights / self.weights.sum(), self.bins

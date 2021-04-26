@@ -418,7 +418,6 @@ class Rational(Rational_base, nn.Module):
         else:
             from rational.utils.histograms_numpy import Histogram
         self.distribution = Histogram(bin_width)
-        print("_cleared_arrays")
 
     def training_mode(self):
         """

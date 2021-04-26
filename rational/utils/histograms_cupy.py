@@ -12,6 +12,7 @@ class Histogram():
         self.bin_size = bin_size
         self._empty = True
         self._rd = int(cp.log10(1./bin_size).item())
+        self._verbose = False
 
     def fill_n(self, input):
         self._update_hist(cp.fromDlpack(to_dlpack(input)))
@@ -26,30 +27,59 @@ class Histogram():
             self.weights, self.bins = weights, bins[:-1]
             self._empty = False
         else: #  update the hist
-            self.weights, self.bins = concat_hists(self.weights, self.bins,
+            self.weights, self.bins = concat_hists(self.__weights, self.__bins,
                                                    weights, bins[:-1],
                                                    self.bin_size, self._rd)
 
     def __repr__(self):
         if self._empty:
-            return "Empty Histogram"
-        return f"Histogram on range {self.bins[0]}, {self.bins[-1]}, of " + \
-               f"bin_size {self.bin_size}, with {self.weights.sum()} total" + \
-               f"elements"
+            rtrn = "Empty Histogram"
+        else:
+            rtrn = f"Histogram on range {self.bins[0]}, {self.bins[-1]}, of " + \
+                   f"bin_size {self.bin_size}, with {self.weights.sum()} total" + \
+                   f"elements"
+        if self._verbose:
+            rtrn += f" {hex(id(self))}"
+        return rtrn
+
+    @property
+    def bins(self):
+        return self.__bins.get().flatten()
+
+    @bins.setter
+    def bins(self, var):
+        self.__bins = var
+
+    @property
+    def weights(self):
+        return self.__weights.get().flatten()
+
+    @property
+    def empty(self):
+        return self._empty
+
+    @property
+    def total(self):
+        return self.weights.sum()
+
+    @weights.setter
+    def weights(self, var):
+        self.__weights = var
+
 
     def normalize(self, numpy=True):
         if numpy:
-            return (self.weights / self.weights.sum()).get().flatten(), \
-                   self.bins.get().flatten()
+            return (self.__weights / self.__weights.sum()).get().flatten(), \
+                   self.bins
         else:
             return self.weights / self.weights.sum(), self.bins
 
-    def _from_physt(self, phystogram):
-        if (phystogram.bin_sizes == phystogram.bin_sizes[0]).all():
-            self.bin_size = phystogram.bin_sizes[0]
-        self.bins = cp.array(phystogram.bin_left_edges)
-        self.weights = cp.array(phystogram.frequencies)
-        return self
+    # def _from_physt(self, phystogram):
+    #     if (phystogram.bin_sizes == phystogram.bin_sizes[0]).all():
+    #         self.bin_size = phystogram.bin_sizes[0]
+    #     self.bins = cp.array(phystogram.bin_left_edges)
+    #     self.weights = cp.array(phystogram.frequencies)
+    #     return self
 
 
 def concat_hists(weights1, bins1, weights2, bins2, bin_size, rd):

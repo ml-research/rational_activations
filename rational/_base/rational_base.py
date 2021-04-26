@@ -1,6 +1,6 @@
 import numpy as np
 from termcolor import colored
-
+import matplotlib.pyplot as plt
 
 class Rational_base():
     count = 0
@@ -80,10 +80,7 @@ class Rational_base():
             new_name = _increment_string(name)
             print(f"\t{name} -> {new_name} in snapshot_dict")
             name = new_name
-        from copy import deepcopy
-        snapshot = Snapshot(name, deepcopy(self))
-        if self.distribution:
-            snapshot.histogram = self.distribution
+        snapshot = Snapshot(name, self)
         if returns:
             return snapshot
         self.snapshot_list.append(snapshot)
@@ -224,6 +221,19 @@ class Rational_base():
                     f"{self.version}) of degrees {self.degrees} running on "
                     f"{self.device}")
 
+    def to_gif(self):
+        if len(self.snapshot_list) < 2:
+            print("Couldn't save a gif as you have taken less than 1 snapshot")
+            return
+        from matplotlib.animation import FuncAnimation
+        fig = plt.gcf()
+        fig.set_tight_layout(True)
+        snapit = iter([snap.show(display=False) for snap in self.snapshot_list])
+        import ipdb; ipdb.set_trace()
+        anim = FuncAnimation(fig, snapit, frames=np.arange(0, 10), interval=200)
+
+
+
 class Snapshot():
     """
     Snapshot to display rational functions
@@ -241,6 +251,11 @@ class Snapshot():
         self.rational = rational.numpy()
         self.range = None
         self.histogram = None
+        if not rational.distribution.empty:
+            from copy import deepcopy
+            self.histogram = deepcopy(rational.distribution)
+            print("Automatically clearing the distribution after snapshot")
+            rational.clear_hist()
         self.best_fitted_function = None
         self.other_func = other_func
 
@@ -285,7 +300,6 @@ class Snapshot():
                 print(msg)
             x = np.array(self.histogram.bins, dtype=float)
         y_rat = self.rational(x)
-        import matplotlib.pyplot as plt
         try:
             import seaborn as sns
             sns.set_style("whitegrid")
@@ -325,7 +339,8 @@ class Snapshot():
         if display:
             plt.legend()
             plt.show()
-
+        else:
+            return plt.gcf()
 
 
     def __repr__(self):
