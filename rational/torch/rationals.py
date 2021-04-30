@@ -22,7 +22,8 @@ if torch_cuda_available():
         exit(1)
 
 from rational.torch.rational_pytorch_functions import Rational_PYTORCH_A_F, \
-    Rational_PYTORCH_B_F, Rational_PYTORCH_C_F, Rational_PYTORCH_D_F
+    Rational_PYTORCH_B_F, Rational_PYTORCH_C_F, Rational_PYTORCH_D_F, \
+    Rational_NONSAFE_F, Rational_CUDA_NONSAFE_F, _get_xps
 
 
 class RecurrentRational():
@@ -212,8 +213,10 @@ class Rational(Rational_base, nn.Module):
                 rational_func = Rational_CUDA_C_F
             elif version == "D":
                 rational_func = Rational_CUDA_D_F
+            elif version == "N":
+                rational_func = Rational_CUDA_NONSAFE_F
             else:
-                raise ValueError("version %s not implemented" % version)
+                raise NotImplementedError(f"version {version} not implemented")
 
             self.activation_function = rational_func.apply
         else:
@@ -225,8 +228,10 @@ class Rational(Rational_base, nn.Module):
                 rational_func = Rational_PYTORCH_C_F
             elif version == "D":
                 rational_func = Rational_PYTORCH_D_F
+            elif version == "N":
+                rational_func = Rational_NONSAFE_F
             else:
-                raise ValueError("version %s not implemented" % version)
+                raise NotImplementedError(f"version {version} not implemented")
 
             self.activation_function = rational_func
 
@@ -244,6 +249,8 @@ class Rational(Rational_base, nn.Module):
             rational_func = Rational_PYTORCH_C_F
         elif self.version == "D":
             rational_func = Rational_PYTORCH_D_F
+        elif self.version == "N":
+            rational_func = Rational_NONSAFE_F
         else:
             raise ValueError("version %s not implemented" % self.version)
         self.activation_function = rational_func
@@ -258,6 +265,8 @@ class Rational(Rational_base, nn.Module):
             rational_func = Rational_CUDA_C_F
         elif self.version == "D":
             rational_func = Rational_CUDA_D_F
+        elif self.version == "N":
+            rational_func = Rational_CUDA_NONSAFE_F
         else:
             raise ValueError("version %s not implemented" % self.version)
         if "cuda" in str(device):
@@ -324,6 +333,8 @@ class Rational(Rational_base, nn.Module):
                 rational_func = Rational_CUDA_C_F
             elif self.version == "D":
                 rational_func = Rational_CUDA_D_F
+            elif self.version == "N":
+                rational_func = Rational_CUDA_NONSAFE_F
             else:
                 raise ValueError("version %s not implemented" % self.version)
 
@@ -337,6 +348,8 @@ class Rational(Rational_base, nn.Module):
                 rational_func = Rational_PYTORCH_C_F
             elif self.version == "D":
                 rational_func = Rational_PYTORCH_D_F
+            elif self.version == "N":
+                rational_func = Rational_NONSAFE_F
             else:
                 raise ValueError("version %s not implemented" % self.version)
             self.activation_function = rational_func
@@ -359,6 +372,8 @@ class Rational(Rational_base, nn.Module):
                 rational_func = Rational_CUDA_C_F
             elif version == "D":
                 rational_func = Rational_CUDA_D_F
+            elif self.version == "N":
+                rational_func = Rational_CUDA_NONSAFE_F
             else:
                 raise ValueError("version %s not implemented" % version)
             self.activation_function = rational_func.apply
@@ -372,6 +387,8 @@ class Rational(Rational_base, nn.Module):
                 rational_func = Rational_PYTORCH_C_F
             elif version == "D":
                 rational_func = Rational_PYTORCH_D_F
+            elif self.version == "N":
+                rational_func = Rational_NONSAFE_F
             else:
                 raise ValueError("version %s not implemented" % self.version)
             self.activation_function = rational_func
@@ -485,3 +502,93 @@ class AugmentedRational(nn.Module):
         out = self.activation_function(x, self.numerator, self.denominator,
                                        self.training)
         return self.vertical_scale * out + self.out_bias
+
+
+class RationalNonSafe(Rational_base, nn.Module):
+    """
+    Rational activation function inherited from ``torch.nn.Module``
+
+    Arguments:
+            approx_func (str):
+                The name of the approximated function for initialisation. \
+                The different initialable functions are available in \
+                `rational.rationals_config.json`. \n
+                Default ``leaky_relu``.
+            degrees (tuple of int):
+                The degrees of the numerator (P) and denominator (Q).\n
+                Default ``(5, 4)``
+            cuda (bool):
+                Use GPU CUDA version. \n
+                If ``None``, use cuda if available on the machine\n
+                Default ``None``
+            version (str):
+                Version of Rational to use. Rational(x) = P(x)/Q(x)\n
+                `A`: Q(x) = 1 + \|b_1.x\| + \|b_2.x\| + ... + \|b_n.x\|\n
+                `B`: Q(x) = 1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
+                `C`: Q(x) = 0.1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
+                `D`: like `B` with noise\n
+                Default ``A``
+            trainable (bool):
+                If the weights are trainable, i.e, if they are updated during \
+                backward pass\n
+                Default ``True``
+    Returns:
+        Module: Rational module
+    """
+
+    def __init__(self, degrees=(5, 4), cuda=None, trainable=True, train_numerator=True,
+                 train_denominator=True):
+        super().__init__()
+
+        if cuda is None:
+            cuda = torch_cuda_available()
+        if cuda is True:
+            device = "cuda"
+        elif cuda is False:
+            device = "cpu"
+        else:
+            device = cuda
+
+        self.numerator = nn.Parameter(torch.tensor([ 0.,  1.01130152, -0.25022214, -0.10285302,  0.02551535]).to(device),
+                                      requires_grad=True)
+        self.denominator = nn.Parameter(torch.tensor([-0.24248419,  0.07964891, -0.02110156]).to(device),
+                                        requires_grad=True)
+        # self.numerator = nn.Parameter(torch.ones(degrees[0]+1).to(device),
+        #                               requires_grad=True)
+        # self.denominator = nn.Parameter(torch.ones(degrees[1]).to(device),
+        #                                 requires_grad=True)
+        self.register_parameter("numerator", self.numerator)
+        self.register_parameter("denominator", self.denominator)
+        self.device = device
+        self.degrees = degrees
+        self.training = trainable
+        self.version = "NonSafe"
+
+    #
+    # def forward(self, x, y):
+    #     z = x.view(-1)
+    #     len_num, len_deno = len(self.numerator), len(self.denominator)
+    #     # xps = torch.vander(z, max(len_num, len_deno), increasing=True)
+    #     xps = _get_xps(z, len_num, len_deno).to(self.numerator.device)
+    #     numerator = xps.mul(self.numerator).sum(1)
+    #     denominator = xps[:, 1:len_deno+1].mul(self.denominator).sum(1) * y.to(self.numerator.device)
+    #     return (numerator - denominator).view(x.shape)
+
+    def forward(self, x):
+        z = x.view(-1)
+        len_num, len_deno = len(self.numerator), len(self.denominator)
+        # xps = torch.vander(z, max(len_num, len_deno), increasing=True)
+        xps = _get_xps(z, len_num, len_deno).to(self.numerator.device)
+        numerator = xps.mul(self.numerator).sum(1)
+        denominator = xps[:, 1:len_deno+1].mul(self.denominator).sum(1)
+        return numerator.div(1 + denominator).view(x.shape)
+
+    def fit(self, x, y):
+        """
+        Linear regression trick to calculate the numerator and denominator \
+        based on x and y
+        """
+        from sklearn import linear_model
+        clf = linear_model.LinearRegression(fit_intercept=False)
+        [np.ones_like(x), x, x**2, x**3, x**4, -y*x, -y*x**2, -y*x**3].T
+        clf.fit(np.array(), y)

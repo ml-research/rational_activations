@@ -1,10 +1,14 @@
 import numpy as np
 from termcolor import colored
 import matplotlib.pyplot as plt
+import warnings
+
 
 class Rational_base():
     count = 0
     list = []
+    _FR_WARNED = False
+    _HIST_WARNED = False
 
     def __init__(self):
         super().__init__()
@@ -218,20 +222,36 @@ class Rational_base():
                     f"\n{self.numerator.device}: {hex(id(self.numerator))}")
         else:
             return (f"Rational Activation Function "
-                    f"{self.version}) of degrees {self.degrees} running on "
+                    f"({self.version}) of degrees {self.degrees} running on "
                     f"{self.device}")
 
-    def to_gif(self):
+    def to_gif(self, title="rational_evolution", other_func=None):
+        import imageio
+        import io
+        from PIL import Image
+        from os import makedirs
+        from shutil import rmtree
         if len(self.snapshot_list) < 2:
             print("Couldn't save a gif as you have taken less than 1 snapshot")
             return
-        from matplotlib.animation import FuncAnimation
         fig = plt.gcf()
         fig.set_tight_layout(True)
-        snapit = iter([snap.show(display=False) for snap in self.snapshot_list])
-        import ipdb; ipdb.set_trace()
-        anim = FuncAnimation(fig, snapit, frames=np.arange(0, 10), interval=200)
-
+        x_min, x_max, y_min, y_max = _get_frontiers(self.snapshot_list)
+        gif_images = []
+        for i, snap in enumerate(self.snapshot_list):
+            im_bytes = io.BytesIO()
+            fig = snap.show(other_func=other_func, display=False)
+            ax0 = fig.axes[0]
+            ax0.set_xlim([x_min, x_max])
+            ax0.set_ylim([y_min, y_max])
+            buf = io.BytesIO()
+            plt.savefig(buf, format='png')
+            buf.seek(0)
+            gif_images.append(Image.open(buf))
+            fig.clf()
+        gif_images[0].save(f'{title}.gif', save_all=True,
+                           append_images=gif_images[1:], optimize=False,
+                           duration=800, loop=0)
 
 
 class Snapshot():
@@ -254,7 +274,10 @@ class Snapshot():
         if not rational.distribution.empty:
             from copy import deepcopy
             self.histogram = deepcopy(rational.distribution)
-            print("Automatically clearing the distribution after snapshot")
+            if not Rational_base._HIST_WARNED:
+                msg = "Automatically clearing the distribution after snapshot"
+                warnings.warn(msg)
+                Rational_base._HIST_WARNED = True
             rational.clear_hist()
         self.best_fitted_function = None
         self.other_func = other_func
@@ -277,35 +300,41 @@ class Snapshot():
                     Otherwise, returns a dictionary with functions informations. \n
                     Default ``True``
                 other_func (callable):
-                    another function to be plotted or a list of other callable
-                    functions or a dictionary with the function name as key
+                    another function to be plotted or a list of other callable \
+                    functions or a dictionary with the function name as key \
                     and the callable as value.
                 tolerance (float):
                     Tolerance the bins frequency.
-                    If tolerance is 0.001, every frequency smaller than 0.001. will be cutted out of the histogram.\n
+                    If tolerance is 0.001, every frequency smaller than 0.001 \
+                    will be cutted out of the histogram.\n
                     Default ``True``
                 force_range (bool):
                     Use `range` provided
                     Default ``False``
         """
+        if x is None and self.range is not None:
+            print("Snapshot: Using range from initialisation")
+            x = self.range
         if self.histogram is None or force_range:
             if x is None:
                 x = np.arange(-3, 3, 0.01)
             elif x.dtype != float:
                 x = x.astype(float)
         else:
-            if range is not None:
+            if x is not None:
                 msg = "Using histogram range, use force_range to " + \
                       "use given range"
-                print(msg)
+                if not Rational_base._FR_WARNED:
+                    warnings.warn(msg)
+                    Rational_base._FR_WARNED = True
             x = np.array(self.histogram.bins, dtype=float)
         y_rat = self.rational(x)
         try:
             import seaborn as sns
             sns.set_style("whitegrid")
         except ImportError:
-            print("Seaborn not found on computer, install it for better",
-                  "visualisation")
+            warnings.warn("Seaborn not found on computer, install it for ",
+                          "better visualisation")
         #  Rational
         ax = plt.gca()
         ax.plot(x, y_rat, label="Rational (self)")
@@ -318,6 +347,8 @@ class Snapshot():
             ax2.bar(bins, freq, width=bins[1] - bins[0],
                     color=grey_color, edgecolor=grey_color)
         # Other funcs
+        if other_func is None and self.other_func is not None:
+            other_func = self.other_func
         other_funcs_dict = {}
         if other_func is not None:
             if type(other_func) is dict:
@@ -332,12 +363,12 @@ class Snapshot():
                     else:
                         func_label = str(func)
                     ax.plot(x, func(x), label=func_label)
+            ax.legend(loc='upper right')
         if title is None:
             ax.set_title(self.name)
         else:
             ax.set_title(f"{title}")
         if display:
-            plt.legend()
             plt.show()
         else:
             return plt.gcf()
@@ -363,3 +394,21 @@ def _increment_string(string):
         return string[:-len(last_number)] + str(int(last_number) + 1)
     else:
         return string + "_2"
+
+
+def _get_frontiers(snapshot_list):
+    x_min, x_max, y_min, y_max = np.inf, -np.inf, np.inf, -np.inf
+    for snap in snapshot_list:
+        fig = snap.show(display=False)
+        x_mi, x_ma = fig.axes[0].get_xlim()
+        y_mi, y_ma = fig.axes[0].get_ylim()
+        if x_mi < x_min:
+            x_min = x_mi
+        if y_mi < y_min:
+            y_min = y_mi
+        if x_ma > x_max:
+            x_max = x_ma
+        if y_ma > y_max:
+            y_max = y_ma
+    fig.clf()
+    return x_min, x_max, y_min, y_max

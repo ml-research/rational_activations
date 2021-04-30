@@ -40,6 +40,8 @@ class Rational():
             rational_func = Rational_version_B
         elif version == "C":
             rational_func = Rational_version_C
+        elif version == "# NOTE: ":
+            rational_func = Rational_version_N
         else:
             raise ValueError("version %s not implemented" % version)
         self.activation_function = rational_func
@@ -212,6 +214,23 @@ def Rational_version_C(x, w_array, d_array):
     Q = np.abs(Q) + np.full_like(Q, 0.1)
     return P/Q
 
+
+def Rational_version_N(x, w_array, d_array):
+    """
+    Non safe version, original rational without norm
+    """
+    xi = np.ones_like(x)
+    P = np.ones_like(x) * w_array[0]
+    for i in range(len(w_array) - 1):
+        xi *= x
+        P += w_array[i+1] * xi
+    xi = np.ones_like(x)
+    Q = np.zeros_like(x)
+    for i in range(len(d_array)):
+        xi *= x
+        Q += d_array[i] * xi
+    Q = Q + np.ones_like(Q)
+    return P/Q
 
 #if __name__ == '__main__':
 #    def crazy_func(x):

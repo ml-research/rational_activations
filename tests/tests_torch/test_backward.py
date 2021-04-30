@@ -2,6 +2,8 @@ import torch
 from torch.nn import MSELoss
 from rational.torch import Rational
 import numpy as np
+import seaborn as sns
+sns.set_theme()
 
 vizu_epochs = [0, 2, 4, 7, 10, 50, 100, 200]
 
@@ -20,19 +22,24 @@ def backward_test(cuda, version, recurrent_rat):
     else:
         rat_func = rat
     loss_fn = MSELoss()
-    optimizer = torch.optim.SGD(rat.parameters(), lr=0.05, momentum=0.9)
-    for i in range(200):
+    optimizer = torch.optim.SGD(rat.parameters(), lr=0.01, momentum=0.9)
+    # rat.input_retrieve_mode()
+    for i in range(1000):
         out = rat_func(inp)
         optimizer.zero_grad()
         loss = loss_fn(out, exp)
         loss.backward()
         optimizer.step()
-        if not i :
-            rat.show(other_func=sigmoid_np)
+        if not i % 200:
+            import matplotlib.pyplot as plt
+            plt.plot(inp.detach().numpy(), rat_func(inp).detach().numpy())
+            plt.plot(inp.detach().numpy(), sigmoid_np(inp.detach().numpy()))
+            plt.legend("recrat")
+            plt.show()
 
 
 def backward_test_hist(cuda, version, recurrent_rat):
-    r1, r2 = -4., 4.
+    r1, r2 = -3., 3.
     rat = Rational(cuda=cuda)
     rat.input_retrieve_mode()
     if recurrent_rat:
@@ -53,17 +60,19 @@ def backward_test_hist(cuda, version, recurrent_rat):
         loss.backward()
         optimizer.step()
         if i in vizu_epochs:
-            rat.snapshot(f"Epoch {i}", other_func=sigmoid_np)
+            rat.snapshot(f"Epoch {i}")
 
     # for snap in rat.snapshot_list:
     #     snap.show(other_func=sigmoid_np)
-
-    rat.to_gif()
+    import time
+    now = time.time()
+    rat.to_gif(other_func=sigmoid_np)
+    print(time.time() - now)
 
 # for cuda in [True, False]:
 #     for version in ["A", "B", "C", "D"]:
 #         for recurrence in [False, True]:
 #             backward_test(cuda, version, recurrence)
 
-# backward_test_hist(False, "A", False)
-backward_test_hist(True, "A", False)
+backward_test(False, "A", True)
+# backward_test_hist(True, "A", False)

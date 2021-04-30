@@ -66,3 +66,21 @@ def Rational_PYTORCH_D_F(x, weight_numerator, weight_denominator, training, rand
                        ).sum(1)
     denominator = xps[:, 1:len_deno+1].mul(weight_denominator).sum(1).abs()
     return numerator.div(1 + denominator).view(x.shape)
+
+def Rational_NONSAFE_F(x, weight_numerator, weight_denominator):
+    # P(X) / Q(X) = a_0 + a_1 * X + ... + a_n * X^n /
+    #               1 + b_1 * X + b_1 * X^2 + ... + b_m * X^m
+    z = x.view(-1)
+    len_num, len_deno = len(weight_numerator), len(weight_denominator)
+    # xps = torch.vander(z, max(len_num, len_deno), increasing=True)
+    xps = _get_xps(z, len_num, len_deno).to(weight_numerator.device)
+    numerator = xps.mul(weight_numerator).sum(1)
+    denominator = xps[:, 1:len_deno+1].mul(weight_denominator).sum(1)
+    return numerator.div(1 + denominator).view(x.shape)
+
+class Rational_CUDA_NONSAFE_F():
+    def __init__(self):
+        pass
+
+    def apply():
+        return Rational_NONSAFE_F

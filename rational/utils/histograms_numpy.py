@@ -14,7 +14,7 @@ class Histogram():
         self._verbose = False
 
     def fill_n(self, input):
-        self._update_hist(input.numpy())
+        self._update_hist(input.detach().numpy())
 
     def _update_hist(self, new_input):
         range_ext = np.around(new_input.min() - self.bin_size / 2, 1), \
