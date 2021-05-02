@@ -25,33 +25,10 @@ class Rational_base():
              tolerance=0.001, title=None):
         snap = self.snapshot(returns=True)
         snap.histogram = self.distribution
-        snap.show(x, fitted_function, other_func, display, tolerance, title)
-        return
-        np_func = self.numpy()
-        freq = None
-        if x is None and self.distribution is None:
-            input_range = np.arange(-3, 3, 0.01)
-            x = input_range
-        elif self.distribution is not None and len(self.distribution.bins) > 0:
-            freq, bins = _cleared_arrays(self.distribution, tolerance)
-            if freq is not None:
-                input_range = np.array(bins, dtype=float)
-                x = input_range
-        else:
-            input_range = np.array(x, dtype=float)
-        outputs = np_func(input_range)
-        for func, func_output in other_funcs_dict.items():
-            ax.plot(input_range, func_output, label=func)
-        if self.best_fitted_function is not None and other_func is None:
-            if '__name__' in dir(self.best_fitted_function):
-                func_label = self.best_fitted_function.__name__
-            else:
-                func_label = str(self.best_fitted_function)
-            a, b, c, d = self.best_fitted_function_params
-            result = a * self.best_fitted_function(c * input_range + d) + b
-            ax.plot(input_range, result, "r-", label=f"Fitted {func_label}")
-        ax.legend()
-        plt.show()
+        fig = snap.show(x, fitted_function, other_func, display, tolerance,
+                        title)
+        if not display:
+            return fig
 
     def snapshot(self, name="snapshot_0", x=None, fitted_function=True,
                  other_func=None, returns=False):
@@ -76,13 +53,13 @@ class Rational_base():
                     and the callable as value.
                 returns (bool):
                     If ``True``, returns the snapshot dict.
-                    Otherwise, saves it in self.snapshot_dict \n
+                    Otherwise, saves it in self.snapshot_list \n
                     Default ``False``
         """
-        if name in [snst.name for snst in self.snapshot_list]:
+        if name in [snst.name for snst in self.snapshot_list] and not returns:
             print("Name for the snapshot already used, incrementing:")
             new_name = _increment_string(name)
-            print(f"\t{name} -> {new_name} in snapshot_dict")
+            print(f"\t{name} -> {new_name} in snapshot_list")
             name = new_name
         snapshot = Snapshot(name, self)
         if returns:
@@ -225,12 +202,25 @@ class Rational_base():
                     f"({self.version}) of degrees {self.degrees} running on "
                     f"{self.device}")
 
-    def to_gif(self, title="rational_evolution", other_func=None):
-        import imageio
+    def save_graph(self, x=None, fitted_function=True, other_func=None,
+                   path=None, tolerance=0.001, title=None, format="svg",
+                   use_last=False):
+        if use_last:
+            if not len(self.snapshot_list):
+                print("Couldn't use the last snapshot as the snapshot_list \
+                      is empty")
+                return
+            snap = self.snapshot_list[-1]
+        else:
+            s_name = title if title else "rational graph"
+            snap = Snapshot(s_name, self)
+        snap.save(x=None, fitted_function=True, other_func=None,
+                  path=None, tolerance=0.001, title=None, format="svg")
+
+    def save_animated_graph(self, path="rational_evolution.gif",
+                            other_func=None):
         import io
         from PIL import Image
-        from os import makedirs
-        from shutil import rmtree
         if len(self.snapshot_list) < 2:
             print("Couldn't save a gif as you have taken less than 1 snapshot")
             return
@@ -249,9 +239,10 @@ class Rational_base():
             buf.seek(0)
             gif_images.append(Image.open(buf))
             fig.clf()
-        gif_images[0].save(f'{title}.gif', save_all=True,
-                           append_images=gif_images[1:], optimize=False,
-                           duration=800, loop=0)
+        if path[-4:] != ".gif":
+            path += ".gif"
+        gif_images[0].save(path, save_all=True, append_images=gif_images[1:],
+                           optimize=False, duration=800, loop=0)
 
 
 class Snapshot():
@@ -271,7 +262,8 @@ class Snapshot():
         self.rational = rational.numpy()
         self.range = None
         self.histogram = None
-        if not rational.distribution.empty:
+        if rational.distribution is not None and \
+           not rational.distribution.is_empty:
             from copy import deepcopy
             self.histogram = deepcopy(rational.distribution)
             if not Rational_base._HIST_WARNED:
@@ -373,6 +365,17 @@ class Snapshot():
         else:
             return plt.gcf()
 
+    def save(self, x=None, fitted_function=True, other_func=None,
+             path=None, tolerance=0.001, title=None, force_range=False,
+             format="svg"):
+        fig = self.show(x, fitted_function, other_func, False, tolerance,
+                        title, force_range)
+        if path == None:
+            path = self.name + f".{format}"
+        elif "." not in path:
+            path += f".{format}"
+        fig.savefig(path)
+        fig.clf()
 
     def __repr__(self):
         return f"Snapshot ({self.name})"

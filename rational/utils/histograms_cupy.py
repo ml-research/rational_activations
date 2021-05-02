@@ -55,7 +55,7 @@ class Histogram():
         return self.__weights.get().flatten()
 
     @property
-    def empty(self):
+    def is_empty(self):
         return self._empty
 
     @property

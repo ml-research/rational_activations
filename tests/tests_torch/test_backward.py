@@ -61,12 +61,13 @@ def backward_test_hist(cuda, version, recurrent_rat):
         optimizer.step()
         if i in vizu_epochs:
             rat.snapshot(f"Epoch {i}")
+            rat.save_graph(use_last=True)
 
     # for snap in rat.snapshot_list:
     #     snap.show(other_func=sigmoid_np)
     import time
     now = time.time()
-    rat.to_gif(other_func=sigmoid_np)
+    rat.save_animated_graph(other_func=sigmoid_np)
     print(time.time() - now)
 
 # for cuda in [True, False]:
@@ -74,5 +75,5 @@ def backward_test_hist(cuda, version, recurrent_rat):
 #         for recurrence in [False, True]:
 #             backward_test(cuda, version, recurrence)
 
-backward_test(False, "A", True)
-# backward_test_hist(True, "A", False)
+# backward_test(False, "A", True)
+backward_test_hist(False, "A", False)

@@ -31,7 +31,7 @@ class Histogram():
                                                    self.bin_size, self._rd)
 
     @property
-    def empty(self):
+    def is_empty(self):
         return self._empty
 
     def __repr__(self):
