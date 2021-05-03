@@ -17,23 +17,63 @@ class Rational_base():
         self.best_fitted_function = None
         self.best_fitted_function_params = None
         self.snapshot_list = list()
-        self._verbose = False
+        self._verbose = True
         Rational_base.count += 1
         Rational_base.list.append(self)
 
+    @classmethod
+    def show_all(cls, x=None, fitted_function=True, other_func=None,
+                 display=True, tolerance=0.001, title=None, axes=None):
+        if axes is not None:
+            for rat, ax in zip(cls.list, axes.flatten()):
+                rat.show(x, fitted_function, other_func, False, tolerance,
+                         title, axis=ax)
+        if display:
+            plt.legend()
+            plt.show()
+
     def show(self, x=None, fitted_function=True, other_func=None, display=True,
-             tolerance=0.001, title=None):
+             tolerance=0.001, title=None, axis=None):
+        """
+        Shows a graph of the function (or returns it if ``returns=True``).
+
+        Arguments:
+                name (str):
+                    Name of the snapshot.\n
+                    Default ``snapshot_0``
+                x (range):
+                    The range to print the function on.\n
+                    Default ``None``
+                fitted_function (bool):
+                    If ``True``, displays the best fitted function if searched.
+                    Otherwise, returns it. \n
+                    Default ``True``
+                other_funcs (callable):
+                    another function to be plotted or a list of other callable
+                    functions or a dictionary with the function name as key
+                    and the callable as value.
+                display (bool):
+                    If ``True``, displays the plot.
+                    Otherwise, returns the figure. \n
+                    Default ``False``
+        """
         snap = self.snapshot(returns=True)
         snap.histogram = self.distribution
-        fig = snap.show(x, fitted_function, other_func, display, tolerance,
-                        title)
-        if not display:
-            return fig
+        if axis is None:
+            fig = snap.show(x, fitted_function, other_func, display, tolerance,
+                            title)
+            if not display:
+                return fig
+            else:
+                fig.show()
+        else:
+            snap.show(x, fitted_function, other_func, display, tolerance,
+                      title, axis=axis)
 
     def snapshot(self, name="snapshot_0", x=None, fitted_function=True,
                  other_func=None, returns=False):
         """
-        Saves a snapshot of the rational functions and related in the
+        Place a snapshot of the rational functions and related in the
         snapshot_list variable (or returns it if ``returns=True``).
 
         Arguments:
@@ -52,7 +92,7 @@ class Rational_base():
                     functions or a dictionary with the function name as key
                     and the callable as value.
                 returns (bool):
-                    If ``True``, returns the snapshot dict.
+                    If ``True``, returns the snapshot.
                     Otherwise, saves it in self.snapshot_list \n
                     Default ``False``
         """
@@ -107,10 +147,6 @@ class Rational_base():
                                "params": (a, b, c, d),
                                "y": result}
 
-        # {"hist": hist_dict,
-        #  "line": {"x": input_range, "y": outputs},
-        #  "fitted_function": fitted_function,
-        #  "other_func": other_funcs_dict}
 
     def fit(self, function, x=None, show=False):
         """
@@ -195,8 +231,7 @@ class Rational_base():
         if self._verbose:
             return (f"Rational Activation Function "
                     f"{self.version}) of degrees {self.degrees} running on "
-                    f"{self.device}"
-                    f"\n{self.numerator.device}: {hex(id(self.numerator))}")
+                    f"{self.device} {hex(id(self))}\n")
         else:
             return (f"Rational Activation Function "
                     f"({self.version}) of degrees {self.degrees} running on "
@@ -219,6 +254,19 @@ class Rational_base():
 
     def save_animated_graph(self, path="rational_evolution.gif",
                             other_func=None):
+        """
+        Creates and saves an animated graph of the animated graph of the \
+        function evolution based on the successive snapshots saved in \
+        `snapshot_list`.
+
+        Arguments:
+                path (str):
+                    Complete path with name of the figure.\n
+                other_funcs (callable):
+                    another function to be plotted or a list of other callable
+                    functions or a dictionary with the function name as key
+                    and the callable as value.
+        """
         import io
         from PIL import Image
         if len(self.snapshot_list) < 2:
@@ -229,7 +277,6 @@ class Rational_base():
         x_min, x_max, y_min, y_max = _get_frontiers(self.snapshot_list)
         gif_images = []
         for i, snap in enumerate(self.snapshot_list):
-            im_bytes = io.BytesIO()
             fig = snap.show(other_func=other_func, display=False)
             ax0 = fig.axes[0]
             ax0.set_xlim([x_min, x_max])
@@ -241,6 +288,7 @@ class Rational_base():
             fig.clf()
         if path[-4:] != ".gif":
             path += ".gif"
+        path = _repair_path(path)
         gif_images[0].save(path, save_all=True, append_images=gif_images[1:],
                            optimize=False, duration=800, loop=0)
 
@@ -275,7 +323,8 @@ class Snapshot():
         self.other_func = other_func
 
     def show(self, x=None, fitted_function=True, other_func=None,
-             display=True, tolerance=0.001, title=None, force_range=False):
+             display=True, tolerance=0.001, title=None, force_range=False,
+             axis=None):
         """
         Show the function using `matplotlib`.
 
@@ -328,8 +377,11 @@ class Snapshot():
             warnings.warn("Seaborn not found on computer, install it for ",
                           "better visualisation")
         #  Rational
-        ax = plt.gca()
-        ax.plot(x, y_rat, label="Rational (self)")
+        if axis is None:
+            ax = plt.gca()
+        else:
+            ax = axis
+        ax.plot(x, y_rat, label="Rational")
         #  Histogram
         if self.histogram is not None:
             freq, bins = _cleared_arrays(self.histogram, tolerance)
@@ -354,26 +406,28 @@ class Snapshot():
                         func_label = func.__name__
                     else:
                         func_label = str(func)
-                    ax.plot(x, func(x), label=func_label)
+                    ax.plot(x, numpify(func, x), label=func_label)
             ax.legend(loc='upper right')
         if title is None:
             ax.set_title(self.name)
         else:
             ax.set_title(f"{title}")
-        if display:
-            plt.show()
-        else:
-            return plt.gcf()
+        if axis is None:
+            if display:
+                plt.show()
+            else:
+                return plt.gcf()
 
     def save(self, x=None, fitted_function=True, other_func=None,
              path=None, tolerance=0.001, title=None, force_range=False,
              format="svg"):
         fig = self.show(x, fitted_function, other_func, False, tolerance,
                         title, force_range)
-        if path == None:
+        if path is None:
             path = self.name + f".{format}"
         elif "." not in path:
             path += f".{format}"
+        path = _repair_path(path)
         fig.savefig(path)
         fig.clf()
 
@@ -388,6 +442,22 @@ def _cleared_arrays(hist, tolerance=0.001):
     if last == 0:
         return freq[first:], bins[first:]
     return freq[first:last], bins[first:last]
+
+
+def _repair_path(path):
+    import os
+    if os.path.exists(path):
+        print(f'Path "{path}" exists')
+        path_list = path.split(".")
+        path_list[-2] = _increment_string(path_list[-2])
+        path = '.'.join(path_list)
+        print(f'New path : "{path}"')
+    if '/' in path:
+        directory = "/".join(path.split("/")[:-1])
+        if not os.path.exists(directory):
+            print(f'Path "{directory}" does not exist, creating')
+            os.makedirs(directory)
+    return path
 
 
 def _increment_string(string):
@@ -415,3 +485,18 @@ def _get_frontiers(snapshot_list):
             y_max = y_ma
     fig.clf()
     return x_min, x_max, y_min, y_max
+
+
+def numpify(func, x):
+    """
+    assert that the function is called and returns a numpy array
+    """
+    try:
+        return np.array(func(x))
+    except TypeError as tper:
+        if "Tensor" in str(tper):
+            import torch
+            return func(torch.tensor(x)).detach().numpy()
+        else:
+            print("Doesn't know how to handle this type of data")
+            raise tper

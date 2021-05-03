@@ -61,7 +61,7 @@ def backward_test_hist(cuda, version, recurrent_rat):
         optimizer.step()
         if i in vizu_epochs:
             rat.snapshot(f"Epoch {i}")
-            rat.save_graph(use_last=True)
+            rat.save_animated_graph(f"dossier/coucou{i}")
 
     # for snap in rat.snapshot_list:
     #     snap.show(other_func=sigmoid_np)

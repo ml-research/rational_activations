@@ -5,9 +5,9 @@ class Histogram():
     """
     Input Histograms, used to retrieve the input of Rational Activations
     """
-    def __init__(self, bin_size=0.1, random_select=False):
+    def __init__(self, bin_size=0.001, random_select=False):
         self.bins = np.array([])
-        self.weights = np.array([], dtype=np.int)
+        self.weights = np.array([], dtype=np.uint32)
         self.bin_size = bin_size
         self._empty = True
         self._rd = int(np.log10(1./bin_size).item())
