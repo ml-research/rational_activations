@@ -15,6 +15,7 @@ This project depends on:
 - pytorch
 - numpy, scipy (if you want to add different initially approximated functions)
 - matplotlib (if you want to use the plotting properties)
+- torchvision (if you want to convert a torchvision model architecture to Rational)
 
 Download and install:
 You can download from the
