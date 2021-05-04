@@ -1,5 +1,5 @@
 Apply the functions to torchvision model
-=======================
+========================================
 
 In this tutorial, we are going to apply rational functions to a (pretrained) PyTorch network directly taken from the torchvision library.
 
