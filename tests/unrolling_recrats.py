@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import sys
+from copy import deepcopy
 sns.set_theme()
 
 
@@ -40,6 +41,8 @@ for axs, unroll in zip(axes, (1, 2, 3, 4, 5)):
     print("#" * 15)
     print(f"Unroll: {unroll}")
     rat = Rational(cuda=False)
+    numerator = deepcopy(rat.numerator)
+    denominator = deepcopy(rat.denominator)
     if unroll == 1:
         rat_func = rat
     elif unroll == 2:
@@ -55,7 +58,26 @@ for axs, unroll in zip(axes, (1, 2, 3, 4, 5)):
         def rat_func(inp):
             return rat(rat(rat(rat(rat(inp)))))
     loss_fn = MSELoss()
-    optimizer = torch.optim.SGD(rat.parameters(), lr=0.001, momentum=0.9)
+    min_loss = np.inf
+    min_lr = None
+    for lr in [0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001]:
+        rat.numerator = deepcopy(numerator)
+        rat.denominator = deepcopy(denominator)
+        optimizer = torch.optim.SGD(rat.parameters(), lr=lr)
+        for i in range(1001):
+            out = rat_func(inp)
+            optimizer.zero_grad()
+            loss = loss_fn(out, exp)
+            loss.backward()
+            optimizer.step()
+        if loss.item() < min_loss:
+            min_lr = lr
+            min_loss = loss.item()
+            print(f'{lr}: {loss.item()}')
+    print(f"Taking lr {min_lr} with loss {min_loss}")
+    rat.numerator = deepcopy(numerator)
+    rat.denominator = deepcopy(denominator)
+    optimizer = torch.optim.SGD(rat.parameters(), lr=min_lr)
     for i in range(1001):
         out = rat_func(inp)
         optimizer.zero_grad()
@@ -74,12 +96,17 @@ for axs, unroll in zip(axes, (1, 2, 3, 4, 5)):
                 ax.plot(inp.detach().numpy(), npfunc(inp.detach().numpy()))
             if i // 250 == 4:
                 ax.plot([0], [0], alpha=0, label=f"Loss: {round(loss.item(), 4)}")
+                ax.plot([0], [0], alpha=0, label=f"lr: {round(min_lr, 4)}")
                 ax.legend()
     print(f"Loss: {round(loss.item(), 4)}")
 
-
-plt.show()
-
+if "show" in sys.argv:
+    plt.show()
+else:
+    if funcstr == "50*x**2/(1 + 4*x)":
+        funcstr = "crazy"
+    plt.tight_layout()
+    plt.savefig(f"{funcstr}.png", dpi=300)
 
 # backward_test(False, "A", True)
 # backward_test_hist(True, "A", False)

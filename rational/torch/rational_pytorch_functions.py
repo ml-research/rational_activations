@@ -67,7 +67,7 @@ def Rational_PYTORCH_D_F(x, weight_numerator, weight_denominator, training, rand
     denominator = xps[:, 1:len_deno+1].mul(weight_denominator).sum(1).abs()
     return numerator.div(1 + denominator).view(x.shape)
 
-def Rational_NONSAFE_F(x, weight_numerator, weight_denominator):
+def Rational_NONSAFE_F(x, weight_numerator, weight_denominator, training):
     # P(X) / Q(X) = a_0 + a_1 * X + ... + a_n * X^n /
     #               1 + b_1 * X + b_1 * X^2 + ... + b_m * X^m
     z = x.view(-1)

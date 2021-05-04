@@ -235,7 +235,6 @@ class Rational(Rational_base, nn.Module):
 
             self.activation_function = rational_func
 
-
     def forward(self, x):
         return self.activation_function(x, self.numerator, self.denominator,
                                         self.training)
