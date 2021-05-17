@@ -10,7 +10,7 @@ class Rational_base():
     _FR_WARNED = False
     _HIST_WARNED = False
 
-    def __init__(self):
+    def __init__(self, name):
         super().__init__()
         self._handle_retrieve_mode = None
         self.distribution = None
@@ -18,19 +18,71 @@ class Rational_base():
         self.best_fitted_function_params = None
         self.snapshot_list = list()
         self._verbose = True
+        if name in [rat.name for rat in self.list]:
+            name = _increment_string(name)
+        self.name = name
         Rational_base.count += 1
         Rational_base.list.append(self)
 
     @classmethod
     def show_all(cls, x=None, fitted_function=True, other_func=None,
-                 display=True, tolerance=0.001, title=None, axes=None):
-        if axes is not None:
-            for rat, ax in zip(cls.list, axes.flatten()):
-                rat.show(x, fitted_function, other_func, False, tolerance,
-                         title, axis=ax)
+                 display=True, tolerance=0.001, title=None, axes=None,
+                 layout="auto"):
+        if axes is None:
+            if layout == "auto":
+                total = len(cls.list)
+                layout = _get_auto_axis_layout(total)
+            if len(layout) != 2:
+                msg = 'layout should be either "auto" or a tuple of size 2'
+                raise TypeError(msg)
+            try:
+                import seaborn as sns
+                with sns.axes_style("whitegrid"):
+                    fig, axes = plt.subplots(*layout)
+            except ImportError:
+                print("Try install seaborn")
+                fig, axes = plt.subplots(*layout)
+            if display:
+                fig.tight_layout()
+            for ax in axes.flatten()[len(cls.list):]:
+                ax.remove()
+            axes = axes[:len(cls.list)]
+        for rat, ax in zip(cls.list, axes.flatten()):
+            rat.show(x, fitted_function, other_func, False, tolerance,
+                     None, axis=ax)
+        if title is not None:
+            fig.suptitle(title, y=1.02)
         if display:
             plt.legend()
             plt.show()
+        else:
+            return fig
+
+    @classmethod
+    def save_all_graphs(cls, x=None, fitted_function=True, other_func=None,
+                        tolerance=0.001, title=None, axes=None, layout="auto",
+                        path=None, format="svg"):
+        fig  = cls.show_all(x, fitted_function, other_func, False, tolerance,
+                            title, axes, layout)
+        if path is None:
+            if title is None:
+                path = "rationals_save" + f".{format}"
+            else:
+                path = f"{title}.{format}"
+        elif "." not in path:
+            path += f".{format}"
+        path = _repair_path(path)
+        fig.savefig(path, bbox_inches='tight')
+        fig.clf()
+
+    @classmethod
+    def capture_all(cls, name="snapshot_0", x=None, fitted_function=True,
+                    other_func=None, returns=False):
+        """
+        Captures snapshot for every instanciated rational
+        """
+        for rat in cls.list:
+            rat.capture(name, x, fitted_function, other_func, returns)
 
     def show(self, x=None, fitted_function=True, other_func=None, display=True,
              tolerance=0.001, title=None, axis=None):
@@ -57,8 +109,12 @@ class Rational_base():
                     Otherwise, returns the figure. \n
                     Default ``False``
         """
-        snap = self.snapshot(returns=True)
+        snap = self.capture(returns=True)
         snap.histogram = self.distribution
+        if title is None:
+            rats_names = [_erase_suffix(rat.name) for rat in self.list]
+            if len(set(rats_names)) != 1:
+                title = self.name
         if axis is None:
             fig = snap.show(x, fitted_function, other_func, display, tolerance,
                             title)
@@ -70,10 +126,10 @@ class Rational_base():
             snap.show(x, fitted_function, other_func, display, tolerance,
                       title, axis=axis)
 
-    def snapshot(self, name="snapshot_0", x=None, fitted_function=True,
-                 other_func=None, returns=False):
+    def capture(self, name="snapshot_0", x=None, fitted_function=True,
+                other_func=None, returns=False):
         """
-        Place a snapshot of the rational functions and related in the
+        Captures a snapshot of the rational functions and related in the
         snapshot_list variable (or returns it if ``returns=True``).
 
         Arguments:
@@ -96,11 +152,9 @@ class Rational_base():
                     Otherwise, saves it in self.snapshot_list \n
                     Default ``False``
         """
-        if name in [snst.name for snst in self.snapshot_list] and not returns:
-            print("Name for the snapshot already used, incrementing:")
-            new_name = _increment_string(name)
-            print(f"\t{name} -> {new_name} in snapshot_list")
-            name = new_name
+        while name in [snst.name for snst in self.snapshot_list] and \
+              not returns:
+            name = _increment_string(name)
         snapshot = Snapshot(name, self)
         if returns:
             return snapshot
@@ -228,7 +282,7 @@ class Rational_base():
                                   " this class, only for the mother class")
 
     def __repr__(self):
-        if self._verbose:
+        if "_verbose" in dir(self) and self._verbose:
             return (f"Rational Activation Function "
                     f"{self.version}) of degrees {self.degrees} running on "
                     f"{self.device} {hex(id(self))}\n")
@@ -409,7 +463,8 @@ class Snapshot():
                     ax.plot(x, numpify(func, x), label=func_label)
             ax.legend(loc='upper right')
         if title is None:
-            ax.set_title(self.name)
+            if not "snapshot" in self.name:
+                ax.set_title(self.name)
         else:
             ax.set_title(f"{title}")
         if axis is None:
@@ -469,6 +524,13 @@ def _increment_string(string):
         return string + "_2"
 
 
+def _erase_suffix(string):
+    if string[-1] in [str(i) for i in range(10)]:
+        return "_".join(string.split("_")[:-1])
+    else:
+        return string
+
+
 def _get_frontiers(snapshot_list):
     x_min, x_max, y_min, y_max = np.inf, -np.inf, np.inf, -np.inf
     for snap in snapshot_list:
@@ -500,3 +562,39 @@ def numpify(func, x):
         else:
             print("Doesn't know how to handle this type of data")
             raise tper
+
+
+def _get_auto_axis_layout(nb_plots):
+    if nb_plots == 1:
+        return 1, 1
+    mid = int(np.sqrt(nb_plots))
+    for i in range(mid, 1, -1):
+        mod = nb_plots % i
+        if mod == 0:
+            return i, nb_plots // i
+    if mid * (mid + 1) >= nb_plots:
+        return mid, mid + 1
+    return mid + 1, mid + 1
+
+
+class hybridmethod:
+    def __init__(self, fclass, finstance=None, doc=None):
+        self.fclass = fclass
+        self.finstance = finstance
+        self.__doc__ = doc or fclass.__doc__
+        # support use on abstract base classes
+        self.__isabstractmethod__ = bool(
+            getattr(fclass, '__isabstractmethod__', False)
+        )
+
+    def classmethod(self, fclass):
+        return type(self)(fclass, self.finstance, None)
+
+    def instancemethod(self, finstance):
+        return type(self)(self.fclass, finstance, self.__doc__)
+
+    def __get__(self, instance, cls):
+        if instance is None or self.finstance is None:
+              # either bound to the class, or no instance method available
+            return self.fclass.__get__(cls, None)
+        return self.finstance.__get__(instance, cls)

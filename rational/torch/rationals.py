@@ -176,8 +176,10 @@ class Rational(Rational_base, nn.Module):
 
     def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=None,
                  version="A", trainable=True, train_numerator=True,
-                 train_denominator=True):
-        super().__init__()
+                 train_denominator=True, name=None):
+        if name is None:
+            name = approx_func
+        super().__init__(name)
 
         if cuda is None:
             cuda = torch_cuda_available()
