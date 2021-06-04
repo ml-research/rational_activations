@@ -42,8 +42,8 @@ class Rational_base():
             except ImportError:
                 print("Try install seaborn")
                 fig, axes = plt.subplots(*layout)
-            if display:
-                fig.tight_layout()
+            # if display:
+            fig.tight_layout()
             for ax in axes.flatten()[len(cls.list):]:
                 ax.remove()
             axes = axes[:len(cls.list)]
@@ -57,32 +57,6 @@ class Rational_base():
             plt.show()
         else:
             return fig
-
-    @classmethod
-    def save_all_graphs(cls, x=None, fitted_function=True, other_func=None,
-                        tolerance=0.001, title=None, axes=None, layout="auto",
-                        path=None, format="svg"):
-        fig  = cls.show_all(x, fitted_function, other_func, False, tolerance,
-                            title, axes, layout)
-        if path is None:
-            if title is None:
-                path = "rationals_save" + f".{format}"
-            else:
-                path = f"{title}.{format}"
-        elif "." not in path:
-            path += f".{format}"
-        path = _repair_path(path)
-        fig.savefig(path, bbox_inches='tight')
-        fig.clf()
-
-    @classmethod
-    def capture_all(cls, name="snapshot_0", x=None, fitted_function=True,
-                    other_func=None, returns=False):
-        """
-        Captures snapshot for every instanciated rational
-        """
-        for rat in cls.list:
-            rat.capture(name, x, fitted_function, other_func, returns)
 
     def show(self, x=None, fitted_function=True, other_func=None, display=True,
              tolerance=0.001, title=None, axis=None):
@@ -126,6 +100,15 @@ class Rational_base():
             snap.show(x, fitted_function, other_func, display, tolerance,
                       title, axis=axis)
 
+    @classmethod
+    def capture_all(cls, name="snapshot_0", x=None, fitted_function=True,
+                    other_func=None, returns=False):
+        """
+        Captures snapshot for every instanciated rational
+        """
+        for rat in cls.list:
+            rat.capture(name, x, fitted_function, other_func, returns)
+
     def capture(self, name="snapshot_0", x=None, fitted_function=True,
                 other_func=None, returns=False):
         """
@@ -159,47 +142,46 @@ class Rational_base():
         if returns:
             return snapshot
         self.snapshot_list.append(snapshot)
-        return
-        np_func = self.numpy()
-        freq = None
-        if x is None and self.distribution is None:
-            input_range = np.arange(-3, 3, 0.01)
-            x = input_range
-        elif self.distribution is not None and len(self.distribution.bins) > 0:
-            freq, bins = _cleared_arrays(self.distribution, tolerance)
-            if freq is not None:
-                input_range = np.array(bins, dtype=float)
-                x = input_range
-        else:
-            input_range = np.array(x, dtype=float)
-        outputs = np_func(input_range)
-        other_funcs_dict = {}
-        if other_func is not None:
-            if type(other_func) is dict:
-                for func_label, func in other_func.items():
-                    other_funcs_dict[func_label] = func(x)
-            else:
-                if type(other_func) is not list:
-                    other_func = [other_func]
-                for func in other_func:
-                    if '__name__' in dir(func):
-                        func_label = func.__name__
-                    else:
-                        func_label = str(func)
-                    other_funcs_dict[func_label] = func(x)
-        if freq is None:
-            hist_dict = None
-        else:
-            hist_dict = {"bins": bins, "freq": freq,
-                         "width": bins[1] - bins[0]}
-        if "best_fitted_function" not in dir(self) or self.best_fitted_function is None:
-            fitted_function = None
-        else:
-            a, b, c, d = self.best_fitted_function_params
-            result = a * self.best_fitted_function(c * input_range + d) + b
-            fitted_function = {"function": self.best_fitted_function,
-                               "params": (a, b, c, d),
-                               "y": result}
+        # np_func = self.numpy()
+        # freq = None
+        # if x is None and self.distribution is None:
+        #     input_range = np.arange(-3, 3, 0.01)
+        #     x = input_range
+        # elif self.distribution is not None and len(self.distribution.bins) > 0:
+        #     freq, bins = _cleared_arrays(self.distribution, tolerance)
+        #     if freq is not None:
+        #         input_range = np.array(bins, dtype=float)
+        #         x = input_range
+        # else:
+        #     input_range = np.array(x, dtype=float)
+        # outputs = np_func(input_range)
+        # other_funcs_dict = {}
+        # if other_func is not None:
+        #     if type(other_func) is dict:
+        #         for func_label, func in other_func.items():
+        #             other_funcs_dict[func_label] = func(x)
+        #     else:
+        #         if type(other_func) is not list:
+        #             other_func = [other_func]
+        #         for func in other_func:
+        #             if '__name__' in dir(func):
+        #                 func_label = func.__name__
+        #             else:
+        #                 func_label = str(func)
+        #             other_funcs_dict[func_label] = func(x)
+        # if freq is None:
+        #     hist_dict = None
+        # else:
+        #     hist_dict = {"bins": bins, "freq": freq,
+        #                  "width": bins[1] - bins[0]}
+        # if "best_fitted_function" not in dir(self) or self.best_fitted_function is None:
+        #     fitted_function = None
+        # else:
+        #     a, b, c, d = self.best_fitted_function_params
+        #     result = a * self.best_fitted_function(c * input_range + d) + b
+        #     fitted_function = {"function": self.best_fitted_function,
+        #                        "params": (a, b, c, d),
+        #                        "y": result}
 
 
     def fit(self, function, x=None, show=False):
@@ -291,23 +273,156 @@ class Rational_base():
                     f"({self.version}) of degrees {self.degrees} running on "
                     f"{self.device}")
 
-    def save_graph(self, x=None, fitted_function=True, other_func=None,
-                   path=None, tolerance=0.001, title=None, format="svg",
-                   use_last=False):
-        if use_last:
-            if not len(self.snapshot_list):
-                print("Couldn't use the last snapshot as the snapshot_list \
-                      is empty")
-                return
-            snap = self.snapshot_list[-1]
-        else:
-            s_name = title if title else "rational graph"
-            snap = Snapshot(s_name, self)
-        snap.save(x=None, fitted_function=True, other_func=None,
-                  path=None, tolerance=0.001, title=None, format="svg")
+    def export_graph(self, path="rational_function.svg", snap_number=-1,
+                     other_func=None):
+        if not len(self.snapshot_list):
+            print("Cannot use the last snapshot as the snapshot_list \
+                  is empty, making a capture with default params")
+            self.capture()
+        snap = self.snapshot_list[snap_number]
+        snap.save(path=path, other_func=other_func)
 
-    def save_animated_graph(self, path="rational_evolution.gif",
-                            other_func=None):
+    @classmethod
+    def export_graphs(cls, path="rational_evolution.svg", together=True,
+                      layout="auto", snap_number=-1, other_func=None):
+        """
+
+        """
+        if together:
+            for i, rat in enumerate(cls.list):
+                if not len(rat.snapshot_list) > 0:
+                    print(f"Cannot use the last snapshots as snapshot n {i} \
+                          is empty, capturing...")
+                    cls.capture_all()
+                    break
+            if layout == "auto":
+                total = len(cls.list)
+                layout = _get_auto_axis_layout(total)
+            if len(layout) != 2:
+                msg = 'layout should be either "auto" or a tuple of size 2'
+                raise TypeError(msg)
+            try:
+                import seaborn as sns
+                with sns.axes_style("whitegrid"):
+                    fig, axes = plt.subplots(*layout)
+            except ImportError:
+                warnings.warn("Seaborn not found on computer, install it for ",
+                              "better visualisation")
+            for rat, ax in zip(cls.list, axes.flatten()):
+                snap = rat.snapshot_list[snap_number]
+                snap.show(display=False, axis=ax, other_func=other_func)
+            for ax in axes.flatten()[len(cls.list):]:
+                ax.remove()
+            fig.savefig(_repair_path(path))
+            fig.clf()
+        else:
+            path = _path_for_multiple(path, "graphs")
+            for i, rat in enumerate(cls.list):
+                pos = path.rfind(".")
+                new_path = f"{path[pos:]}_{i}{path[:pos]}"
+                rat.export_graph(new_path)
+
+
+    @classmethod
+    def export_evolution_graphs(cls, path="rational_evolution.gif",
+                                together=True, layout="auto", animated=True,
+                                other_func=None):
+        if animated:
+            if together:
+                nb_sn = len(cls.list[0].snapshot_list)
+                if any([len(rat.snapshot_list) != nb_sn for rat in cls.list]):
+                    msg = "Seems that not all rationals have the same " \
+                          "number of snapshots."
+                    warnings.warn(msg)
+                import io
+                from PIL import Image
+                limits = []
+                for i, rat in enumerate(cls.list):
+                    if len(rat.snapshot_list) < 2:
+                        msg = "Cannot save a gif as you have taken less " \
+                              f"than 1 snapshot for rational n {i}"
+                        print(msg)
+                        return
+                    limits.append(_get_frontiers(rat.snapshot_list,
+                                                 other_func))
+                if layout == "auto":
+                    total = len(cls.list)
+                    layout = _get_auto_axis_layout(total)
+                if len(layout) != 2:
+                    msg = 'layout should be either "auto" or a tuple of size 2'
+                    raise TypeError(msg)
+                fig = plt.gcf()
+                fig.set_tight_layout(True)
+                gif_images = []
+                seaborn_installed = False
+                try:
+                    import seaborn as sns
+                except ImportError:
+                    warnings.warn("Seaborn not found on computer, install",
+                                  " it for better visualisation")
+                for i in range(nb_sn):
+                    if seaborn_installed:
+                        with sns.axes_style("whitegrid"):
+                            fig, axes = plt.subplots(*layout)
+                    else:
+                        fig, axes = plt.subplots(*layout)
+                    for rat, ax, lim in zip(cls.list, axes.flatten(), limits):
+                        x_min, x_max, y_min, y_max = lim
+                        input = np.arange(x_min, x_max, (x_max - x_min)/10000)
+                        snap = rat.snapshot_list[i]
+                        snap.show(x=input, other_func=other_func,
+                                  display=False, axis=ax)
+                        ax.set_xlim([x_min, x_max])
+                        ax.set_ylim([y_min, y_max])
+                    for ax in axes.flatten()[len(cls.list):]:
+                        ax.remove()
+                    buf = io.BytesIO()
+                    plt.savefig(buf, format='png')
+                    buf.seek(0)
+                    gif_images.append(Image.open(buf))
+                    fig.clf()
+                if path[-4:] != ".gif":
+                    path += ".gif"
+                path = _repair_path(path)
+                gif_images[0].save(path, save_all=True, duration=800, loop=0,
+                                   append_images=gif_images[1:], optimize=False)
+            else:
+                path = _path_for_multiple(path, "graphs")
+                for i, rat in enumerate(cls.list):
+                    pos = path.rfind(".")
+                    if pos > 0:
+                        new_path = f"{path[pos:]}_{i}{path[:pos]}"
+                    else:
+                        new_path = f"{path}_{i}"
+                    rat.export_evolution_graph(new_path, True, other_func)
+        else:  # not animated
+            if path[-4:] == ".gif":
+                path = path[-4:] + ".svg"
+            path = _path_for_multiple(path, "evolution")
+            if together:
+                nb_sn = len(cls.list[0].snapshot_list)
+                if any([len(rat.snapshot_list) != nb_sn for rat in cls.list]):
+                    msg = "Seems that not all rationals have the " \
+                          "same number of snapshots."
+                    warnings.warn(msg)
+                for snap_number in range(nb_sn):
+                    if "." in path:
+                        ext = path.split(".")[-1]
+                        main = ".".join(path.split(".")[:-1])
+                        new_path = f"{main}_{snap_number}.{ext}"
+                    else:
+                        new_path = f"{path}_{snap_number}"
+                    cls.export_graphs(new_path, together, layout, snap_number,
+                                      other_func)
+            else:
+                for i, rat in enumerate(cls.list):
+                    pos = path.rfind(".")
+                    new_path = f"{path[pos:]}_{i}{path[:pos]}"
+                    rat.export_evolution_graph(path, False, other_func)
+
+
+    def export_evolution_graph(self, path="rational_evolution.gif",
+                               animated=True, other_func=None):
         """
         Creates and saves an animated graph of the animated graph of the \
         function evolution based on the successive snapshots saved in \
@@ -316,35 +431,44 @@ class Rational_base():
         Arguments:
                 path (str):
                     Complete path with name of the figure.\n
-                other_funcs (callable):
+                other_func (callable):
                     another function to be plotted or a list of other callable
                     functions or a dictionary with the function name as key
                     and the callable as value.
         """
-        import io
-        from PIL import Image
-        if len(self.snapshot_list) < 2:
-            print("Couldn't save a gif as you have taken less than 1 snapshot")
-            return
-        fig = plt.gcf()
-        fig.set_tight_layout(True)
-        x_min, x_max, y_min, y_max = _get_frontiers(self.snapshot_list)
-        gif_images = []
-        for i, snap in enumerate(self.snapshot_list):
-            fig = snap.show(other_func=other_func, display=False)
-            ax0 = fig.axes[0]
-            ax0.set_xlim([x_min, x_max])
-            ax0.set_ylim([y_min, y_max])
-            buf = io.BytesIO()
-            plt.savefig(buf, format='png')
-            buf.seek(0)
-            gif_images.append(Image.open(buf))
-            fig.clf()
-        if path[-4:] != ".gif":
-            path += ".gif"
-        path = _repair_path(path)
-        gif_images[0].save(path, save_all=True, append_images=gif_images[1:],
-                           optimize=False, duration=800, loop=0)
+        if animated:
+            import io
+            from PIL import Image
+            if len(self.snapshot_list) < 2:
+                print("Cannot save a gif as you have taken less than 1 snapshot")
+                return
+            fig = plt.gcf()
+            fig.set_tight_layout(True)
+            x_min, x_max, y_min, y_max = _get_frontiers(self.snapshot_list,
+                                                        other_func)
+            input = np.arange(x_min, x_max, (x_max - x_min)/10000)
+            gif_images = []
+            for i, snap in enumerate(self.snapshot_list):
+                fig = snap.show(x=input, other_func=other_func, display=False)
+                ax0 = fig.axes[0]
+                ax0.set_xlim([x_min, x_max])
+                ax0.set_ylim([y_min, y_max])
+                buf = io.BytesIO()
+                plt.savefig(buf, format='png')
+                buf.seek(0)
+                gif_images.append(Image.open(buf))
+                fig.clf()
+            if path[-4:] != ".gif":
+                path += ".gif"
+            path = _repair_path(path)
+            gif_images[0].save(path, save_all=True, duration=800, loop=0,
+                               append_images=gif_images[1:], optimize=False)
+        else:
+            if path[-4:] == ".gif":
+                path = path[-4:] + ".svg"
+            new_path = _path_for_multiple(path, "evolution")
+            for i, snap in enumerate(self.snapshot_list):
+                snap.save(path=new_path, other_func=other_func)
 
 
 class Snapshot():
@@ -377,8 +501,7 @@ class Snapshot():
         self.other_func = other_func
 
     def show(self, x=None, fitted_function=True, other_func=None,
-             display=True, tolerance=0.001, title=None, force_range=False,
-             axis=None):
+             display=True, tolerance=0.001, title=None, axis=None):
         """
         Show the function using `matplotlib`.
 
@@ -403,26 +526,19 @@ class Snapshot():
                     If tolerance is 0.001, every frequency smaller than 0.001 \
                     will be cutted out of the histogram.\n
                     Default ``True``
-                force_range (bool):
-                    Use `range` provided
-                    Default ``False``
         """
-        if x is None and self.range is not None:
+        if x is not None:
+            if x.dtype != float:
+                x = x.astype(float)
+            if not isinstance(x, np.ndarray):
+                x = np.array(x)
+        elif x is None and self.range is not None:
             print("Snapshot: Using range from initialisation")
             x = self.range
-        if self.histogram is None or force_range:
-            if x is None:
-                x = np.arange(-3, 3, 0.01)
-            elif x.dtype != float:
-                x = x.astype(float)
-        else:
-            if x is not None:
-                msg = "Using histogram range, use force_range to " + \
-                      "use given range"
-                if not Rational_base._FR_WARNED:
-                    warnings.warn(msg)
-                    Rational_base._FR_WARNED = True
+        elif self.histogram is not None:
             x = np.array(self.histogram.bins, dtype=float)
+        elif x is None:
+            x = np.arange(-3, 3, 0.01)
         y_rat = self.rational(x)
         try:
             import seaborn as sns
@@ -435,7 +551,7 @@ class Snapshot():
             ax = plt.gca()
         else:
             ax = axis
-        ax.plot(x, y_rat, label="Rational")
+        ax.plot(x, y_rat, label="Rational", zorder=2)
         #  Histogram
         if self.histogram is not None:
             freq, bins = _cleared_arrays(self.histogram, tolerance)
@@ -443,7 +559,9 @@ class Snapshot():
             ax2.set_yticks([])
             grey_color = (0.5, 0.5, 0.5, 0.6)
             ax2.bar(bins, freq, width=bins[1] - bins[0],
-                    color=grey_color, edgecolor=grey_color)
+                    color=grey_color, edgecolor=grey_color, alpha=0.4)
+            ax.set_zorder(ax2.get_zorder()+1) # put ax in front of ax2
+            ax.patch.set_visible(False)
         # Other funcs
         if other_func is None and self.other_func is not None:
             other_func = self.other_func
@@ -474,10 +592,9 @@ class Snapshot():
                 return plt.gcf()
 
     def save(self, x=None, fitted_function=True, other_func=None,
-             path=None, tolerance=0.001, title=None, force_range=False,
-             format="svg"):
+             path=None, tolerance=0.001, title=None, format="svg"):
         fig = self.show(x, fitted_function, other_func, False, tolerance,
-                        title, force_range)
+                        title)
         if path is None:
             path = self.name + f".{format}"
         elif "." not in path:
@@ -501,12 +618,19 @@ def _cleared_arrays(hist, tolerance=0.001):
 
 def _repair_path(path):
     import os
+    changed = False
     if os.path.exists(path):
         print(f'Path "{path}" exists')
-        path_list = path.split(".")
-        path_list[-2] = _increment_string(path_list[-2])
-        path = '.'.join(path_list)
-        print(f'New path : "{path}"')
+        changed = True
+    while os.path.exists(path):
+        if "." in path:
+            path_list = path.split(".")
+            path_list[-2] = _increment_string(path_list[-2])
+            path = '.'.join(path_list)
+        else:
+            path = _increment_string(path)
+    if changed:
+        print(f'Incremented, new path : "{path}"')
     if '/' in path:
         directory = "/".join(path.split("/")[:-1])
         if not os.path.exists(directory):
@@ -531,10 +655,10 @@ def _erase_suffix(string):
         return string
 
 
-def _get_frontiers(snapshot_list):
+def _get_frontiers(snapshot_list, other_func=None):
     x_min, x_max, y_min, y_max = np.inf, -np.inf, np.inf, -np.inf
     for snap in snapshot_list:
-        fig = snap.show(display=False)
+        fig = snap.show(display=False, other_func=other_func)
         x_mi, x_ma = fig.axes[0].get_xlim()
         y_mi, y_ma = fig.axes[0].get_ylim()
         if x_mi < x_min:
@@ -577,24 +701,15 @@ def _get_auto_axis_layout(nb_plots):
     return mid + 1, mid + 1
 
 
-class hybridmethod:
-    def __init__(self, fclass, finstance=None, doc=None):
-        self.fclass = fclass
-        self.finstance = finstance
-        self.__doc__ = doc or fclass.__doc__
-        # support use on abstract base classes
-        self.__isabstractmethod__ = bool(
-            getattr(fclass, '__isabstractmethod__', False)
-        )
-
-    def classmethod(self, fclass):
-        return type(self)(fclass, self.finstance, None)
-
-    def instancemethod(self, finstance):
-        return type(self)(self.fclass, finstance, self.__doc__)
-
-    def __get__(self, instance, cls):
-        if instance is None or self.finstance is None:
-              # either bound to the class, or no instance method available
-            return self.fclass.__get__(cls, None)
-        return self.finstance.__get__(instance, cls)
+def _path_for_multiple(path, suffix):
+    from os import makedirs
+    if "." in path:
+        path_root = ".".join(path.split(".")[:-1])
+        path_ext = "." + path.split(".")[-1]
+    else:
+        path_root = path
+        path_ext = ""
+    main_part = path_root.split("/")[-1]
+    save_folder = _repair_path(f"{path_root}_{suffix}")
+    makedirs(save_folder)
+    return f"{save_folder}/{main_part}{path_ext}"

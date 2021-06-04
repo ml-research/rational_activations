@@ -13,31 +13,66 @@ Rational("identity", cuda=False)
 
 print(Rational.list)
 
-if "save" in sys.argv:
-    Rational.save_all_graphs(other_func=torch.sin, title="All rationals")
-else:
-    Rational.show_all(other_func=torch.sin, title="All rationals")
+# if "save" in sys.argv:
+#     Rational.save_all_graphs(other_func=torch.sin, title="All rationals")
+# else:
+#     Rational.show_all(other_func=torch.sin, title="All rationals")
 
 # ================================================
 
 
 dev = Rational.list[0].device
-inp = torch.arange(-3, 3, 0.01).to(dev)
 
-exp = torch.sin(inp)
+
 criterion = torch.nn.MSELoss()
 
-for rat in Rational.list:
-    optimizer = torch.optim.SGD(rat.parameters(), lr=0.01, momentum=0.9)
-    for epoch in range(100):
+# for rat in Rational.list:
+#     optimizer = torch.optim.SGD(rat.parameters(), lr=0.01, momentum=0.9)
+#     for epoch in range(100):
+#         inp = (torch.randn(10000)).to(dev)
+#         exp = torch.sin(inp)
+#         optimizer.zero_grad()
+#         if epoch in capturing_epochs:
+#             rat.saving_input = True
+#         out = rat(inp)
+#         loss = criterion(out, exp)
+#         loss.backward()
+#         if epoch in capturing_epochs:
+#             # rat.capture(f"Epoch {epoch}")
+#             rat.capture(f"Epoch {epoch}")
+#             rat.saving_input = False
+#         optimizer.step()
+
+optimizers = [torch.optim.SGD(rat.parameters(), lr=0.01, momentum=0.9)
+              for rat in Rational.list]
+for epoch in range(100):
+    for (rat, optimizer) in zip(Rational.list, optimizers):
+        inp = ((torch.rand(10000)-0.5)*5).to(dev)
+        exp = torch.sin(inp)
         optimizer.zero_grad()
+        if epoch in capturing_epochs:
+            rat.saving_input = True
         out = rat(inp)
         loss = criterion(out, exp)
         loss.backward()
         if epoch in capturing_epochs:
-            rat.capture()
+            rat.capture(f"Epoch {epoch}")
+            rat.saving_input = False
         optimizer.step()
+    # Rational.capture_all()
 
-rat.save_animated_graph("coucou.gif")
+
+# seulement la premiere rationelle fait des histogrames.
+
+# rat.save_animated_graph("coucou.gif")
+# Rational.save_all_animated_graphs("coucou.gif")
+# Rational.export_graphs("coucou.png")
+# animated = False
+# together = False
+for animated in [True]:
+    for together in [True, False]:
+        title = f"rat_a_{animated}_t_{together}"
+        Rational.export_evolution_graphs(title, animated=animated, together=together,
+                                         other_func=torch.sin)
 # import ipdb; ipdb.set_trace()
 # Rational.show_all(other_func=torch.sin)

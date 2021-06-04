@@ -6,7 +6,7 @@ class Histogram():
     """
     Input Histograms, used to retrieve the input of Rational Activations
     """
-    def __init__(self, bin_size=0.001, random_select=False):
+    def __init__(self, bin_size=0.01, random_select=False):
         self.bins = cp.array([])
         self.weights = cp.array([], dtype=cp.uint32)
         self.bin_size = bin_size

@@ -100,7 +100,8 @@ class RecurrentRationalModule(nn.Module):
     def fit(self, function, x=None, show=False):
         return self.rational.fit(function=function, x=x, show=show)
 
-    def input_retrieve_mode(self, auto_stop=True, max_saves=1000, bin_width=0.1):
+    def input_retrieve_mode(self, auto_stop=True, max_saves=1000,
+                            bin_width=0.01):
         """
         Will retrieve the distribution of the input in self.distribution. \n
         This will slow down the function, as it has to retrieve the input \
@@ -118,11 +119,11 @@ class RecurrentRationalModule(nn.Module):
                     Default ``1000``
         """
         if self._handle_retrieve_mode is not None:
-            print("Already in retrieve mode")
+            # print("Already in retrieve mode")
             return
         from rational.utils.histograms_cupy import Histogram as hist1
         self.distribution = hist1(bin_width)
-        print("Retrieving input from now on.")
+        # print("Retrieving input from now on.")
         if auto_stop:
             self.inputs_saved = 0
             self._handle_retrieve_mode = self.register_forward_hook(_save_input_auto_stop)
@@ -395,7 +396,8 @@ class Rational(Rational_base, nn.Module):
             self.activation_function = rational_func
             self.version = version
 
-    def input_retrieve_mode(self, auto_stop=True, max_saves=1000, bin_width=0.1):
+    def input_retrieve_mode(self, auto_stop=False, max_saves=1000,
+                            bin_width=0.01):
         """
         Will retrieve the distribution of the input in self.distribution. \n
         This will slow down the function, as it has to retrieve the input \
@@ -406,21 +408,21 @@ class Rational(Rational_base, nn.Module):
                     If True, the retrieving will stop after `max_saves` \
                     calls to forward.\n
                     Else, use :meth:`torch.Rational.training_mode`.\n
-                    Default ``True``
+                    Default ``False``
                 max_saves (int):
                     The range on which the curves of the functions are fitted \
                     together.\n
                     Default ``1000``
         """
         if self._handle_retrieve_mode is not None:
-            print("Already in retrieve mode")
+            # print("Already in retrieve mode")
             return
         if "cuda" in self.device:
             from rational.utils.histograms_cupy import Histogram
         else:
             from rational.utils.histograms_numpy import Histogram
         self.distribution = Histogram(bin_width)
-        print("Retrieving input from now on.")
+        # print("Retrieving input from now on.")
         if auto_stop:
             self.inputs_saved = 0
             self._handle_retrieve_mode = self.register_forward_hook(_save_input_auto_stop)
@@ -441,9 +443,24 @@ class Rational(Rational_base, nn.Module):
         """
         Stops retrieving the distribution of the input in `self.distribution`.
         """
-        print("Training mode, no longer retrieving the input.")
+        # print("Training mode, no longer retrieving the input.")
         self._handle_retrieve_mode.remove()
         self._handle_retrieve_mode = None
+
+    @property
+    def saving_input(self):
+        return self._saving_input
+
+    @saving_input.setter
+    def saving_input(self, new_value):
+        if new_value is True:
+            self._saving_input = True
+            self.input_retrieve_mode()
+        elif new_value is False:
+            self._saving_input = False
+            self.training_mode()
+        else:
+            print("saving_input of rationals should be set with booleans")
 
 
 def _save_input(self, input, output):
