@@ -72,14 +72,7 @@ class Histogram():
             return (self.__weights / self.__weights.sum()).get().flatten(), \
                    self.bins
         else:
-            return self.weights / self.weights.sum(), self.bins
-
-    # def _from_physt(self, phystogram):
-    #     if (phystogram.bin_sizes == phystogram.bin_sizes[0]).all():
-    #         self.bin_size = phystogram.bin_sizes[0]
-    #     self.bins = cp.array(phystogram.bin_left_edges)
-    #     self.weights = cp.array(phystogram.frequencies)
-    #     return self
+            return self.__weights / self.__weights.sum(), self.__bins
 
 
 def concat_hists(weights1, bins1, weights2, bins2, bin_size, rd):

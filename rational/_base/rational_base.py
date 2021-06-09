@@ -1,3 +1,11 @@
+"""
+Rational Activation Functions (Base for every framework)
+========================================================
+
+This module allows you to create Rational Neural Networks using Learnable
+Rational activation functions. This base function is used by Pytorch,
+TensorFlow/Keras, and MXNET Rational Activation Functions.
+"""
 import numpy as np
 from termcolor import colored
 import matplotlib.pyplot as plt
@@ -28,6 +36,44 @@ class Rational_base():
     def show_all(cls, x=None, fitted_function=True, other_func=None,
                  display=True, tolerance=0.001, title=None, axes=None,
                  layout="auto"):
+        """
+        Shows a graph of the all instanciated rational functions (or returns \
+        it if ``returns=True``).
+
+        Arguments:
+                x (range):
+                    The range to print the function on.\n
+                    Default ``None``
+                fitted_function (bool):
+                    If ``True``, displays the best fitted function if searched.
+                    Otherwise, returns it. \n
+                    Default ``True``
+                other_funcs (callable):
+                    another function to be plotted or a list of other callable
+                    functions or a dictionary with the function name as key
+                    and the callable as value.
+                display (bool):
+                    If ``True``, displays the plot.
+                    Otherwise, returns the figure. \n
+                    Default ``False``
+                tolerance (float):
+                    If the input histogram is used, it will be pruned. \n
+                    Every bin containg less than `tolerance` of the total \
+                    input is pruned out.
+                    (Reduces noise).
+                    Default ``0.001``
+                title (str):
+                    If not None, a title for the figure
+                    Default ``None``
+                axes (matplotlib.pyplot.axis):
+                    axes to be plotted on. If None, creates them automatically \
+                    (see `layout`).
+                    Default ``None``
+                layout (tuple or 'auto'):
+                    Grid layout of the figure. If "auto", one is generated.\
+                    (see `layout`).
+                    Default ``auto``
+        """
         if axes is None:
             if layout == "auto":
                 total = len(cls.list)
@@ -64,9 +110,6 @@ class Rational_base():
         Shows a graph of the function (or returns it if ``returns=True``).
 
         Arguments:
-                name (str):
-                    Name of the snapshot.\n
-                    Default ``snapshot_0``
                 x (range):
                     The range to print the function on.\n
                     Default ``None``
@@ -82,6 +125,18 @@ class Rational_base():
                     If ``True``, displays the plot.
                     Otherwise, returns the figure. \n
                     Default ``False``
+                tolerance (float):
+                    If the input histogram is used, it will be pruned. \n
+                    Every bin containg less than `tolerance` of the total \
+                    input is pruned out.
+                    (Reduces noise).
+                    Default ``0.001``
+                title (str):
+                    If not None, a title for the figure
+                    Default ``None``
+                axis (matplotlib.pyplot.axis):
+                    axis to be plotted on. If None, creates one automatically.
+                    Default ``None``
         """
         snap = self.capture(returns=True)
         snap.histogram = self.distribution
@@ -104,10 +159,39 @@ class Rational_base():
     def capture_all(cls, name="snapshot_0", x=None, fitted_function=True,
                     other_func=None, returns=False):
         """
-        Captures snapshot for every instanciated rational
+        Captures a snapshot of every instanciated rational functions and \
+        related in the snapshot_list variable (or returns a list of them if \
+        ``returns=True``).
+
+        Arguments:
+                name (str):
+                    Name of the snapshot.\n
+                    Default ``snapshot_0``
+                x (range):
+                    The range to print the function on.\n
+                    Default ``None``
+                fitted_function (bool):
+                    If ``True``, displays the best fitted function if searched.
+                    Otherwise, returns it. \n
+                    Default ``True``
+                other_funcs (callable):
+                    another function to be plotted or a list of other callable
+                    functions or a dictionary with the function name as key
+                    and the callable as value.
+                returns (bool):
+                    If ``True``, returns the snapshot.
+                    Otherwise, saves it in self.snapshot_list \n
+                    Default ``False``
         """
-        for rat in cls.list:
-            rat.capture(name, x, fitted_function, other_func, returns)
+        if returns:
+            captures = []
+            for rat in cls.list:
+                captures.append(rat.capture(name, x, fitted_function,
+                                            other_func, returns))
+            return captures
+        else:
+            for rat in cls.list:
+                rat.capture(name, x, fitted_function, other_func, returns)
 
     def capture(self, name="snapshot_0", x=None, fitted_function=True,
                 other_func=None, returns=False):
@@ -135,146 +219,40 @@ class Rational_base():
                     Otherwise, saves it in self.snapshot_list \n
                     Default ``False``
         """
-        while name in [snst.name for snst in self.snapshot_list] and \
-              not returns:
+        while name in [snst.name for snst in self.snapshot_list] \
+              and not returns:
             name = _increment_string(name)
-        snapshot = Snapshot(name, self)
+        snapshot = Snapshot(name, self, fitted_function, other_func)
         if returns:
             return snapshot
         self.snapshot_list.append(snapshot)
-        # np_func = self.numpy()
-        # freq = None
-        # if x is None and self.distribution is None:
-        #     input_range = np.arange(-3, 3, 0.01)
-        #     x = input_range
-        # elif self.distribution is not None and len(self.distribution.bins) > 0:
-        #     freq, bins = _cleared_arrays(self.distribution, tolerance)
-        #     if freq is not None:
-        #         input_range = np.array(bins, dtype=float)
-        #         x = input_range
-        # else:
-        #     input_range = np.array(x, dtype=float)
-        # outputs = np_func(input_range)
-        # other_funcs_dict = {}
-        # if other_func is not None:
-        #     if type(other_func) is dict:
-        #         for func_label, func in other_func.items():
-        #             other_funcs_dict[func_label] = func(x)
-        #     else:
-        #         if type(other_func) is not list:
-        #             other_func = [other_func]
-        #         for func in other_func:
-        #             if '__name__' in dir(func):
-        #                 func_label = func.__name__
-        #             else:
-        #                 func_label = str(func)
-        #             other_funcs_dict[func_label] = func(x)
-        # if freq is None:
-        #     hist_dict = None
-        # else:
-        #     hist_dict = {"bins": bins, "freq": freq,
-        #                  "width": bins[1] - bins[0]}
-        # if "best_fitted_function" not in dir(self) or self.best_fitted_function is None:
-        #     fitted_function = None
-        # else:
-        #     a, b, c, d = self.best_fitted_function_params
-        #     result = a * self.best_fitted_function(c * input_range + d) + b
-        #     fitted_function = {"function": self.best_fitted_function,
-        #                        "params": (a, b, c, d),
-        #                        "y": result}
-
-
-    def fit(self, function, x=None, show=False):
-        """
-        Compute the parameters a, b, c, and d to have the neurally equivalent \
-        function of the provided one as close as possible to this rational \
-        function.
-
-        Arguments:
-                function (callable):
-                    The function you want to fit to rational.\n
-                x (array):
-                    The range on which the curves of the functions are fitted
-                    together.\n
-                    Default ``True``
-                show (bool):
-                    If  ``True``, plots the final fitted function and \
-                    rational (using matplotlib).\n
-                    Default ``False``
-        Returns:
-            tuple: ((a, b, c, d), dist) with: \n
-            a, b, c, d: the parameters to adjust the function \
-                (vertical and horizontal scales and bias) \n
-            dist: The final distance between the rational function and the \
-            fitted one
-        """
-        if "rational.keras" in str(type(function)) or \
-           "rational.torch" in str(type(function)):
-            function = function.numpy()
-        used_dist = False
-        rational_numpy = self.numpy()
-        if x is not None:
-            (a, b, c, d), distance = rational_numpy.fit(function, x)
-        else:
-            if self.distribution is not None:
-                freq, bins = _cleared_arrays(self.distribution)
-                x = bins
-                used_dist = True
-            else:
-                import numpy as np
-                x = np.arange(-3., 3., 0.1)
-            (a, b, c, d), distance = rational_numpy.fit(function, x)
-        if show:
-            def func(inp):
-                return a * function(c * inp + d) + b
-
-            if '__name__' in dir(function):
-                func_label = function.__name__
-            else:
-                func_label = str(function)
-            self.show(x, other_func={func_label: func})
-        if self.best_fitted_function is None:
-            self.best_fitted_function = function
-            self.best_fitted_function_params = (a, b, c, d)
-        return (a, b, c, d), distance
-
-    def best_fit(self, functions_list, x=None, show=False):
-        if self.distribution is not None:
-            freq, bins = _cleared_arrays(self.distribution)
-            x = bins
-        (a, b, c, d), distance = self.fit(functions_list[0], x=x, show=show)
-        min_dist = distance
-        print(f"{functions_list[0]}: {distance:>3}")
-        params = (a, b, c, d)
-        final_function = functions_list[0]
-        for func in functions_list[1:]:
-            (a, b, c, d), distance = self.fit(func, x=x, show=show)
-            print(f"{func}: {distance:>3}")
-            if min_dist > distance:
-                min_dist = distance
-                params = (a, b, c, d)
-                final_func = func
-                print(f"{func} is the new best fitted function")
-        self.best_fitted_function = final_func
-        self.best_fitted_function_params = params
-        return final_func, (a, b, c, d)
-
-    def numpy(self):
-        raise NotImplementedError("the numpy method is not implemented for",
-                                  " this class, only for the mother class")
-
-    def __repr__(self):
-        if "_verbose" in dir(self) and self._verbose:
-            return (f"Rational Activation Function "
-                    f"{self.version}) of degrees {self.degrees} running on "
-                    f"{self.device} {hex(id(self))}\n")
-        else:
-            return (f"Rational Activation Function "
-                    f"({self.version}) of degrees {self.degrees} running on "
-                    f"{self.device}")
 
     def export_graph(self, path="rational_function.svg", snap_number=-1,
                      other_func=None):
+        """
+        Saves one graph of the function based on the last snapshot \
+        (by default, and if available).
+
+        Arguments:
+                path (str):
+                    Complete path with name of the figure.\n
+                    Default ``"rational_functions.svg"``
+                together (bool):
+                    If True, the graphs of every functions are stored in \
+                    different files.\n
+                    Default ``True``
+                layout (tuple or 'auto'):
+                    Grid layout of the figure. If "auto", one is generated.\
+                    (see `layout`).
+                    Default ``auto``
+                snap_number (int):
+                    The snap to take in snapshot_list for each function.\n
+                    Default ``-1 (last)``
+                other_func (callable):
+                    another function to be plotted or a list of other callable
+                    functions or a dictionary with the function name as key
+                    and the callable as value.
+        """
         if not len(self.snapshot_list):
             print("Cannot use the last snapshot as the snapshot_list \
                   is empty, making a capture with default params")
@@ -283,10 +261,31 @@ class Rational_base():
         snap.save(path=path, other_func=other_func)
 
     @classmethod
-    def export_graphs(cls, path="rational_evolution.svg", together=True,
+    def export_graphs(cls, path="rational_functions.svg", together=True,
                       layout="auto", snap_number=-1, other_func=None):
         """
+        Saves one or more graph(s) of the function based on the last snapshot \
+        (by default, and if available) for each instanciated rational function.
 
+        Arguments:
+                path (str):
+                    Complete path with name of the figure.\n
+                    Default ``"rational_functions.svg"``
+                together (bool):
+                    If True, the graphs of every functions are stored in \
+                    different files.\n
+                    Default ``True``
+                layout (tuple or 'auto'):
+                    Grid layout of the figure. If "auto", one is generated.\
+                    (see `layout`).
+                    Default ``auto``
+                snap_number (int):
+                    The snap to take in snapshot_list for each function.\n
+                    Default ``-1 (last)``
+                other_func (callable):
+                    another function to be plotted or a list of other callable
+                    functions or a dictionary with the function name as key
+                    and the callable as value.
         """
         if together:
             for i, rat in enumerate(cls.list):
@@ -322,11 +321,36 @@ class Rational_base():
                 new_path = f"{path[pos:]}_{i}{path[:pos]}"
                 rat.export_graph(new_path)
 
-
     @classmethod
-    def export_evolution_graphs(cls, path="rational_evolution.gif",
+    def export_evolution_graphs(cls, path="rationals_evolution.gif",
                                 together=True, layout="auto", animated=True,
                                 other_func=None):
+        """
+        Creates and saves an animated graph of the function evolution based \
+        on the successive snapshots saved in `snapshot_list` for each \
+        instanciated rational function.
+
+        Arguments:
+                path (str):
+                    Complete path with name of the figure.\n
+                    Default ``"rationals_evolution.gif"``
+                together (bool):
+                    If True, the graphs of every functions are stored in \
+                    different files.\n
+                    Default ``True``
+                layout (tuple or 'auto'):
+                    Grid layout of the figure. If "auto", one is generated.\
+                    (see `layout`).
+                    Default ``auto``
+                animated (bool):
+                    If True, creates an animated gif, else, different files \
+                    are created.\n
+                    Default ``True``
+                other_func (callable):
+                    another function to be plotted or a list of other \
+                    callable functions or a dictionary with the function \
+                    name as key and the callable as value.
+        """
         if animated:
             if together:
                 nb_sn = len(cls.list[0].snapshot_list)
@@ -417,20 +441,25 @@ class Rational_base():
             else:
                 for i, rat in enumerate(cls.list):
                     pos = path.rfind(".")
-                    new_path = f"{path[pos:]}_{i}{path[:pos]}"
-                    rat.export_evolution_graph(path, False, other_func)
-
+                    if pos > 0:
+                        new_path = f"{path[pos:]}_{i}{path[:pos]}"
+                    else:
+                        new_path = f"{path}_{i}"
+                    rat.export_evolution_graph(new_path, False, other_func)
 
     def export_evolution_graph(self, path="rational_evolution.gif",
                                animated=True, other_func=None):
         """
-        Creates and saves an animated graph of the animated graph of the \
-        function evolution based on the successive snapshots saved in \
-        `snapshot_list`.
+        Creates and saves an animated graph of the function evolution based \
+        on the successive snapshots saved in `snapshot_list`.
 
         Arguments:
                 path (str):
                     Complete path with name of the figure.\n
+                    Default ``"rational_evolution.gif"``
+                animated (bool):
+                    Complete path with name of the figure.\n
+                    Default ``True``
                 other_func (callable):
                     another function to be plotted or a list of other callable
                     functions or a dictionary with the function name as key
@@ -466,10 +495,128 @@ class Rational_base():
         else:
             if path[-4:] == ".gif":
                 path = path[-4:] + ".svg"
-            new_path = _path_for_multiple(path, "evolution")
+            path = _path_for_multiple(path, "evolution")
             for i, snap in enumerate(self.snapshot_list):
+                pos = path.rfind(".")
+                if pos > 0:
+                    new_path = f"{path[pos:]}_{i}{path[:pos]}"
+                else:
+                    new_path = f"{path}_{i}"
                 snap.save(path=new_path, other_func=other_func)
 
+    def fit(self, function, x=None, show=False):
+        """
+        Compute the parameters a, b, c, and d to have the neurally equivalent \
+        function of the provided one as close as possible to this rational \
+        function.
+
+        Arguments:
+                function (callable):
+                    The function you want to fit to rational.\n
+                x (array):
+                    The range on which the curves of the functions are fitted
+                    together.\n
+                    Default ``None``
+                show (bool):
+                    If  ``True``, plots the final fitted function and \
+                    rational (using matplotlib).\n
+                    Default ``False``
+        Returns:
+            tuple: ((a, b, c, d), dist) with: \n
+            a, b, c, d: the parameters to adjust the function \
+                (vertical and horizontal scales and bias) \n
+            dist: The final distance between the rational function and the \
+            fitted one
+        """
+        if "rational.keras" in str(type(function)) or \
+           "rational.torch" in str(type(function)):
+            function = function.numpy()
+        used_dist = False
+        rational_numpy = self.numpy()
+        if x is not None:
+            (a, b, c, d), distance = rational_numpy.fit(function, x)
+        else:
+            if self.distribution is not None:
+                freq, bins = _cleared_arrays(self.distribution)
+                x = bins
+                used_dist = True
+            else:
+                import numpy as np
+                x = np.arange(-3., 3., 0.1)
+            (a, b, c, d), distance = rational_numpy.fit(function, x)
+        if show:
+            def func(inp):
+                return a * function(c * inp + d) + b
+
+            if '__name__' in dir(function):
+                func_label = function.__name__
+            else:
+                func_label = str(function)
+            self.show(x, other_func={func_label: func})
+        if self.best_fitted_function is None:
+            self.best_fitted_function = function
+            self.best_fitted_function_params = (a, b, c, d)
+        return (a, b, c, d), distance
+
+    def best_fit(self, functions_list, x=None, show=False):
+        """
+        Compute the distance between the rational and the functions in \
+        `functions_list`, and return the one with the minimal the distance.
+
+        Arguments:
+                functions_list (list of callable):
+                    The function you want to fit to rational.\n
+                x (array):
+                    The range on which the curves of the functions are fitted
+                    together.\n
+                    Default ``None``
+                show (bool):
+                    If  ``True``, plots the final fitted function and \
+                    rational (using matplotlib).\n
+                    Default ``False``
+        Returns:
+            tuple: ((a, b, c, d), dist) with: \n
+            a, b, c, d: the parameters to adjust the function \
+                (vertical and horizontal scales and bias) \n
+            dist: The final distance between the rational function and the \
+            fitted one
+        """
+        if self.distribution is not None:
+            freq, bins = _cleared_arrays(self.distribution)
+            x = bins
+        (a, b, c, d), distance = self.fit(functions_list[0], x=x, show=show)
+        min_dist = distance
+        print(f"{functions_list[0]}: {distance:>3}")
+        params = (a, b, c, d)
+        final_function = functions_list[0]
+        for func in functions_list[1:]:
+            (a, b, c, d), distance = self.fit(func, x=x, show=show)
+            print(f"{func}: {distance:>3}")
+            if min_dist > distance:
+                min_dist = distance
+                params = (a, b, c, d)
+                final_func = func
+                print(f"{func} is the new best fitted function")
+        self.best_fitted_function = final_func
+        self.best_fitted_function_params = params
+        return final_func, (a, b, c, d)
+
+    def numpy(self):
+        """
+        Returns a numpy version of this activation function.
+        """
+        raise NotImplementedError("the numpy method is not implemented for",
+                                  " this class, only for the mother class")
+
+    def __repr__(self):
+        if "_verbose" in dir(self) and self._verbose:
+            return (f"Rational Activation Function "
+                    f"{self.version}) of degrees {self.degrees} running on "
+                    f"{self.device} {hex(id(self))}\n")
+        else:
+            return (f"Rational Activation Function "
+                    f"({self.version}) of degrees {self.degrees} running on "
+                    f"{self.device}")
 
 class Snapshot():
     """
@@ -480,10 +627,19 @@ class Snapshot():
                 The name of Snapshot.
             rational (Rational):
                 A rational function to save
+            fitted_function (bool):
+                If ``True``, displays the best fitted function if searched.
+                Otherwise, returns it. \n
+                Default ``True``
+            other_func (callable):
+                another function to be plotted or a list of other callable \
+                functions or a dictionary with the function name as key \
+                and the callable as value.
     Returns:
         Module: Rational module
     """
-    def __init__(self, name, rational, other_func=None):
+
+    def __init__(self, name, rational, fitted_function=True, other_func=None):
         self.name = name
         self.rational = rational.numpy()
         self.range = None
@@ -497,7 +653,13 @@ class Snapshot():
                 warnings.warn(msg)
                 Rational_base._HIST_WARNED = True
             rational.clear_hist()
-        self.best_fitted_function = None
+        if fitted_function and rational.distribution is not None:
+            self.best_fitted_function = rational.best_fitted_function
+            self.best_fitted_function_params = \
+                rational.best_fitted_function_params
+        else:
+            self.best_fitted_function = None
+            self.best_fitted_function_params = None
         self.other_func = other_func
 
     def show(self, x=None, fitted_function=True, other_func=None,
@@ -526,6 +688,12 @@ class Snapshot():
                     If tolerance is 0.001, every frequency smaller than 0.001 \
                     will be cutted out of the histogram.\n
                     Default ``True``
+                title (str)
+                    If not `None`, title to be displayed on the figure.\n
+                    Default ``None``
+                axis (matplotlib.pyplot.axis):
+                    axis to be plotted on. If None, creates one automatically.
+                    Default ``None``
         """
         if x is not None:
             if x.dtype != float:
@@ -552,6 +720,14 @@ class Snapshot():
         else:
             ax = axis
         ax.plot(x, y_rat, label="Rational", zorder=2)
+        if fitted_function and self.best_fitted_function is not None:
+            if '__name__' in dir(self.best_fitted_function):
+                func_label = self.best_fitted_function.__name__
+            else:
+                func_label = str(self.best_fitted_function)
+            a, b, c, d = self.best_fitted_function_params
+            y_bff = a * numpify(self.best_fitted_function, c * x + d) + b
+            ax.plot(x, y_bff, "r-", label=f"Fitted {func_label}", zorder=2)
         #  Histogram
         if self.histogram is not None:
             freq, bins = _cleared_arrays(self.histogram, tolerance)
@@ -565,7 +741,6 @@ class Snapshot():
         # Other funcs
         if other_func is None and self.other_func is not None:
             other_func = self.other_func
-        other_funcs_dict = {}
         if other_func is not None:
             if type(other_func) is dict:
                 for func_label, func in other_func.items():
@@ -593,6 +768,33 @@ class Snapshot():
 
     def save(self, x=None, fitted_function=True, other_func=None,
              path=None, tolerance=0.001, title=None, format="svg"):
+        """
+        Saves an image of the snapshot.
+
+        Arguments:
+                x (range):
+                    The range to print the function on.\n
+                    Default ``None``
+                fitted_function (bool):
+                    If ``True``, displays the best fitted function if searched.
+                    Otherwise, returns it. \n
+                    Default ``True``
+                other_func (callable):
+                    another function to be plotted or a list of other callable \
+                    functions or a dictionary with the function name as key \
+                    and the callable as value.\n
+                tolerance (float):
+                    Tolerance the bins frequency.
+                    If tolerance is 0.001, every frequency smaller than 0.001 \
+                    will be cutted out of the histogram.\n
+                    Default ``True``
+                title (str)
+                    If not `None`, title to be displayed on the figure.\n
+                    Default ``None``
+                format (str)
+                    The format of the figure, if not in the title.\n
+                    Default ``svg``
+        """
         fig = self.show(x, fitted_function, other_func, False, tolerance,
                         title)
         if path is None:
@@ -655,10 +857,11 @@ def _erase_suffix(string):
         return string
 
 
-def _get_frontiers(snapshot_list, other_func=None):
+def _get_frontiers(snapshot_list, other_func=None, fitted_function=True):
     x_min, x_max, y_min, y_max = np.inf, -np.inf, np.inf, -np.inf
     for snap in snapshot_list:
-        fig = snap.show(display=False, other_func=other_func)
+        fig = snap.show(display=False, fitted_function=fitted_function,
+                        other_func=other_func)
         x_mi, x_ma = fig.axes[0].get_xlim()
         y_mi, y_ma = fig.axes[0].get_ylim()
         if x_mi < x_min:
@@ -675,7 +878,7 @@ def _get_frontiers(snapshot_list, other_func=None):
 
 def numpify(func, x):
     """
-    assert that the function is called and returns a numpy array
+    Assert that the function is called and returns a numpy array
     """
     try:
         return np.array(func(x))

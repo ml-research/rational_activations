@@ -6,22 +6,22 @@ import sys
 from pprint import pprint as print
 
 capturing_epochs = [0, 1, 2, 4, 8, 16, 32, 64, 99]
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
-Rational("leaky_relu", cuda=False)
-Rational("sigmoid", cuda=False)
-Rational("identity", cuda=False)
+Rational("leaky_relu", cuda="cuda" in device)
+Rational("sigmoid", cuda="cuda" in device)
+Rational("identity", cuda="cuda" in device)
 
 print(Rational.list)
 
-# if "save" in sys.argv:
-#     Rational.save_all_graphs(other_func=torch.sin, title="All rationals")
-# else:
-#     Rational.show_all(other_func=torch.sin, title="All rationals")
+if "save" in sys.argv:
+    Rational.save_all_graphs(other_func=torch.sin, title="All rationals")
+else:
+    Rational.show_all(other_func=torch.sin, title="All rationals")
+
 
 # ================================================
 
-
-dev = Rational.list[0].device
 
 
 criterion = torch.nn.MSELoss()
@@ -29,7 +29,7 @@ criterion = torch.nn.MSELoss()
 # for rat in Rational.list:
 #     optimizer = torch.optim.SGD(rat.parameters(), lr=0.01, momentum=0.9)
 #     for epoch in range(100):
-#         inp = (torch.randn(10000)).to(dev)
+#         inp = (torch.randn(10000)).to(device)
 #         exp = torch.sin(inp)
 #         optimizer.zero_grad()
 #         if epoch in capturing_epochs:
@@ -47,7 +47,7 @@ optimizers = [torch.optim.SGD(rat.parameters(), lr=0.01, momentum=0.9)
               for rat in Rational.list]
 for epoch in range(100):
     for (rat, optimizer) in zip(Rational.list, optimizers):
-        inp = ((torch.rand(10000)-0.5)*5).to(dev)
+        inp = ((torch.rand(10000)-0.5)*5).to(device)
         exp = torch.sin(inp)
         optimizer.zero_grad()
         if epoch in capturing_epochs:
@@ -69,7 +69,7 @@ for epoch in range(100):
 # Rational.export_graphs("coucou.png")
 # animated = False
 # together = False
-for animated in [True]:
+for animated in [True, False]:
     for together in [True, False]:
         title = f"rat_a_{animated}_t_{together}"
         Rational.export_evolution_graphs(title, animated=animated, together=together,

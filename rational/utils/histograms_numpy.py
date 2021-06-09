@@ -49,7 +49,26 @@ class Histogram():
     def total(self):
         return self.weights.sum()
 
-    def normalize(self, numpy=True):
+    def normalize(self, numpy=True, nb_output=100):
+        """
+
+        """
+        if nb_output is not None and nb_output < len(self.bins):
+            div = len(self.bins) // nb_output
+            if len(self.bins) % div == 0:
+                weights = np.nanmean(self.weights.reshape(-1, div), axis=1)
+                last = self.bins[-1]
+            else:
+                import ipdb; ipdb.set_trace()
+                to_add = div - self.weights.size % div
+                padded = np.pad(self.weights, (0, to_add), mode='constant',
+                                constant_values=np.NaN).reshape(-1, div)
+                weights = np.nanmean(padded, axis=1)
+                last = self.bins[-1] + self.bin_size * to_add
+            bins = np.linspace(self.bins[0], last, len(weights),
+                               endpoint=False)
+            return weights / weights.sum(), bins
+        else:
             return self.weights / self.weights.sum(), self.bins
 
     def _from_physt(self, phystogram):
