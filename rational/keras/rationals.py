@@ -10,9 +10,10 @@ import tensorflow as tf
 
 from rational.keras.versions import _version_a, _version_b, _version_c, _version_d
 from rational.utils.get_weights import get_parameters
+from rational._base.rational_base import Rational_base
 
 
-class Rational(Layer):
+class Rational(Rational_base, Layer):
     """
     Rational Activation Functions, inheriting from ``tensorflow.keras.layers.Layer``.
 
@@ -54,7 +55,7 @@ class Rational(Layer):
     """
     def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=False, version="A",
                  trainable=True):
-        super(Rational, self).__init__()
+        super().__init__()
 
         w_numerator, w_denominator = get_parameters(version, degrees, approx_func)
 
@@ -70,12 +71,16 @@ class Rational(Layer):
 
         # record whether weights are trainable. Used later by call() method
         self.training = trainable
+        self.degrees = degrees
+        self.version = version
+        self.init_approximation = approx_func
 
         # set rational activation function version
         self.rational_func = {'A': _version_a, 'B': _version_b, 'C': _version_c, 'D': _version_d}\
             .get(version)
         if self.rational_func is None:
             raise ValueError("rational activation function version %s not implemented" % version)
+
 
     def build(self, input_shape):
         """
@@ -110,3 +115,14 @@ class Rational(Layer):
                 output tensor, with the Rational Activation Function applied to it
         """
         return self.rational_func(inputs, self.numerator, self.denominator, self.training)
+
+    def numpy(self):
+        """
+        Returns a numpy version of this activation function.
+        """
+        from rational.numpy import Rational as Rational_numpy
+        rational_n = Rational_numpy(self.init_approximation, self.degrees,
+                                    self.version)
+        rational_n.numerator = self.numerator.numpy().tolist()
+        rational_n.denominator = self.denominator.numpy().tolist()
+        return rational_n

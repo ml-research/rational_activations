@@ -30,10 +30,10 @@ function log () {
 
 
 printf "auditwheel repairing\n"
-auditwheel -v repair --plat manylinux2014_x86_64 dist/rational_activations*$PY_V*linux_x86_64.whl # Repairing the wheel and puting it inside wheelhouse
+auditwheel -v repair --plat manylinux2014_x86_64 dist/rational_activations_$CUDA_CP*$PY_V*linux_x86_64.whl # Repairing the wheel and puting it inside wheelhouse
 cd wheelhouse/
-$PYTHON_V -m wheel unpack rational_activations-*$PY_V*.whl
-cd rational_activations-*/rational_activations.libs/
+$PYTHON_V -m wheel unpack rational_activations_$CUDA_CP-*$PY_V*.whl
+cd rational_activations_$CUDA_CP*/rational_activations*.libs/
 CORRUPTED_FILES_DIR='corrupted_files/'
 mkdir -p $CORRUPTED_FILES_DIR
 CORRUPTED_FILES=`find . -maxdepth 1 -type f | grep .so | sed 's/.\///g' `
@@ -85,12 +85,12 @@ do
 done
 rm -rf $CORRUPTED_FILES_DIR
 cd ../../
-rm rational_activations-*$PY_V*-manylinux2014_x86_64.whl
+rm rational_activations_$CUDA_CP-*$PY_V*-manylinux2014_x86_64.whl
 Rational_WHEEL_DIR=`find . -maxdepth 1 -type d | grep rational_activations`
 $PYTHON_V -m wheel pack $Rational_WHEEL_DIR  # creates the new wheel
-rm -R `ls -1 -d rational_activations-*/`  # removes the rational directory only
+rm -R `ls -1 -d rational_activations*/`  # removes the rational directory only
 mkdir -p $CUDA_V
-mv rational_activations-*$PY_V*-manylinux2014_x86_64.whl $CUDA_V
+mv rational_activations_$CUDA_CP-*$PY_V*-manylinux2014_x86_64.whl $CUDA_V
 cd $cwd
 
 unset TORCH_LIB CUDA_LIB PY_V  # To be sure they are reseted

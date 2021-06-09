@@ -7,15 +7,15 @@ Finding the weights of the to map an specific activation function
 import json
 import numpy as np
 from .utils import fit_rational_to_base_function
-import matplotlib.pyplot as plt
 import torch
 import os
 from rational.numpy.rationals import Rational_version_A, Rational_version_B, \
-    Rational_version_C
+    Rational_version_C, Rational_version_N
 
 
 def plot_result(x_array, rational_array, target_array,
                 original_func_name="Original function"):
+    import matplotlib.pyplot as plt
     plt.plot(x_array, rational_array, label="Rational approx")
     plt.plot(x_array, target_array, label=original_func_name)
     plt.legend()
@@ -84,7 +84,7 @@ def find_weights(function, function_name=None, degrees=None, bounds=None,
     Finds the weights of the numerator and the denominator of the rational function.
     Beside `function`, all parameters can be left to the default ``None``. \n
     In this case, user is asked to provide the params interactively.
-    
+
     Arguments:
             function (callable):
                 The function to approximate (e.g. from torch.functional).\n
@@ -141,7 +141,8 @@ def find_weights(function, function_name=None, degrees=None, bounds=None,
     step = (ub - lb) / nb_points
     x = np.arange(lb, ub, step)
     if version is None:
-        version = typed_input("Rational Version: ", str, ["A", "B", "C", "D"])
+        version = typed_input("Rational Version: ", str,
+                              ["A", "B", "C", "D", "N"])
     if version == 'A':
         rational = Rational_version_A
     elif version == 'B':
@@ -150,6 +151,8 @@ def find_weights(function, function_name=None, degrees=None, bounds=None,
         rational = Rational_version_C
     elif version == 'D':
         rational = Rational_version_B
+    elif version == 'N':
+        rational = Rational_version_N
 
     w_params, d_params = fit_rational_to_base_function(rational, function_to_approx, x,
                                                        degrees=degrees,

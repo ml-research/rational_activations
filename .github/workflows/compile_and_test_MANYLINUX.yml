@@ -1,0 +1,152 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+#         python -m pytest --ignore=rational/mxnet/tests --ignore=rational/keras/tests/ -k rational/torch/tests/
+name: CI-CD
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  manylinux_compilation:
+    name: Compile all manylinux wheels
+    runs-on: k4ntz
+    steps:
+      - uses: actions/checkout@v2
+      - name: Current dir & nvidia-smi
+        run: |
+          pwd
+          ls -l
+          nvidia-smi
+      - name: Pull up-to-date repo
+        run: |
+          echo Pulling master branch
+          docker exec rat_manylinux bash -c 'cd rational_activations && git pull ci_repo master'
+      - name: Install the wheels
+        run: |
+          echo  Running manylinux script, this will take some time...
+          docker exec rat_manylinux bash -c 'cd rational_activations && ./pypi_build_scripts/make_manylinux.sh'
+          echo Printing wheelhouse files...
+          docker exec rat_manylinux bash -c 'cd rational_activations && ls wheelhouse && ls wheelhouse/cuda-10.2/ && ls wheelhouse/cuda-10.1/'
+      - name: Copy wheels outside of docker container
+        run: |
+          mkdir temp_wheels/
+          rm -rf temp_wheels/*
+          docker cp rat_manylinux:/rational_activations/wheelhouse/cuda-10.2/ temp_wheels/
+          docker cp rat_manylinux:/rational_activations/wheelhouse/cuda-10.1/ temp_wheels/
+
+  build-and-test-cuda102:
+    name: Tests Cuda 10.2, Python 3.6
+    runs-on: GPU4
+    needs: manylinux_compilation
+    strategy:
+      matrix:
+        python-version: ['3.6']
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Current dir
+        run: |
+          pwd
+          nvidia-smi
+      - name: Create new python env (on self-hosted runners we have to handle isolation ourselves)
+        run: |
+          python -m venv .env
+          source .env/bin/activate
+      - name: Install dependencies
+        run: |
+          source .env/bin/activate
+          pip install --upgrade pip
+          pip install airspeed matplotlib pytest scipy wheel
+          pip install mxnet-cu102 torch==1.7.1 tensorflow-gpu
+          # We need to export correct pointers for CUDA_HOME and nvcc that corresond to the correct CUDA version.
+          echo "CUDA_HOME=/usr/local/cuda-10.2/" >> $GITHUB_ENV
+          echo "PATH=/usr/local/cuda-10.2/bin:$PATH" >> $GITHUB_ENV  # instead of alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
+          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-10.2/targets/x86_64-linux/lib" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-10.2/extras/CUPTI/lib64" >> $GITHUB_ENV
+      - name: Check Python and CUDA versions
+        run: |
+          source .env/bin/activate
+          python --version
+          python -c "import sys; print('Python version:', sys.version)"
+          python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
+          python -c "import torch; print('CUDA version used by PyTorch:', torch.version.cuda)"
+          nvcc --version
+          echo CUDA_HOME: $CUDA_HOME
+      - name: Install package
+        run: |
+          source .env/bin/activate
+          pip install temp_wheels/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl
+      - name: Test Torch
+        run: |
+          cd tests
+          source .env/bin/activate
+          python -m pytest tests_torch
+      - name: Test Keras
+        run: |
+          source .env/bin/activate
+          python -m pytest tests_keras
+      - name: Test MxNet
+        run: |
+          source .env/bin/activate
+          python -m pytest tests_mxnet
+
+  build-and-test-cuda102_py38:
+    name: Tests Cuda 10.2, Python 3.8
+    runs-on: GPU4
+    needs: manylinux_compilation
+    strategy:
+      matrix:
+        python-version: ['3.8']
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Create new python env (on self-hosted runners we have to handle isolation ourselves)
+        run: |
+          python -m venv .env
+          source .env/bin/activate
+      - name: Install dependencies
+        run: |
+          source .env/bin/activate
+          pip install --upgrade pip
+          pip install airspeed matplotlib pytest scipy wheel
+          pip install mxnet-cu102 torch==1.7.1 tensorflow-gpu
+          # We need to export correct pointers for CUDA_HOME and nvcc that corresond to the correct CUDA version.
+          echo "CUDA_HOME=/usr/local/cuda-10.2/" >> $GITHUB_ENV
+          echo "PATH=/usr/local/cuda-10.2/bin:$PATH" >> $GITHUB_ENV  # instead of alias nvcc="/usr/local/cuda-10.2/bin/nvcc"
+          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-10.2/targets/x86_64-linux/lib" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-10.2/extras/CUPTI/lib64" >> $GITHUB_ENV
+      - name: Check Python and CUDA versions
+        run: |
+          source .env/bin/activate
+          python --version
+          python -c "import sys; print('Python version:', sys.version)"
+          python -c "import torch; print('Cuda available:', torch.cuda.is_available())"
+          python -c "import torch; print('CUDA version used by PyTorch:', torch.version.cuda)"
+          nvcc --version
+          echo CUDA_HOME: $CUDA_HOME
+      - name: Install package
+        run: |
+          source .env/bin/activate
+          pip install temp_wheels/rational_activations-0.1.0-cp38-cp38-manylinux2014_x86_64.whl
+      - name: Test Torch
+        run: |
+          cd tests
+          source .env/bin/activate
+          python -m pytest tests_torch
+      - name: Test Keras
+        run: |
+          source .env/bin/activate
+          python -m pytest tests_keras
+      - name: Test MxNet
+        run: |
+          source .env/bin/activate
+          python -m pytest tests_mxnet
+
+

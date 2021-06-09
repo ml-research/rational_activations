@@ -1,0 +1,12 @@
+airspeed
+flake8
+h5py
+numpy
+scipy
+matplotlib
+# tensorflow>=2.0.0
+# tensorflow
+# mxnet
+pytest
+setuptools>=42.0.0
+wheel

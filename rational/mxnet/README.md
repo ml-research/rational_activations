@@ -2,6 +2,12 @@
 This package contains an implementation of [Rational Activation Functions](https://arxiv.org/abs/1907.06732)
 for the machine learning framework [MxNet](https://mxnet.apache.org).
 
+## Dependencies
+Depending on your CUDA version, you should install ``mxnet-cu102`` (CUDA 10.2) or ``mxnet-cu101`` (CUDA 10.1). E.g.:
+
+    pip3 install -U pip wheel
+    pip3 install mxnet-cu102  rational-activations
+
 ## Integrating Rational Activation Functions into Neural Networks
 In MxNet, you can instantiate a Rational Activation Function by running
 ```python

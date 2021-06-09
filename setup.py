@@ -6,9 +6,24 @@ from distutils.command.clean import clean
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 from torch.cuda import is_available as torch_cuda_available
 from rational import __version__
+import os
 degrees = [(3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (5, 4), (7, 6)]
 # degrees = [(5, 4), (7, 6)]
+name='rational-activations-cu102'
 
+#import ipdb; ipdb.set_trace()
+#find_packages(where="rational")
+
+def is_torch_cuda_available():
+    """Wrapper for torch cuda availability check (torch.cuda.is_available) that takes an environment variable
+    'FORCE_CUDA' into account and returns also true iff FORCE_CUDA=1.
+
+    This is necessary when building rational in a Dockerfile script since the docker build pass doesn't have
+    access to cuda and thus torch.cuda.is_available always returns false, even when the docker image which is
+    to be built in fact does have cuda.
+    """
+    force_cuda = os.getenv("FORCE_CUDA", "0") == "1"
+    return force_cuda or torch_cuda_available()
 
 def generate_cpp_module(fname, degrees=degrees, versions=None):
     file_content = airspeed.Template("""
@@ -100,7 +115,7 @@ constexpr uint32_t THREADS_PER_BLOCK = 512;
     with open(fname, "w") as text_file:
         text_file.write(content)
 
-if torch_cuda_available():
+if is_torch_cuda_available():
     version_names = []
     template_contents = ""
     for template_fname in sorted(glob.glob("rational/_cuda/versions/*.cu")):
@@ -125,7 +140,8 @@ class clean_all(clean):
         super().run()
         import shutil
         import os
-        shutil.rmtree('rational_activations.egg-info')
+        egginf = name.replace('-', '_')
+        shutil.rmtree(egginf + '.egg-info')
         shutil.rmtree('dist')
         if os.path.exists("rational/cuda.cpython-36m-x86_64-linux-gnu.so"):
             os.remove("rational/cuda.cpython-36m-x86_64-linux-gnu.so")
@@ -133,7 +149,7 @@ class clean_all(clean):
 
 
 setup(
-    name='rational-activations',
+    name=name,
     version=__version__,
     author="Alejandro Molina, Quentin Delfosse, Patrick Schramowski",
     author_email="molina@cs.tu-darmstadt.de, quentin.delfosse@cs.tu-darmstadt.de",
@@ -141,7 +157,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/ml-research/rational_activations",
-    packages=find_packages(),
+    packages=find_packages(exclude=["keras_tests", "mxnet_tests", "tests"]),
     package_data={'': ['*.json']},
     include_package_data=True,
     classifiers=[
@@ -161,10 +177,10 @@ setup(
             'nvcc': ['-gencode=arch=compute_60,code="sm_60,compute_60"', '-lineinfo']
         }
     ),
-    ] if torch_cuda_available() else [],
+    ] if is_torch_cuda_available() else [],
     cmdclass={
         'build_ext': BuildExtension,
         'clean': clean_all
     },
-    setup_requires=['torch'],
+    setup_requires=['airspeed'],
     python_requires='>=3.5.0',)

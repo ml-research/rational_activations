@@ -11,9 +11,10 @@ from mxnet.gluon import HybridBlock
 
 from rational.utils.get_weights import get_parameters
 from rational.mxnet.versions import _version_a, _version_b, _version_c, _version_d
+from rational._base.rational_base import Rational_base
 
 
-class Rational(HybridBlock):
+class Rational(Rational_base, HybridBlock):
     """
     Rational Activation Function, inheriting from ``mxnet.gluon.HybridBlock``.
 
@@ -55,8 +56,7 @@ class Rational(HybridBlock):
     """
 
     def __init__(self, approx_func='leaky_relu', degrees=(5, 4), cuda=False,
-                 version='A', trainable=True, train_numerator=True,
-                 train_denominator=True, **kwargs):
+                 version='A', trainable=True, **kwargs):
         super(Rational, self).__init__(**kwargs)
 
         # read initial parameter configuration from external files
@@ -71,6 +71,10 @@ class Rational(HybridBlock):
         # symbolic execution, but are unable to retrieve them at later stages
         self.numerator_length = len(w_numerator)
         self.denominator_length = len(w_denominator)
+        self.training = trainable
+        self.degrees = degrees
+        self.version = version
+        self.init_approximation = approx_func
 
         # set specified context (currently not happening, since unclear, how and why helpful)
         # self.device = gpu() if cuda else cpu()
@@ -80,15 +84,15 @@ class Rational(HybridBlock):
             self.numerator = self.params.get(name='w_numerator', shape=(len(w_numerator),),
                                              init=initializer.Constant(
                                                  w_numerator),
-                                             grad_req='write' if train_numerator and trainable
+                                             grad_req='write' if trainable
                                              else 'null',
-                                             differentiable=train_numerator and trainable)
+                                             differentiable=trainable)
             self.denominator = self.params.get(name='w_denominator', shape=(len(w_denominator),),
                                                init=initializer.Constant(
                                                    w_denominator),
-                                               grad_req='write' if train_denominator and trainable
+                                               grad_req='write' if trainable
                                                else 'null',
-                                               differentiable=train_denominator and trainable)
+                                               differentiable=trainable)
 
         # register whether function is trainable, since this information needs to be passed to
         # version D
@@ -106,3 +110,14 @@ class Rational(HybridBlock):
     def hybrid_forward(self, F, x, numerator, denominator):
         return self.rational_func(F, x, numerator, denominator, self.training,
                                   self.numerator_length, self.denominator_length)
+
+    def numpy(self):
+        """
+        Returns a numpy version of this activation function.
+        """
+        from rational.numpy import Rational as Rational_numpy
+        rational_n = Rational_numpy(self.init_approximation, self.degrees,
+                                    self.version)
+        rational_n.numerator = self.numerator.data().asnumpy().tolist()
+        rational_n.denominator = self.denominator.data().asnumpy().tolist()
+        return rational_n
