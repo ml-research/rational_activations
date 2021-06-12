@@ -86,7 +86,11 @@ class Rational_base():
                 with sns.axes_style("whitegrid"):
                     fig, axes = plt.subplots(*layout)
             except ImportError:
-                print("Try install seaborn")
+                if not Snapshot._SEABORN_WARNED:
+                    msg = "Seaborn not found on computer, install it " \
+                          "for better visualisation"
+                    warnings.warn(msg)
+                    Snapshot._SEABORN_WARNED = True
                 fig, axes = plt.subplots(*layout)
             # if display:
             for ax in axes.flatten()[len(cls.list):]:
@@ -383,13 +387,16 @@ class Rational_base():
                     raise TypeError(msg)
                 fig = plt.gcf()
                 gif_images = []
-                seaborn_installed = False
+                seaborn_installed = True
                 try:
                     import seaborn as sns
                 except ImportError:
-                    msg = "Seaborn not found on computer, install it " \
-                          "for better visualisation"
-                    warnings.warn(msg)
+                    seaborn_installed = False
+                    if not Snapshot._SEABORN_WARNED:
+                        msg = "Seaborn not found on computer, install it " \
+                              "for better visualisation"
+                        warnings.warn(msg)
+                        Snapshot._SEABORN_WARNED = True
                 for i in range(nb_sn):
                     if seaborn_installed:
                         with sns.axes_style("whitegrid"):
