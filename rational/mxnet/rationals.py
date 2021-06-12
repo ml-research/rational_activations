@@ -20,34 +20,34 @@ class Rational(Rational_base, HybridBlock):
 
     Arguments:
             approx_func (str):
-                The name of the approximated function for initialisation.
-                The different functions are available in `rational.rationals_config.json`.
+                The name of the approximated function for initialisation. \n
+                The different functions are available in `rational.rationals_config.json`. \n
                 Default: ``leaky_relu``
 
             degrees (tuple of int):
-                The degrees of the numerator (P) and denominator (Q).
+                The degrees of the numerator (P) and denominator (Q).\n
                 Default ``(5, 4)``
 
             cuda (bool):
-                whether to execute on cuda device.
-                NOTE: THIS PARAMETER IS CURRENTLY NOT CONSIDERED.
+                whether to execute on cuda device.\n
+                NOTE: THIS PARAMETER IS CURRENTLY NOT CONSIDERED.\n
                 CUDA GPUS ARE USED WHEN IT IS POSSIBLE
 
             version (str):
                 Version of Rational to use. Rational(x) = P(x)/Q(x),
                 where
-                P(x) = (a_0 + a_1 * x + a_2 * x^2 + ... + a_n * x^n) and
+                P(x) = (a_0 + a_1 * x + a_2 * x^2 + ... + a_n * x^n) and \n
 
-                `A`: Q(x) = (1 + |b_0 * x| + | b_1 * x^2| + ... + | b_m * x^{m+1}|)
-                `B`: Q(x) = (1 + |b_0 * x + b_1 * x^2 + ... + b_m * x^{m + 1}|)
-                `C`: Q(x) = (0.1 + |b_0 + b_1 * x + b_2 * x^2 + ... + b_m * x^m|)
-                `D`: like `B` with noised coefficients b_i
+                `A`: Q(x) = (1 + \|b_0 * x\| + \| b_1 * x^2\| + ... + \| b_m * x^{m+1}\|)\n
+                `B`: Q(x) = (1 + \|b_0 * x + b_1 * x^2 + ... + b_m * x^{m + 1}\|)\n
+                `C`: Q(x) = (0.1 + \|b_0 + b_1 * x + b_2 * x^2 + ... + b_m * x^m\|)\n
+                `D`: like `B` with noised coefficients b_i\n
 
                 Default ``A``
 
             trainable (bool):
                 Whether the weights are trainable, i.e, if they are updated during
-                backward pass.
+                backward pass. \n
                 Default ``True``
 
     Returns:

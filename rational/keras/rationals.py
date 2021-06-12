@@ -8,24 +8,26 @@ Rational activation functions.
 from tensorflow.keras.layers import Layer
 import tensorflow as tf
 
-from rational.keras.versions import _version_a, _version_b, _version_c, _version_d
+from rational.keras.versions import _version_a, _version_b, _version_c, \
+    _version_d
 from rational.utils.get_weights import get_parameters
 from rational._base.rational_base import Rational_base
 
 
 class Rational(Rational_base, Layer):
     """
-    Rational Activation Functions, inheriting from ``tensorflow.keras.layers.Layer``.
+    Rational Activation Functions, inheriting from \
+    ``tensorflow.keras.layers.Layer``.
 
     Arguments:
             approx_func (str):
                 The name of the approximated function for initialisation.
-                The different functions are available in `rational.rationals_config.json`.
+                The different functions are available in `rational.rationals_config.json`. \n
                 Default: ``leaky_relu``
 
             degrees (tuple of int):
-                The degrees of the numerator (P) and denominator (Q).
-                Default ``(5, 4)``
+                The degrees of the numerator (P) and denominator (Q). \n
+                Default: ``(5, 4)``
 
             cuda (bool):
                 whether to execute on cuda device.
@@ -35,19 +37,19 @@ class Rational(Rational_base, Layer):
             version (str):
                 Version of Rational to use. Rational(x) = P(x)/Q(x),
                 where
-                P(x) = (a_0 + a_1 * x + a_2 * x^2 + ... + a_n * x^n) and
+                P(x) = (a_0 + a_1 * x + a_2 * x^2 + ... + a_n * x^n) and \n
 
-                `A`: Q(x) = (1 + |b_0 * x| + | b_1 * x^2| + ... + | b_m * x^{m+1}|)
-                `B`: Q(x) = (1 + |b_0 * x + b_1 * x^2 + ... + b_m * x^{m + 1}|)
-                `C`: Q(x) = (0.1 + |b_0 + b_1 * x + b_2 * x^2 + ... + b_m * x^m|)
-                `D`: like `B` with noised coefficients b_i
+                `A`: Q(x) = (1 + \|b_0 * x\| + \| b_1 * x^2\| + ... +  \| b_m * x^{m+1}\|) \n
+                `B`: Q(x) = (1 + \|b_0 * x + b_1 * x^2 + ... + b_m * x^{m + 1}\|) \n
+                `C`: Q(x) = (0.1 + \|b_0 + b_1 * x + b_2 * x^2 + ... + b_m * x^m\|) \n
+                `D`: like `B` with noised coefficients b_i \n
 
-                Default ``A``
+                Default: ``A``
 
             trainable (bool):
                 Whether the weights are trainable, i.e, if they are updated during
-                backward pass.
-                Default ``True``
+                backward pass. \n
+                Default: ``True``
 
     Returns:
         Layer:

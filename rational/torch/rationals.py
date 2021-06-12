@@ -145,7 +145,7 @@ class RecurrentRationalModule(nn.Module):
 
 class Rational(Rational_base, nn.Module):
     """
-    Rational activation function inherited from ``torch.nn.Module``
+    Rational activation function inherited from ``torch.nn.Module``.
 
     Arguments:
             approx_func (str):
@@ -206,6 +206,7 @@ class Rational(Rational_base, nn.Module):
         self.training = trainable
 
         self.init_approximation = approx_func
+        self._saving_input = False
 
         if "cuda" in str(device):
             if version == "A":
@@ -446,6 +447,25 @@ class Rational(Rational_base, nn.Module):
         # print("Training mode, no longer retrieving the input.")
         self._handle_retrieve_mode.remove()
         self._handle_retrieve_mode = None
+
+    @classmethod
+    def save_all_inputs(self, save):
+        """
+        Have every rational save every input.
+
+        Arguments:
+                save (bool):
+                    If True, every instanciated rational function will \
+                    retrieve its input, else, it won't.
+        """
+        if save:
+            for rat in self.list:
+                rat._saving_input = True
+                rat.input_retrieve_mode()
+        else:
+            for rat in self.list:
+                rat._saving_input = False
+                rat.training_mode()
 
     @property
     def saving_input(self):

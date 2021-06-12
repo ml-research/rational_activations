@@ -5,7 +5,7 @@ import numpy as np
 import seaborn as sns
 sns.set_theme()
 
-vizu_epochs = [0, 2, 4, 7, 10, 50, 100, 200]
+visu_epochs = [0, 2, 4, 7, 10, 50, 100, 200]
 
 def sigmoid_np(x):
     return 1 / (1 + np.exp(-x))
@@ -59,7 +59,7 @@ def backward_test_hist(cuda, version, recurrent_rat):
         loss = loss_fn(out, exp)
         loss.backward()
         optimizer.step()
-        if i in vizu_epochs:
+        if i in visu_epochs:
             rat.snapshot(f"Epoch {i}")
             rat.save_animated_graph(f"dossier/coucou{i}")
 

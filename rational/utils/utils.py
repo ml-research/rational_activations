@@ -1,6 +1,7 @@
 import warnings
 import numpy as np
 from numpy import zeros, inf
+import matplotlib.pyplot as plt
 
 # np.random.seed(0)
 
@@ -116,3 +117,310 @@ def find_closest_equivalent(rational_func, new_func, x):
     final_func_output = np.array(equivalent_func(x, a, b, c, d))
     final_distance = np.sqrt(((y - final_func_output)**2).sum())
     return (a, b, c, d), final_distance
+
+
+
+class Snapshot():
+    """
+    Snapshot to save, display, and export images of rational functions.
+    Makes it easy to generate animations of the function through time, ... etc.
+
+    Arguments:
+            name (str):
+                The name of Snapshot.
+            rational (Rational):
+                A rational function to save
+            fitted_function (bool):
+                If ``True``, displays the best fitted function if searched.
+                Otherwise, returns it. \n
+                Default ``True``
+            other_func (callable):
+                another function to be plotted or a list of other callable \
+                functions or a dictionary with the function name as key \
+                and the callable as value.
+                Default ``None``
+    Returns:
+        Module: Rational module
+    """
+
+    _HIST_WARNED = False
+
+    def __init__(self, name, rational, fitted_function=True, other_func=None):
+        self.name = name
+        self.rational = rational.numpy()
+        self.range = None
+        self.histogram = None
+        if rational.distribution is not None and \
+           not rational.distribution.is_empty:
+            from copy import deepcopy
+            self.histogram = deepcopy(rational.distribution)
+            if not Snapshot._HIST_WARNED:
+                msg = "Automatically clearing the distribution after snapshot"
+                warnings.warn(msg)
+                Snapshot._HIST_WARNED = True
+            rational.clear_hist()
+        if fitted_function and rational.distribution is not None:
+            self.best_fitted_function = rational.best_fitted_function
+            self.best_fitted_function_params = \
+                rational.best_fitted_function_params
+        else:
+            self.best_fitted_function = None
+            self.best_fitted_function_params = None
+        self.other_func = other_func
+
+    def show(self, x=None, fitted_function=True, other_func=None,
+             display=True, tolerance=0.001, title=None, axis=None):
+        """
+        Show the function using `matplotlib`.
+
+        Arguments:
+                x (range):
+                    The range to print the function on.\n
+                    Default ``None``
+                fitted_function (bool):
+                    If ``True``, displays the best fitted function if searched.
+                    Otherwise, returns it. \n
+                    Default ``True``
+                display (bool):
+                    If ``True``, displays the graph.
+                    Otherwise, returns a dictionary with functions informations. \n
+                    Default ``True``
+                other_func (callable):
+                    another function to be plotted or a list of other callable \
+                    functions or a dictionary with the function name as key \
+                    and the callable as value.
+                    Default ``None``
+                tolerance (float):
+                    Tolerance the bins frequency.
+                    If tolerance is 0.001, every frequency smaller than 0.001 \
+                    will be cutted out of the histogram.\n
+                    Default ``True``
+                title (str)
+                    If not `None`, title to be displayed on the figure.\n
+                    Default ``None``
+                axis (matplotlib.pyplot.axis):
+                    axis to be plotted on. If None, creates one automatically.
+                    Default ``None``
+        """
+        if x is not None:
+            if x.dtype != float:
+                x = x.astype(float)
+            if not isinstance(x, np.ndarray):
+                x = np.array(x)
+        elif x is None and self.range is not None:
+            print("Snapshot: Using range from initialisation")
+            x = self.range
+        elif self.histogram is not None:
+            x = np.array(self.histogram.bins, dtype=float)
+        elif x is None:
+            x = np.arange(-3, 3, 0.01)
+        y_rat = self.rational(x)
+        try:
+            import seaborn as sns
+            sns.set_style("whitegrid")
+        except ImportError:
+            warnings.warn("Seaborn not found on computer, install it for ",
+                          "better visualisation")
+        #  Rational
+        if axis is None:
+            ax = plt.gca()
+        else:
+            ax = axis
+        ax.plot(x, y_rat, label="Rational", zorder=2)
+        if fitted_function and self.best_fitted_function is not None:
+            if '__name__' in dir(self.best_fitted_function):
+                func_label = self.best_fitted_function.__name__
+            else:
+                func_label = str(self.best_fitted_function)
+            a, b, c, d = self.best_fitted_function_params
+            y_bff = a * numpify(self.best_fitted_function, c * x + d) + b
+            ax.plot(x, y_bff, "r-", label=f"Fitted {func_label}", zorder=2)
+        #  Histogram
+        if self.histogram is not None:
+            freq, bins = _cleared_arrays(self.histogram, tolerance)
+            ax2 = ax.twinx()
+            ax2.set_yticks([])
+            grey_color = (0.5, 0.5, 0.5, 0.6)
+            ax2.bar(bins, freq, width=bins[1] - bins[0],
+                    color=grey_color, edgecolor=grey_color, alpha=0.4)
+            ax.set_zorder(ax2.get_zorder()+1) # put ax in front of ax2
+            ax.patch.set_visible(False)
+        # Other funcs
+        if other_func is None and self.other_func is not None:
+            other_func = self.other_func
+        if other_func is not None:
+            if type(other_func) is dict:
+                for func_label, func in other_func.items():
+                    ax.plot(x, func(x), label=func)
+            else:
+                if type(other_func) is not list:
+                    other_func = [other_func]
+                for func in other_func:
+                    if '__name__' in dir(func):
+                        func_label = func.__name__
+                    else:
+                        func_label = str(func)
+                    ax.plot(x, numpify(func, x), label=func_label)
+            ax.legend(loc='upper right')
+        if title is None:
+            if not "snapshot" in self.name:
+                ax.set_title(self.name)
+        else:
+            ax.set_title(f"{title}")
+        if axis is None:
+            if display:
+                plt.show()
+            else:
+                return plt.gcf()
+
+    def save(self, x=None, fitted_function=True, other_func=None,
+             path=None, tolerance=0.001, title=None, format="svg"):
+        """
+        Saves an image of the snapshot.
+
+        Arguments:
+                x (range):
+                    The range to print the function on.\n
+                    Default ``None``
+                fitted_function (bool):
+                    If ``True``, displays the best fitted function if searched.
+                    Otherwise, returns it. \n
+                    Default ``True``
+                other_func (callable):
+                    another function to be plotted or a list of other callable \
+                    functions or a dictionary with the function name as key \
+                    and the callable as value.\n
+                    Default ``None``
+                tolerance (float):
+                    Tolerance the bins frequency.
+                    If tolerance is 0.001, every frequency smaller than 0.001 \
+                    will be cutted out of the histogram.\n
+                    Default ``True``
+                title (str)
+                    If not `None`, title to be displayed on the figure.\n
+                    Default ``None``
+                format (str)
+                    The format of the figure, if not in the title.\n
+                    Default ``svg``
+        """
+        fig = self.show(x, fitted_function, other_func, False, tolerance,
+                        title)
+        if path is None:
+            path = self.name + f".{format}"
+        elif "." not in path:
+            path += f".{format}"
+        path = _repair_path(path)
+        fig.savefig(path)
+        fig.clf()
+
+    def __repr__(self):
+        return f"Snapshot ({self.name})"
+
+
+def _cleared_arrays(hist, tolerance=0.001):
+    freq, bins = hist.normalize()
+    first = (freq > tolerance).argmax()
+    last = - (freq > tolerance)[::-1].argmax()
+    if last == 0:
+        return freq[first:], bins[first:]
+    return freq[first:last], bins[first:last]
+
+
+def _repair_path(path):
+    import os
+    changed = False
+    if os.path.exists(path):
+        print(f'Path "{path}" exists')
+        changed = True
+    while os.path.exists(path):
+        if "." in path:
+            path_list = path.split(".")
+            path_list[-2] = _increment_string(path_list[-2])
+            path = '.'.join(path_list)
+        else:
+            path = _increment_string(path)
+    if changed:
+        print(f'Incremented, new path : "{path}"')
+    if '/' in path:
+        directory = "/".join(path.split("/")[:-1])
+        if not os.path.exists(directory):
+            print(f'Path "{directory}" does not exist, creating')
+            os.makedirs(directory)
+    return path
+
+
+def _increment_string(string):
+    if string[-1] in [str(i) for i in range(10)]:
+        import re
+        last_number = re.findall(r'\d+', string)[-1]
+        return string[:-len(last_number)] + str(int(last_number) + 1)
+    else:
+        return string + "_2"
+
+
+def _erase_suffix(string):
+    if string[-1] in [str(i) for i in range(10)]:
+        return "_".join(string.split("_")[:-1])
+    else:
+        return string
+
+
+def _get_frontiers(snapshot_list, other_func=None, fitted_function=True):
+    x_min, x_max, y_min, y_max = np.inf, -np.inf, np.inf, -np.inf
+    for snap in snapshot_list:
+        fig = snap.show(display=False, fitted_function=fitted_function,
+                        other_func=other_func)
+        x_mi, x_ma = fig.axes[0].get_xlim()
+        y_mi, y_ma = fig.axes[0].get_ylim()
+        if x_mi < x_min:
+            x_min = x_mi
+        if y_mi < y_min:
+            y_min = y_mi
+        if x_ma > x_max:
+            x_max = x_ma
+        if y_ma > y_max:
+            y_max = y_ma
+    fig.clf()
+    return x_min, x_max, y_min, y_max
+
+
+def numpify(func, x):
+    """
+    Assert that the function is called and returns a numpy array
+    """
+    try:
+        return np.array(func(x))
+    except TypeError as tper:
+        if "Tensor" in str(tper):
+            import torch
+            return func(torch.tensor(x)).detach().numpy()
+        else:
+            print("Doesn't know how to handle this type of data")
+            raise tper
+
+
+def _get_auto_axis_layout(nb_plots):
+    if nb_plots == 1:
+        return 1, 1
+    mid = int(np.sqrt(nb_plots))
+    for i in range(mid, 1, -1):
+        mod = nb_plots % i
+        if mod == 0:
+            return i, nb_plots // i
+    if mid * (mid + 1) >= nb_plots:
+        return mid, mid + 1
+    return mid + 1, mid + 1
+
+
+def _path_for_multiple(path, suffix):
+    from os import makedirs
+    if "." in path:
+        path_root = ".".join(path.split(".")[:-1])
+        path_ext = "." + path.split(".")[-1]
+    else:
+        path_root = path
+        path_ext = ""
+    main_part = path_root.split("/")[-1]
+    save_folder = _repair_path(f"{path_root}_{suffix}")
+    makedirs(save_folder)
+    return f"{save_folder}/{main_part}{path_ext}"
