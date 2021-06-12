@@ -307,8 +307,11 @@ class Rational_base():
                 with sns.axes_style("whitegrid"):
                     fig, axes = plt.subplots(*layout)
             except ImportError:
-                warnings.warn("Seaborn not found on computer, install it for ",
-                              "better visualisation")
+                if not Snapshot._SEABORN_WARNED:
+                    msg = "Seaborn not found on computer, install it " \
+                          "for better visualisation"
+                    warnings.warn(msg)
+                    Snapshot._SEABORN_WARNED = True
             for rat, ax in zip(cls.list, axes.flatten()):
                 snap = rat.snapshot_list[snap_number]
                 snap.show(display=False, axis=ax, other_func=other_func)
@@ -384,8 +387,9 @@ class Rational_base():
                 try:
                     import seaborn as sns
                 except ImportError:
-                    warnings.warn("Seaborn not found on computer, install",
-                                  " it for better visualisation")
+                    msg = "Seaborn not found on computer, install it " \
+                          "for better visualisation"
+                    warnings.warn(msg)
                 for i in range(nb_sn):
                     if seaborn_installed:
                         with sns.axes_style("whitegrid"):

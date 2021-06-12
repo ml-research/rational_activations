@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 
 # np.random.seed(0)
 
-
 def _wrap_func(func, xdata, ydata, degrees):
     def func_wrapped(params):
         params1 = params[:degrees[0]+1]
@@ -144,6 +143,7 @@ class Snapshot():
     """
 
     _HIST_WARNED = False
+    _SEABORN_WARNED = False
 
     def __init__(self, name, rational, fitted_function=True, other_func=None):
         self.name = name
@@ -219,8 +219,11 @@ class Snapshot():
             import seaborn as sns
             sns.set_style("whitegrid")
         except ImportError:
-            warnings.warn("Seaborn not found on computer, install it for ",
-                          "better visualisation")
+            if not self._SEABORN_WARNED:
+                msg = "Seaborn not found on computer, install it for " \
+                      "better visualisation"
+                warnings.warn(msg)
+                self._SEABORN_WARNED = False
         #  Rational
         if axis is None:
             ax = plt.gca()
