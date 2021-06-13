@@ -10,20 +10,17 @@ import torch.nn as nn
 from torch.cuda import is_available as torch_cuda_available
 from rational.utils.get_weights import get_parameters
 from rational._base.rational_base import Rational_base
+from rational.torch.rational_pytorch_functions import Rational_PYTORCH_A_F, \
+    Rational_PYTORCH_B_F, Rational_PYTORCH_C_F, Rational_PYTORCH_D_F, \
+    Rational_NONSAFE_F, Rational_CUDA_NONSAFE_F, _get_xps
 
 
 if torch_cuda_available():
     try:
         from rational.torch.rational_cuda_functions import Rational_CUDA_A_F, \
             Rational_CUDA_B_F, Rational_CUDA_C_F, Rational_CUDA_D_F
-    except ImportError as ImpErr:
-        print('\n\nError importing rational_cuda, is cuda not available?\n\n')
-        print(ImpErr)
-        exit(1)
-
-from rational.torch.rational_pytorch_functions import Rational_PYTORCH_A_F, \
-    Rational_PYTORCH_B_F, Rational_PYTORCH_C_F, Rational_PYTORCH_D_F, \
-    Rational_NONSAFE_F, Rational_CUDA_NONSAFE_F, _get_xps
+    except ImportError:
+        pass
 
 
 class RecurrentRational():
@@ -221,8 +218,10 @@ class Rational(Rational_base, nn.Module):
                 rational_func = Rational_CUDA_NONSAFE_F
             else:
                 raise NotImplementedError(f"version {version} not implemented")
-
-            self.activation_function = rational_func.apply
+            if 'apply' in dir(rational_func):
+                self.activation_function = rational_func.apply
+            else:
+                self.activation_function = rational_func
         else:
             if version == "A":
                 rational_func = Rational_PYTORCH_A_F
@@ -276,7 +275,10 @@ class Rational(Rational_base, nn.Module):
             self.device = f"{device}"
         else:
             self.device = f"cuda:{device}"
-        self.activation_function = rational_func.apply
+        if 'apply' in dir(rational_func):
+            self.activation_function = rational_func.apply
+        else:
+            self.activation_function = rational_func
 
     def _to(self, device):
         """
@@ -341,7 +343,10 @@ class Rational(Rational_base, nn.Module):
             else:
                 raise ValueError("version %s not implemented" % self.version)
 
-            self.activation_function = rational_func.apply
+            if 'apply' in dir(rational_func):
+                self.activation_function = rational_func.apply
+            else:
+                self.activation_function = rational_func
         else:
             if self.version == "A":
                 rational_func = Rational_PYTORCH_A_F
@@ -379,7 +384,10 @@ class Rational(Rational_base, nn.Module):
                 rational_func = Rational_CUDA_NONSAFE_F
             else:
                 raise ValueError("version %s not implemented" % version)
-            self.activation_function = rational_func.apply
+            if 'apply' in dir(rational_func):
+                self.activation_function = rational_func.apply
+            else:
+                self.activation_function = rational_func
             self.version = version
         else:
             if version == "A":

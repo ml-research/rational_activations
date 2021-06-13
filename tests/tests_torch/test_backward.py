@@ -38,37 +38,37 @@ def backward_test(cuda, version, recurrent_rat):
             plt.show()
 
 
-def backward_test_hist(cuda, version, recurrent_rat):
-    r1, r2 = -3., 3.
-    rat = Rational(cuda=cuda)
-    rat.input_retrieve_mode()
-    if recurrent_rat:
-        def rat_func(inp):
-            return rat(rat(inp))
-    else:
-        rat_func = rat
-    loss_fn = MSELoss()
-    optimizer = torch.optim.SGD(rat.parameters(), lr=0.05, momentum=0.9)
-    for i in range(201):
-        inp = (r1 - r2) * torch.rand(400) + r2
-        if cuda:
-            inp = inp.cuda()
-        exp = torch.sigmoid(inp)
-        out = rat_func(inp)
-        optimizer.zero_grad()
-        loss = loss_fn(out, exp)
-        loss.backward()
-        optimizer.step()
-        if i in visu_epochs:
-            rat.snapshot(f"Epoch {i}")
-            rat.save_animated_graph(f"dossier/coucou{i}")
-
-    # for snap in rat.snapshot_list:
-    #     snap.show(other_func=sigmoid_np)
-    import time
-    now = time.time()
-    rat.save_animated_graph(other_func=sigmoid_np)
-    print(time.time() - now)
+# def backward_test_hist(cuda, version, recurrent_rat):
+#     r1, r2 = -3., 3.
+#     rat = Rational(cuda=cuda)
+#     rat.input_retrieve_mode()
+#     if recurrent_rat:
+#         def rat_func(inp):
+#             return rat(rat(inp))
+#     else:
+#         rat_func = rat
+#     loss_fn = MSELoss()
+#     optimizer = torch.optim.SGD(rat.parameters(), lr=0.05, momentum=0.9)
+#     for i in range(201):
+#         inp = (r1 - r2) * torch.rand(400) + r2
+#         if cuda:
+#             inp = inp.cuda()
+#         exp = torch.sigmoid(inp)
+#         out = rat_func(inp)
+#         optimizer.zero_grad()
+#         loss = loss_fn(out, exp)
+#         loss.backward()
+#         optimizer.step()
+#         if i in visu_epochs:
+#             rat.capture(f"Epoch {i}")
+#     rat.export_evolution_graph(f"snapplot.svg")
+# 
+#     # for snap in rat.snapshot_list:
+#     #     snap.show(other_func=sigmoid_np)
+#     import time
+#     now = time.time()
+#     rat.save_animated_graph(other_func=sigmoid_np)
+#     print(time.time() - now)
 
 # for cuda in [True, False]:
 #     for version in ["A", "B", "C", "D"]:
@@ -76,4 +76,4 @@ def backward_test_hist(cuda, version, recurrent_rat):
 #             backward_test(cuda, version, recurrence)
 
 # backward_test(False, "A", True)
-backward_test_hist(False, "A", False)
+# backward_test_hist(False, "A", False)
