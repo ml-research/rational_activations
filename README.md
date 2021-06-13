@@ -31,11 +31,11 @@ And, therefore relieves the network designer of having to commit to a potentiall
  :octocat: See [rational_rl](https://github.com/ml-research/rational_rl) github repo
 
 ## 2. Dependencies
-We support ***MxNet, Keras, and PyTorch***. Instructions for MxNet can be found [here](rational/mxnet). Instructions for Keras [here](rational/keras). 
+We support ***MxNet, Keras, and PyTorch***. Instructions for MxNet can be found [here](rational/mxnet). Instructions for Keras [here](rational/keras).
 The following README instructions **assume that you want to use rational activations in PyTorch.**
 
     PyTorch>=1.4.0
-    CUDA>=10.1
+    CUDA>=10.2
 
 
 ## 3. Installation
@@ -44,49 +44,45 @@ To install the rational_activations module, you can use pip, but:<br/>
 
 :bangbang:  You should be careful about the CUDA version running on your machine.
 
-
 To get your CUDA version:
 
     import torch
     torch.version.cuda
 
-For **your** corresponding version of CUDA, please use one of the following command blocks:
-#### CUDA 10.2
+For non TensorFlow and MXNet users, or **if the command bellow don't work** the package listed bellow don't work on your machine:
+#### TensorFlow or MXNet (or PyTorch not CUDA optimized)
 
      pip3 install -U pip wheel
-     pip3 install torch rational-activations
+     pip3 install torch rational_activations
 
-#### CUDA 10.1
-##### Python3.6
+If you want a CUDA optimized version:
 
-       pip3 install -U pip wheel
-       pip3 install torch==1.7.1+cu101 -f https://download.pytorch.org/whl/torch_stable.html
-       pip3 install https://github.com/ml-research/rational_activations/blob/master/wheelhouse/cuda-10.1/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl\?raw\=true 
+For **your** corresponding version of CUDA, please use one of the following command blocks:
 
-##### Python3.7
+#### CUDA 10.2 & PyTorch 1.7.1 (default one)
 
-       pip3 install -U pip wheel
-       pip3 install torch==1.7.1+cu101 -f https://download.pytorch.org/whl/torch_stable.html
-       pip3 install https://github.com/ml-research/rational_activations/blob/master/wheelhouse/cuda-10.1/rational_activations-0.1.0-cp37-cp37m-manylinux2014_x86_64.whl\?raw\=true 
+     pip3 install -U pip wheel
+     pip3 install torch rational_activations_cu102
 
-##### Python3.8
 
-         pip3 install -U pip wheel
-         pip3 install torch==1.7.1+cu101 -f https://download.pytorch.org/whl/torch_stable.html
-         pip3 install https://github.com/ml-research/rational_activations/blob/master/wheelhouse/cuda-10.1/rational_activations-0.1.0-cp38-cp38-manylinux2014_x86_64.whl\?raw\=true
-         
-         
-#### CUDA 11.0
+#### CUDA 11.0 & PyTorch 1.7.1 (default one)
 ##### Python3.6
 
        pip3 install -U pip wheel
        pip3 install torch==1.7.1+cu110 -f https://download.pytorch.org/whl/torch_stable.html
-       pip3 install https://github.com/ml-research/rational_activations/blob/master/wheelhouse/cuda-11.0/rational_activations-0.1.0-cp36-cp36m-manylinux2014_x86_64.whl\?raw\=true 
+       pip3 install rational_activations_cu110
+
+#### CUDA 11.0 & PyTorch 1.8.1 (latest one)
+##### Python3.6
+
+        pip3 install -U pip wheel
+        pip3 install torch==1.8.1+cu110 -f https://download.pytorch.org/whl/torch_stable.html
+        pip3 install rational_activations_cu110
 
 ##### Python3.7
 
        pip3 install -U pip wheel
-       pip3 install torch==1.7.1+cu110 -f https://download.pytorch.org/whl/torch_stable.html
+       pip3 install torch==1.8.1+cu110 -f https://download.pytorch.org/whl/torch_stable.html
        pip3 install https://github.com/ml-research/rational_activations/blob/master/wheelhouse/cuda-11.0/rational_activations-0.1.0-cp37-cp37m-manylinux2014_x86_64.whl\?raw\=true
 
 ##### Python3.8
