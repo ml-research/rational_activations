@@ -35,5 +35,5 @@ To see the activation function:
 .. literalinclude:: code/how_to_use_rationals.py
     :lines: 92-102
 
-.. image:: ../approx_lrelu.png
+.. image:: images/approx_lrelu.png
    :width: 600

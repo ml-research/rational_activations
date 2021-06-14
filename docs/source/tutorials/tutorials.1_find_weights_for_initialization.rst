@@ -34,7 +34,7 @@ You will be asked if you want to see a plot of the obtained rational function.
 
 If you accept, you will be shown a plot (to check the accuracy):
 
-.. image:: ../approx_tanh.png
+.. image:: images/approx_tanh.png
   :width: 600
 
 Then, you will be asked if you want to store this result for latter use.

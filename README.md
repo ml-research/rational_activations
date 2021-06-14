@@ -129,12 +129,19 @@ model = torch.nn.Sequential(
   year={2019}
 }
 
-
-@article{delfosse2020rationals,
-  title={Rational Activation functions},
-  author={Delfosse, Quentin and Schramowski, Patrick and Molina, Alejandro and Beck, Nils and Hsu, Ting-Yu and Kashef, Yasien and Rüling-Cachay, Salva and Zimmermann, Julius},
+@article{delfosse2021recurrent,
+  title={Recurrent Rational Networks},
+  author={Delfosse, Quentin and Schramowski, Patrick and Molina, Alejandro and Kersting, Kristian},
   journal={arXiv preprint arXiv:2102.09407},
-  year={2020}
+  year={2021}
+}
+
+@misc{delfosse2020rationals,
+  author = {Rational Activation functions},
+  title = {Delfosse, Quentin and Schramowski, Patrick and Molina, Alejandro and Beck, Nils and Hsu, Ting-Yu and Kashef, Yasien and Rüling-Cachay, Salva and Zimmermann, Julius},
+  year = {2020},
+  publisher = {GitHub},
+  journal = {GitHub repository},
   howpublished={\url{https://github.com/ml-research/rational_activations}}
 }
 ```

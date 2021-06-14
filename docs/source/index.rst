@@ -56,3 +56,16 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+
+Cite us in your paper
+=====================
+
+Rational activations were first introduced as Padé Activation Units in
+:cite:p:`molina2019pade`, and later developed as Rational Activation in
+:cite:p:`delfosse2021recurrent`.
+
+To cite the package only: :cite:p:`delfosse2020rationals`.
+
+.. bibliography::
+   :all:
