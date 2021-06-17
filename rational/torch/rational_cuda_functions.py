@@ -1,6 +1,7 @@
 import torch
 if torch.cuda.is_available():
     try:
+        import torch
         from rational.cuda import *
         class Rational_CUDA_A_F(torch.autograd.Function):
             @staticmethod
