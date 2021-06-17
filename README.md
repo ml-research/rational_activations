@@ -77,19 +77,19 @@ For **your** corresponding version of CUDA, please use one of the following comm
 
         pip3 install -U pip wheel
         pip3 install torch==1.8.1+cu110 -f https://download.pytorch.org/whl/torch_stable.html
-        pip3 install https://github.com/ml-research/rational_activations/blob/master/wheelhouse/torch1.7.1/cuda-11.0/rational_activations_cu110-0.2.0-cp36-cp36m-manylinux2014_x86_64.whl?raw=true
+        pip3 install https://github.com/ml-research/rational_activations/blob/master/wheelhouse/torch1.8.1/cuda-11.0/rational_activations_cu110-0.2.0-cp36-cp36m-manylinux2014_x86_64.whl?raw=true
 
 ##### Python3.7
 
        pip3 install -U pip wheel
        pip3 install torch==1.8.1+cu110 -f https://download.pytorch.org/whl/torch_stable.html
-       pip3 install https://github.com/ml-research/rational_activations/blob/master/wheelhouse/torch1.7.1/cuda-11.0/rational_activations_cu110-0.2.0-cp37-cp37m-manylinux2014_x86_64.whl?raw=true
+       pip3 install https://github.com/ml-research/rational_activations/blob/master/wheelhouse/torch1.8.1/cuda-11.0/rational_activations_cu110-0.2.0-cp37-cp37m-manylinux2014_x86_64.whl?raw=true
 
 ##### Python3.8
 
          pip3 install -U pip wheel
          pip3 install torch==1.8.1+cu110 -f https://download.pytorch.org/whl/torch_stable.html
-         pip3 install https://github.com/ml-research/rational_activations/blob/master/wheelhouse/torch1.7.1/cuda-11.0/rational_activations_cu110-0.2.0-cp38-cp38-manylinux2014_x86_64.whl?raw=true
+         pip3 install https://github.com/ml-research/rational_activations/blob/master/wheelhouse/torch1.8.1/cuda-11.0/rational_activations_cu110-0.2.0-cp38-cp38-manylinux2014_x86_64.whl?raw=true
 
 
 #### Other CUDA/Pytorch</h3>
