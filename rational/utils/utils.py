@@ -2,6 +2,7 @@ import warnings
 import numpy as np
 from numpy import zeros, inf
 import matplotlib.pyplot as plt
+from numpy.lib.financial import ipmt
 
 # np.random.seed(0)
 
@@ -212,6 +213,7 @@ class Snapshot():
             x = self.range
         elif self.histogram is not None:
             x = np.array(self.histogram.bins, dtype=float)
+            x = _cleared_arrays(self.histogram, tolerance)[1]
         elif x is None:
             x = np.arange(-3, 3, 0.01)
         y_rat = self.rational(x)
@@ -275,6 +277,68 @@ class Snapshot():
                 plt.show()
             else:
                 return plt.gcf()
+    
+    def borders(self, x=None, fitted_function=True, other_func=None,
+                tolerance=0.001):
+        """
+        Returns the borders x_min, x_max, y_min, y_max.
+
+        Arguments:
+                x (range):
+                    The range to print the function on.\n
+                    Default ``None``
+                fitted_function (bool):
+                    If ``True``, displays the best fitted function if searched.
+                    Otherwise, returns it. \n
+                    Default ``True``
+                other_func (callable):
+                    another function to be plotted or a list of other callable \
+                    functions or a dictionary with the function name as key \
+                    and the callable as value.
+                    Default ``None``
+                tolerance (float):
+                    Tolerance the bins frequency.
+                    If tolerance is 0.001, every frequency smaller than 0.001 \
+                    will be cutted out of the histogram.\n
+                    Default ``True``
+        Returns:
+            Module: Rational module
+        """
+        if x is not None:
+            if x.dtype != float:
+                x = x.astype(float)
+            if not isinstance(x, np.ndarray):
+                x = np.array(x)
+        elif x is None and self.range is not None:
+            x = self.range
+        elif self.histogram is not None:
+            x = np.array(self.histogram.bins, dtype=float)
+            x = _cleared_arrays(self.histogram, tolerance)[1]
+        elif x is None:
+            x = np.arange(-3, 3, 0.01)
+        y_rat = self.rational(x)
+        x_min, x_max = x.min(), x.max()
+        y_min, y_max = y_rat.min(), y_rat.max()
+        if fitted_function and self.best_fitted_function is not None:
+            a, b, c, d = self.best_fitted_function_params
+            y_bff = a * numpify(self.best_fitted_function, c * x + d) + b
+            y_min, y_max = min(y_min, y_bff.min()), max(y_max, y_bff.max())
+        # Other funcs
+        if other_func is None and self.other_func is not None:
+            other_func = self.other_func
+        if other_func is not None:
+            if type(other_func) is dict:
+                for func_label, func in other_func.items():
+                    y_of = numpify(func, x)
+                    y_min, y_max = min(y_min, y_of.min()), max(y_max, y_of.max())
+            else:
+                if type(other_func) is not list:
+                    other_func = [other_func]
+                for func in other_func:
+                    y_of = numpify(func, x)
+                    y_min, y_max = min(y_min, y_of.min()), max(y_max, y_of.max())
+        return x_min, x_max, y_min, y_max
+
 
     def save(self, x=None, fitted_function=True, other_func=None,
              path=None, tolerance=0.001, title=None, format="svg"):
@@ -368,13 +432,13 @@ def _erase_suffix(string):
         return string
 
 
-def _get_frontiers(snapshot_list, other_func=None, fitted_function=True):
+def _get_frontiers(snapshot_list, other_func=None, fitted_function=True, 
+                   tolerance=0.001):
     x_min, x_max, y_min, y_max = np.inf, -np.inf, np.inf, -np.inf
     for snap in snapshot_list:
-        fig = snap.show(display=False, fitted_function=fitted_function,
-                        other_func=other_func)
-        x_mi, x_ma = fig.axes[0].get_xlim()
-        y_mi, y_ma = fig.axes[0].get_ylim()
+        x_mi, x_ma, y_mi, y_ma = snap.borders(fitted_function=fitted_function,
+                                              other_func=other_func,
+                                              tolerance=tolerance)
         if x_mi < x_min:
             x_min = x_mi
         if y_mi < y_min:
@@ -383,8 +447,8 @@ def _get_frontiers(snapshot_list, other_func=None, fitted_function=True):
             x_max = x_ma
         if y_ma > y_max:
             y_max = y_ma
-    fig.clf()
-    return x_min, x_max, y_min, y_max
+    span = y_max - y_min
+    return x_min, x_max, y_min - 0.1 * span, y_max + 0.1 * span
 
 
 def numpify(func, x):

@@ -6,6 +6,7 @@ This module allows you to create Rational Neural Networks using Learnable
 Rational activation functions. This base function is used by Pytorch,
 TensorFlow/Keras, and MXNET Rational Activation Functions.
 """
+import ipdb
 import matplotlib.pyplot as plt
 import numpy as np
 import warnings
@@ -397,12 +398,14 @@ class Rational_base():
                               "for better visualisation"
                         warnings.warn(msg)
                         Snapshot._SEABORN_WARNED = True
+                if seaborn_installed:
+                    with sns.axes_style("whitegrid"):
+                        figs = tuple(np.flip(np.array(layout) * (4, 6)))
+                        fig, axes = plt.subplots(*layout, figsize=figs)
+                else:
+                    figs = tuple(np.flip(np.array(layout) * (4, 6)))
+                    fig, axes = plt.subplots(*layout, figsize=figs)
                 for i in range(nb_sn):
-                    if seaborn_installed:
-                        with sns.axes_style("whitegrid"):
-                            fig, axes = plt.subplots(*layout)
-                    else:
-                        fig, axes = plt.subplots(*layout)
                     for rat, ax, lim in zip(cls.list, axes.flatten(), limits):
                         x_min, x_max, y_min, y_max = lim
                         input = np.arange(x_min, x_max, (x_max - x_min)/10000)
@@ -412,13 +415,17 @@ class Rational_base():
                         ax.set_xlim([x_min, x_max])
                         ax.set_ylim([y_min, y_max])
                     for ax in axes.flatten()[len(cls.list):]:
-                        ax.remove()
+                        ax.remove()  # removes empty axes
                     buf = io.BytesIO()
                     fig.set_tight_layout(True)
                     plt.savefig(buf, format='png')
                     buf.seek(0)
                     gif_images.append(Image.open(buf))
-                    fig.clf()
+                    for i, ax in enumerate(fig.axes):
+                        if i < len(axes.flatten()):
+                            ax.cla()
+                        else:
+                            ax.remove()
                 if path[-4:] != ".gif":
                     path += ".gif"
                 path = _repair_path(path)
