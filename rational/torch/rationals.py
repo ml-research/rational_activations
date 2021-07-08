@@ -528,6 +528,11 @@ class EmbeddedRational(nn.Module):
         for rat in self.successive_rats:
             x = rat(x)
         return x
+    
+    def _apply(self, fn):
+        for rat in self.successive_rats:
+            rat._apply(fn)
+        return super()._apply(fn)
 
 class RecurrentRational():
     """
