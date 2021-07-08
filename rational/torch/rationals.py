@@ -6,6 +6,7 @@ This module allows you to create Rational Neural Networks using Learnable
 Rational activation functions with Pytorch networks.
 """
 import torch
+from torch._C import device
 import torch.nn as nn
 from torch.cuda import is_available as torch_cuda_available
 from rational.utils.get_weights import get_parameters
@@ -141,7 +142,7 @@ class Rational(Rational_base, nn.Module):
         self.activation_function = rational_func
         self.device = "cpu"
 
-    def _cuda(self, device="0"):
+    def _cuda(self, device):
         if self.version == "A":
             rational_func = Rational_CUDA_A_F
         elif self.version == "B":
@@ -180,7 +181,8 @@ class Rational(Rational_base, nn.Module):
         if "Module.cpu" in str(fn):
             self._cpu()
         elif "Module.cuda" in str(fn):
-            self._cuda()
+            device = fn.__closure__[1].cell_contents
+            self._cuda(device)
         elif "Module.to" in str(fn):
             device = fn.__closure__[1].cell_contents
             assert type(device) == torch.device  # otherwise loop on __closure__
@@ -531,7 +533,8 @@ class EmbeddedRational(nn.Module):
     
     def _apply(self, fn):
         for rat in self.successive_rats:
-            rat._apply(fn)
+            device = fn.__closure__[1].cell_contents
+            rat.device = device
         return super()._apply(fn)
 
 class RecurrentRational():
