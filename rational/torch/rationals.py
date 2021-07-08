@@ -23,123 +23,6 @@ if torch_cuda_available():
         pass
 
 
-class RecurrentRational():
-    """
-    Recurrent rational activation function - wrapper for Rational
-
-    Arguments:
-            approx_func (str):
-                The name of the approximated function for initialisation. \
-                The different initialable functions are available in \
-                `rational.rationals_config.json`. \n
-                Default ``leaky_relu``
-            degrees (tuple of int):
-                The degrees of the numerator (P) and denominator (Q).\n
-                Default ``(5, 4)``
-            cuda (bool):
-                Use GPU CUDA version. \n
-                If ``None``, use cuda if available on the machine\n
-                Default ``None``
-            version (str):
-                Version of Rational to use. Rational(x) = P(x)/Q(x)\n
-                `A`: Q(x) = 1 + \|b_1.x\| + \|b_2.x\| + ... + \|b_n.x\|\n
-                `B`: Q(x) = 1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
-                `C`: Q(x) = 0.1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
-                `D`: like `B` with noise\n
-                Default ``A``
-            trainable (bool):
-                If the weights are trainable, i.e, if they are updated during \
-                backward pass\n
-                Default ``True``
-    Returns:
-        Module: Rational module
-    """
-
-    def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=None,
-                 version="A", trainable=True, train_numerator=True,
-                 train_denominator=True):
-        self.rational = Rational(approx_func=approx_func,
-                                 degrees=degrees,
-                                 cuda=cuda,
-                                 version=version,
-                                 trainable=trainable,
-                                 train_numerator=train_numerator,
-                                 train_denominator=train_denominator)
-
-    def __call__(self, *args, **kwargs):
-        return RecurrentRationalModule(self.rational)
-
-
-class RecurrentRationalModule(nn.Module):
-    def __init__(self, rational):
-        super(RecurrentRationalModule, self).__init__()
-        self.rational = rational
-        self._handle_retrieve_mode = None
-        self.distribution = None
-
-    def forward(self, x):
-        return self.rational(x)
-
-    def __repr__(self):
-        return (f"Recurrent Rational Activation Function (PYTORCH version "
-                f"{self.rational.version}) of degrees {self.rational.degrees} running on "
-                f"{self.rational.device}")
-
-    def cpu(self):
-        return self.rational.cpu()
-
-    def cuda(self):
-        return self.rational.cuda()
-
-    def numpy(self):
-        return self.rational.numpy()
-
-    def fit(self, function, x=None, show=False):
-        return self.rational.fit(function=function, x=x, show=show)
-
-    def input_retrieve_mode(self, auto_stop=True, max_saves=1000,
-                            bin_width=0.01):
-        """
-        Will retrieve the distribution of the input in self.distribution. \n
-        This will slow down the function, as it has to retrieve the input \
-        dist.\n
-
-        Arguments:
-                auto_stop (bool):
-                    If True, the retrieving will stop after `max_saves` \
-                    calls to forward.\n
-                    Else, use :meth:`torch.Rational.training_mode`.\n
-                    Default ``True``
-                max_saves (int):
-                    The range on which the curves of the functions are fitted \
-                    together.\n
-                    Default ``1000``
-        """
-        if self._handle_retrieve_mode is not None:
-            # print("Already in retrieve mode")
-            return
-        from rational.utils.histograms_cupy import Histogram as hist1
-        self.distribution = hist1(bin_width)
-        # print("Retrieving input from now on.")
-        if auto_stop:
-            self.inputs_saved = 0
-            self._handle_retrieve_mode = self.register_forward_hook(_save_input_auto_stop)
-            self._max_saves = max_saves
-        else:
-            self._handle_retrieve_mode = self.register_forward_hook(_save_input)
-
-    def training_mode(self):
-        """
-        Stops retrieving the distribution of the input in `self.distribution`.
-        """
-        print("Training mode, no longer retrieving the input.")
-        self._handle_retrieve_mode.remove()
-        self._handle_retrieve_mode = None
-
-    def show(self, input_range=None, display=True):
-        return self.rational.show(input_range=input_range, display=display)
-
-
 class Rational(Rational_base, nn.Module):
     """
     Rational activation function inherited from ``torch.nn.Module``.
@@ -491,17 +374,6 @@ class Rational(Rational_base, nn.Module):
             print("saving_input of rationals should be set with booleans")
 
 
-def _save_input(self, input, output):
-    self.distribution.fill_n(input[0])
-
-
-def _save_input_auto_stop(self, input, output):
-    self.inputs_saved += 1
-    self.distribution.fill_n(input[0])
-    if self.inputs_saved > self._max_saves:
-        self.training_mode()
-
-
 class AugmentedRational(nn.Module):
     """
     Augmented Rational activation function inherited from ``Rational``
@@ -638,3 +510,148 @@ class RationalNonSafe(Rational_base, nn.Module):
         clf = linear_model.LinearRegression(fit_intercept=False)
         [np.ones_like(x), x, x**2, x**3, x**4, -y*x, -y*x**2, -y*x**3].T
         clf.fit(np.array(), y)
+
+
+class EmbeddedRational(nn.Module):
+    nb_rats = 2
+
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        self.successive_rats = []
+        for i in range(self.nb_rats):
+            rat = Rational(*args, **kwargs)
+            self.add_module(f"rat_{i}", rat)
+            self.successive_rats.append(rat)
+    
+    def forward(self, x):
+        for rat in self.successive_rats:
+            x = rat(x)
+        return x
+
+class RecurrentRational():
+    """
+    Recurrent rational activation function - wrapper for Rational
+
+    Arguments:
+            approx_func (str):
+                The name of the approximated function for initialisation. \
+                The different initialable functions are available in \
+                `rational.rationals_config.json`. \n
+                Default ``leaky_relu``
+            degrees (tuple of int):
+                The degrees of the numerator (P) and denominator (Q).\n
+                Default ``(5, 4)``
+            cuda (bool):
+                Use GPU CUDA version. \n
+                If ``None``, use cuda if available on the machine\n
+                Default ``None``
+            version (str):
+                Version of Rational to use. Rational(x) = P(x)/Q(x)\n
+                `A`: Q(x) = 1 + \|b_1.x\| + \|b_2.x\| + ... + \|b_n.x\|\n
+                `B`: Q(x) = 1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
+                `C`: Q(x) = 0.1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
+                `D`: like `B` with noise\n
+                Default ``A``
+            trainable (bool):
+                If the weights are trainable, i.e, if they are updated during \
+                backward pass\n
+                Default ``True``
+    Returns:
+        Module: Rational module
+    """
+
+    def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=None,
+                 version="A", trainable=True, train_numerator=True,
+                 train_denominator=True):
+        self.rational = Rational(approx_func=approx_func,
+                                 degrees=degrees,
+                                 cuda=cuda,
+                                 version=version,
+                                 trainable=trainable,
+                                 train_numerator=train_numerator,
+                                 train_denominator=train_denominator)
+
+    def __call__(self, *args, **kwargs):
+        return RecurrentRationalModule(self.rational)
+
+
+class RecurrentRationalModule(nn.Module):
+    def __init__(self, rational):
+        super(RecurrentRationalModule, self).__init__()
+        self.rational = rational
+        self._handle_retrieve_mode = None
+        self.distribution = None
+
+    def forward(self, x):
+        return self.rational(x)
+
+    def __repr__(self):
+        return (f"Recurrent Rational Activation Function (PYTORCH version "
+                f"{self.rational.version}) of degrees {self.rational.degrees} running on "
+                f"{self.rational.device}")
+
+    def cpu(self):
+        return self.rational.cpu()
+
+    def cuda(self):
+        return self.rational.cuda()
+
+    def numpy(self):
+        return self.rational.numpy()
+
+    def fit(self, function, x=None, show=False):
+        return self.rational.fit(function=function, x=x, show=show)
+
+    def input_retrieve_mode(self, auto_stop=True, max_saves=1000,
+                            bin_width=0.01):
+        """
+        Will retrieve the distribution of the input in self.distribution. \n
+        This will slow down the function, as it has to retrieve the input \
+        dist.\n
+
+        Arguments:
+                auto_stop (bool):
+                    If True, the retrieving will stop after `max_saves` \
+                    calls to forward.\n
+                    Else, use :meth:`torch.Rational.training_mode`.\n
+                    Default ``True``
+                max_saves (int):
+                    The range on which the curves of the functions are fitted \
+                    together.\n
+                    Default ``1000``
+        """
+        if self._handle_retrieve_mode is not None:
+            # print("Already in retrieve mode")
+            return
+        from rational.utils.histograms_cupy import Histogram as hist1
+        self.distribution = hist1(bin_width)
+        # print("Retrieving input from now on.")
+        if auto_stop:
+            self.inputs_saved = 0
+            self._handle_retrieve_mode = self.register_forward_hook(_save_input_auto_stop)
+            self._max_saves = max_saves
+        else:
+            self._handle_retrieve_mode = self.register_forward_hook(_save_input)
+
+    def training_mode(self):
+        """
+        Stops retrieving the distribution of the input in `self.distribution`.
+        """
+        print("Training mode, no longer retrieving the input.")
+        self._handle_retrieve_mode.remove()
+        self._handle_retrieve_mode = None
+
+    def show(self, input_range=None, display=True):
+        return self.rational.show(input_range=input_range, display=display)
+
+
+def _save_input(self, input, output):
+    self.distribution.fill_n(input[0])
+
+
+def _save_input_auto_stop(self, input, output):
+    self.inputs_saved += 1
+    self.distribution.fill_n(input[0])
+    if self.inputs_saved > self._max_saves:
+        self.training_mode()
+

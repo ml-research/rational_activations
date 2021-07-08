@@ -1,2 +1,2 @@
 from .rationals import Rational, RecurrentRational, RecurrentRationalModule, \
-    RationalNonSafe
+    RationalNonSafe, EmbeddedRational
