@@ -184,6 +184,7 @@ class Rational(Rational_base, nn.Module):
         elif "Module.to" in str(fn):
             device = fn.__closure__[1].cell_contents
             assert type(device) == torch.device  # otherwise loop on __closure__
+            self.device = str(device)
             self._to(device)
         return super()._apply(fn)
 
