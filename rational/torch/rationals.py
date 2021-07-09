@@ -55,10 +55,17 @@ class Rational(Rational_base, nn.Module):
     Returns:
         Module: Rational module
     """
+    warned = False
 
     def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=None,
                  version="A", trainable=True, train_numerator=True,
                  train_denominator=True, name=None):
+        
+        if not Rational.warned:
+            print("\n\n\nUsing Rationals\n\n\n")
+            Rational.warned = True
+        
+
         if name is None:
             name = approx_func
         super().__init__(name)
@@ -181,7 +188,7 @@ class Rational(Rational_base, nn.Module):
         if "Module.cpu" in str(fn):
             self._cpu()
         elif "Module.cuda" in str(fn):
-            device = fn.__closure__[1].cell_contents
+            device = fn.__closure__[0].cell_contents
             self._cuda(device)
         elif "Module.to" in str(fn):
             device = fn.__closure__[1].cell_contents
@@ -519,6 +526,10 @@ class EmbeddedRational(nn.Module):
     nb_rats = 2
 
     def __init__(self, *args, **kwargs):
+        if not Rational.warned:
+            print("\n\n\nUsing Embedded Rationals\n\n\n")
+            Rational.warned = True
+
         super().__init__()
         self.successive_rats = []
         for i in range(self.nb_rats):
@@ -533,7 +544,10 @@ class EmbeddedRational(nn.Module):
     
     def _apply(self, fn):
         for rat in self.successive_rats:
-            device = fn.__closure__[1].cell_contents
+            if len(fn.__closure__) > 1:
+                device = fn.__closure__[1].cell_contents
+            else:
+                device = fn.__closure__[0].cell_contents
             rat.device = device
         return super()._apply(fn)
 
