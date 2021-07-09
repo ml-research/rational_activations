@@ -191,10 +191,12 @@ class Rational(Rational_base, nn.Module):
             device = fn.__closure__[0].cell_contents
             self._cuda(device)
         elif "Module.to" in str(fn):
-            device = fn.__closure__[1].cell_contents
-            assert type(device) == torch.device  # otherwise loop on __closure__
-            self.device = str(device)
-            self._to(device)
+            for clos in fn.__closure__:
+                if type(clos.cell_contents) is torch.device:
+                    device = clos.cell_contents
+                    self.device = str(device)
+                    self._to(device)
+                    break
         return super()._apply(fn)
 
     def numpy(self):
@@ -544,11 +546,11 @@ class EmbeddedRational(nn.Module):
     
     def _apply(self, fn):
         for rat in self.successive_rats:
-            if len(fn.__closure__) > 1:
-                device = fn.__closure__[1].cell_contents
-            else:
-                device = fn.__closure__[0].cell_contents
-            rat.device = device
+            for clos in fn.__closure__:
+                if type(clos.cell_contents) is torch.device:
+                    device = clos.cell_contents
+                    rat.device = device
+                    break
         return super()._apply(fn)
 
 class RecurrentRational():
