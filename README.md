@@ -137,8 +137,8 @@ model = torch.nn.Sequential(
 }
 
 @misc{delfosse2020rationals,
-  author = {Rational Activation functions},
-  title = {Delfosse, Quentin and Schramowski, Patrick and Molina, Alejandro and Beck, Nils and Hsu, Ting-Yu and Kashef, Yasien and Rüling-Cachay, Salva and Zimmermann, Julius},
+  author = {Delfosse, Quentin and Schramowski, Patrick and Molina, Alejandro and Beck, Nils and Hsu, Ting-Yu and Kashef, Yasien and Rüling-Cachay, Salva and Zimmermann, Julius},
+  title = {Rational Activation functions},
   year = {2020},
   publisher = {GitHub},
   journal = {GitHub repository},
