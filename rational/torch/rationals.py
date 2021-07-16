@@ -60,11 +60,6 @@ class Rational(Rational_base, nn.Module):
     def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=None,
                  version="A", trainable=True, train_numerator=True,
                  train_denominator=True, name=None):
-        
-        if not Rational.warned:
-            print("\n\n\nUsing Rationals\n\n\n")
-            Rational.warned = True
-        
 
         if name is None:
             name = approx_func
