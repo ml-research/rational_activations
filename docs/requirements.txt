@@ -7,6 +7,7 @@ sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.4
 sphinxcontrib.bibtex==2.3.0
 sphinxcontrib-websupport==1.2.4
+sphinxcontrib-serializinghtml
 numpy
 rational_activations
 tensorflow
