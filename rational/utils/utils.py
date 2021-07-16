@@ -2,7 +2,7 @@ import warnings
 import numpy as np
 from numpy import zeros, inf
 import matplotlib.pyplot as plt
-from numpy.lib.financial import ipmt
+# from numpy.lib.financial import ipmt
 
 # np.random.seed(0)
 
@@ -145,10 +145,12 @@ class Snapshot():
 
     _HIST_WARNED = False
     _SEABORN_WARNED = False
+    _SCIPY_WARNED = False
 
     def __init__(self, name, rational, fitted_function=True, other_func=None):
         self.name = name
         self.rational = rational.numpy()
+        self.use_kde = rational.use_kde
         self.range = None
         self.histogram = None
         if rational.distribution is not None and \
@@ -225,7 +227,7 @@ class Snapshot():
                 msg = "Seaborn not found on computer, install it for " \
                       "better visualisation"
                 warnings.warn(msg)
-                self._SEABORN_WARNED = False
+                self._SEABORN_WARNED = True
         #  Rational
         if axis is None:
             ax = plt.gca()
@@ -242,12 +244,28 @@ class Snapshot():
             ax.plot(x, y_bff, "r-", label=f"Fitted {func_label}", zorder=2)
         #  Histogram
         if self.histogram is not None:
-            freq, bins = _cleared_arrays(self.histogram, tolerance)
+            weights, bins = _cleared_arrays(self.histogram, tolerance)
             ax2 = ax.twinx()
             ax2.set_yticks([])
-            grey_color = (0.5, 0.5, 0.5, 0.6)
-            ax2.bar(bins, freq, width=bins[1] - bins[0],
-                    color=grey_color, edgecolor=grey_color, alpha=0.4)
+            try:
+                import scipy.stats as sts
+                scipy_imported = True
+            except ImportError:
+                if not self._SCIPY_WARNED:
+                    msg = "Scipy not found on computer, install it for " \
+                        "better visualisation"
+                    warnings.warn(msg)
+                    scipy_imported = False
+                    self._SCIPY_WARNED = True
+            if self.use_kde and scipy_imported:
+                resamples = np.random.choice((bins[:-1] + bins[1:])/2, size=weights.sum(), p=weights[1:]/weights[1:].sum())
+                rkde = sts.gaussian_kde(resamples)
+                rcurv = rkde.pdf(bins)
+                ax2.plot(bins, rcurv, lw=1)
+                ax2.fill_between(bins, rcurv, alpha = 0.3)
+            else:
+                ax2.bar(bins, weights/weights.max(), width=bins[1] - bins[0], 
+                        linewidth=0, alpha=0.3)
             ax.set_zorder(ax2.get_zorder()+1) # put ax in front of ax2
             ax.patch.set_visible(False)
         # Other funcs
@@ -384,14 +402,22 @@ class Snapshot():
         return f"Snapshot ({self.name})"
 
 
-def _cleared_arrays(hist, tolerance=0.001):
-    freq, bins = hist.normalize()
-    first = (freq > tolerance).argmax()
-    last = - (freq > tolerance)[::-1].argmax()
-    if last == 0:
-        return freq[first:], bins[first:]
-    return freq[first:last], bins[first:last]
+# def _cleared_arrays(hist, tolerance=0.001):
+#     freq, bins = hist.normalize()
+#     first = (freq > tolerance).argmax()
+#     last = - (freq > tolerance)[::-1].argmax()
+#     if last == 0:
+#         return freq[first:], bins[first:]
+#     return freq[first:last], bins[first:last]
 
+def _cleared_arrays(hist, tolerance=0.001):
+    weights, bins = hist.weights, hist.bins
+    total = weights.sum()
+    first = (weights > tolerance*total).argmax()
+    last = - (weights > tolerance*total)[::-1].argmax()
+    if last == 0:
+        return weights[first:], bins[first:]
+    return weights[first:last], bins[first:last]
 
 def _repair_path(path):
     import os

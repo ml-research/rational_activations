@@ -301,7 +301,7 @@ class Rational(Rational_base, nn.Module):
             self.version = version
 
     def input_retrieve_mode(self, auto_stop=False, max_saves=1000,
-                            bin_width=0.01):
+                            bin_width=0.1):
         """
         Will retrieve the distribution of the input in self.distribution. \n
         This will slow down the function, as it has to retrieve the input \

@@ -6,7 +6,6 @@ This module allows you to create Rational Neural Networks using Learnable
 Rational activation functions. This base function is used by Pytorch,
 TensorFlow/Keras, and MXNET Rational Activation Functions.
 """
-import ipdb
 import matplotlib.pyplot as plt
 import numpy as np
 import warnings
@@ -18,6 +17,7 @@ from rational.utils.utils import Snapshot, _path_for_multiple, \
 class Rational_base():
     count = 0
     list = []
+    use_kde = True
 
     def __init__(self, name):
         super().__init__()
@@ -144,7 +144,7 @@ class Rational_base():
                     Default ``None``
         """
         snap = self.capture(returns=True)
-        snap.histogram = self.distribution
+        # snap.histogram = self.distribution
         if title is None:
             rats_names = [_erase_suffix(rat.name) for rat in self.list]
             if len(set(rats_names)) != 1:
@@ -415,14 +415,17 @@ class Rational_base():
                         ax.set_xlim([x_min, x_max])
                         ax.set_ylim([y_min, y_max])
                     for ax in axes.flatten()[len(cls.list):]:
-                        ax.remove()  # removes empty axes
+                        try:
+                            ax.remove()  # removes empty axes
+                        except KeyError:
+                            pass
                     buf = io.BytesIO()
                     fig.set_tight_layout(True)
                     plt.savefig(buf, format='png')
                     buf.seek(0)
                     gif_images.append(Image.open(buf))
                     for i, ax in enumerate(fig.axes):
-                        if i < len(axes.flatten()):
+                        if i < len(axes.flatten()) - 1:
                             ax.cla()
                         else:
                             ax.remove()

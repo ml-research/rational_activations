@@ -8,7 +8,7 @@ rat_i = Rational("identity")
 device = "cuda" if torch.cuda.is_available() else "cpu"
 criterion = torch.nn.MSELoss()
 
-optimizers = [torch.optim.SGD(rat.parameters(), lr=0.01, momentum=0.9)
+optimizers = [torch.optim.Adam(rat.parameters(), lr=0.01, momentum=0.9)
               for rat in Rational.list]
 
 capturing_epochs = [0, 1, 2, 4, 8, 16, 32, 64, 99, 149, 199]
