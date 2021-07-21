@@ -56,8 +56,12 @@ class Rational(Rational_base, HybridBlock):
     """
 
     def __init__(self, approx_func='leaky_relu', degrees=(5, 4), cuda=False,
-                 version='A', trainable=True, **kwargs):
-        super(Rational, self).__init__(**kwargs)
+                 version='A', trainable=True, name=None, **kwargs):
+        
+        if name is None:
+            name = approx_func
+            super().__init__(name)
+        # super(Rational, self).__init__(**kwargs)
 
         # read initial parameter configuration from external files
         w_numerator, w_denominator = get_parameters(
@@ -121,3 +125,7 @@ class Rational(Rational_base, HybridBlock):
         rational_n.numerator = self.numerator.data().asnumpy().tolist()
         rational_n.denominator = self.denominator.data().asnumpy().tolist()
         return rational_n
+
+    @property
+    def device(self):
+        return str(mx.context.current_context())

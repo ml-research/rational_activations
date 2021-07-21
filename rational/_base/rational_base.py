@@ -27,9 +27,9 @@ class Rational_base():
         self.best_fitted_function_params = None
         self.snapshot_list = list()
         self._verbose = True
-        if name in [rat.name for rat in self.list]:
+        if name in [rat.func_name for rat in self.list]:
             name = _increment_string(name)
-        self.name = name
+        self.func_name = name
         Rational_base.count += 1
         Rational_base.list.append(self)
 
@@ -146,9 +146,9 @@ class Rational_base():
         snap = self.capture(returns=True)
         # snap.histogram = self.distribution
         if title is None:
-            rats_names = [_erase_suffix(rat.name) for rat in self.list]
+            rats_names = [_erase_suffix(rat.func_name) for rat in self.list]
             if len(set(rats_names)) != 1:
-                title = self.name
+                title = self.func_name
         if axis is None:
             fig = snap.show(x, fitted_function, other_func, display, tolerance,
                             title)

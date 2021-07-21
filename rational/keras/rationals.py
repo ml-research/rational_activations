@@ -56,8 +56,10 @@ class Rational(Rational_base, Layer):
             Rational layer
     """
     def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=False, version="A",
-                 trainable=True):
-        super().__init__()
+                 trainable=True, name=None):
+        if name is None:
+            name = approx_func
+        super().__init__(name)
 
         w_numerator, w_denominator = get_parameters(version, degrees, approx_func)
 
@@ -128,3 +130,7 @@ class Rational(Rational_base, Layer):
         rational_n.numerator = self.numerator.numpy().tolist()
         rational_n.denominator = self.denominator.numpy().tolist()
         return rational_n
+
+    @property
+    def device(self):
+        return self.numerator.device.split("device:")[-1]
