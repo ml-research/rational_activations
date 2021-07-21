@@ -106,7 +106,7 @@ For any other combinaison of python, please install from source:
 If you encounter any trouble installing rational, please contact [this person](quentin.delfosse@cs.tu-darmstadt.de).
 
 ## 4. Using Rational in Neural Networks
-
+Please also check [the documentation](https://rational-activations.readthedocs.io/en/latest/) :notebook_with_decorative_cover:	
 Rational can be integrated in the same way as any other common activation function.
 
 ~~~~
