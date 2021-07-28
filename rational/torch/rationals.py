@@ -347,7 +347,7 @@ class Rational(Rational_base, nn.Module):
         self._handle_retrieve_mode = None
 
     @classmethod
-    def save_all_inputs(self, save):
+    def save_all_inputs(self, save, bin_width="auto"):
         """
         Have every rational save every input.
 
@@ -355,11 +355,17 @@ class Rational(Rational_base, nn.Module):
                 save (bool):
                     If True, every instanciated rational function will \
                     retrieve its input, else, it won't.
+                bin_width (float or "auto"):
+                    The size of the histogram's bin width to store the input \
+                    in.\n
+                    If `"auto"`, then automatically determines the bin width \
+                    to have ~100 bins.\n
+                    Default ``"auto"``
         """
         if save:
             for rat in self.list:
                 rat._saving_input = True
-                rat.input_retrieve_mode()
+                rat.input_retrieve_mode(bin_width=bin_width)
         else:
             for rat in self.list:
                 rat._saving_input = False
@@ -533,12 +539,12 @@ class EmbeddedRational(nn.Module):
             rat = Rational(*args, **kwargs)
             self.add_module(f"rat_{i}", rat)
             self.successive_rats.append(rat)
-    
+
     def forward(self, x):
         for rat in self.successive_rats:
             x = rat(x)
         return x
-    
+
     def _apply(self, fn):
         for rat in self.successive_rats:
             for clos in fn.__closure__:
@@ -674,4 +680,3 @@ def _save_input_auto_stop(self, input, output):
     self.distribution.fill_n(input[0])
     if self.inputs_saved > self._max_saves:
         self.training_mode()
-

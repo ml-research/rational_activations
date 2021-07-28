@@ -6,24 +6,38 @@ class Histogram():
     """
     Input Histograms, used to retrieve the input of Rational Activations
     """
-    def __init__(self, bin_size=0.01, random_select=False):
+    def __init__(self, bin_size="auto", random_select=False):
         self.bins = cp.array([])
         self.weights = cp.array([], dtype=cp.uint32)
-        self.bin_size = bin_size
         self._empty = True
-        self._rd = int(cp.log10(1./bin_size).item())
         self._verbose = False
+        if bin_size == "auto":
+            self._auto_bs = True
+            self.bin_size = 0.0001
+            self._rd = 4
+        else:
+            self._auto_bs = False
+            self.bin_size = bin_size
+            self._rd = int(cp.log10(1./bin_size).item())
 
     def fill_n(self, input):
         self._update_hist(cp.fromDlpack(to_dlpack(input)))
 
     def _update_hist(self, new_input):
-        range_ext = cp.around(new_input.min() - self.bin_size / 2, 1), \
-                    cp.around(new_input.max() + self.bin_size / 2, 1)
+        range_ext = cp.around(new_input.min() - self.bin_size / 2, self._rd), \
+                    cp.around(new_input.max() + self.bin_size / 2, self._rd)
         bins_array = cp.arange(range_ext[0], range_ext[1] + self.bin_size,
                                self.bin_size)
         weights, bins = cp.histogram(new_input, bins_array)
         if self._empty:
+            if self._auto_bs:
+                self._rd = int(cp.log10(1./(range_ext[1] - range_ext[0])).item()) + 2
+                self.bin_size = 1./(10**self._rd)
+                range_ext = cp.around(new_input.min() - self.bin_size / 2, self._rd), \
+                            cp.around(new_input.max() + self.bin_size / 2, self._rd)
+                bins_array = cp.arange(range_ext[0], range_ext[1] + self.bin_size,
+                                       self.bin_size)
+                weights, bins = cp.histogram(new_input, bins_array)
             self.weights, self.bins = weights, bins[:-1]
             self._empty = False
         else: #  update the hist

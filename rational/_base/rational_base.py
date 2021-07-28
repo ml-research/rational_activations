@@ -9,6 +9,7 @@ TensorFlow/Keras, and MXNET Rational Activation Functions.
 import matplotlib.pyplot as plt
 import numpy as np
 import warnings
+from tqdm import tqdm
 from rational.utils.utils import Snapshot, _path_for_multiple, \
     _get_auto_axis_layout, _get_frontiers, _erase_suffix, _increment_string, \
     _repair_path, _cleared_arrays
@@ -18,6 +19,7 @@ class Rational_base():
     count = 0
     list = []
     use_kde = True
+    _WARNED_EMPTY = False
 
     def __init__(self, name):
         super().__init__()
@@ -260,8 +262,10 @@ class Rational_base():
                     Default ``None``
         """
         if not len(self.snapshot_list):
-            print("Cannot use the last snapshot as the snapshot_list \
-                  is empty, making a capture with default params")
+            if not Rational_base._WARNED_EMPTY:
+                print("Cannot use the last snapshot as the snapshot_list "
+                      "is empty, making a capture with default params")
+                Rational_base._WARNED_EMPTY = True
             self.capture()
         snap = self.snapshot_list[snap_number]
         snap.save(path=path, other_func=other_func)
@@ -326,9 +330,9 @@ class Rational_base():
             fig.clf()
         else:
             path = _path_for_multiple(path, "graphs")
-            for i, rat in enumerate(cls.list):
+            for i, rat in enumerate(tqdm(cls.list, desc="Saving Rationals")):
                 pos = path.rfind(".")
-                new_path = f"{path[pos:]}_{i}{path[:pos]}"
+                new_path = f"{path[:pos]}_{i}{path[pos:]}"
                 rat.export_graph(new_path)
 
     @classmethod
@@ -436,7 +440,8 @@ class Rational_base():
                                    append_images=gif_images[1:], optimize=False)
             else:
                 path = _path_for_multiple(path, "graphs")
-                for i, rat in enumerate(cls.list):
+                bar_title = "Saving Rationals' evolutions"
+                for i, rat in enumerate(tqdm(cls.list, desc=bar_title)):
                     pos = path.rfind(".")
                     if pos > 0:
                         new_path = f"{path[pos:]}_{i}{path[:pos]}"
