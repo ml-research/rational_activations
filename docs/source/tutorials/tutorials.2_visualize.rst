@@ -66,6 +66,15 @@ we can also directly save the graphs instead of displaying it, by using the
 :meth:`~rational_torch.Rational.export_graph` and classmethod
 :meth:`~rational_torch.Rational.export_graphs` of our rational.
 
+You can also give your own axis to visualise all instanciated function on the
+same axis or chery pick the functions you want to vizualize on the same graph:
+
+.. literalinclude:: code/visualize.py
+  :lines: 29-42
+
+.. image:: images/on_one_axis.png
+  :width: 600
+
 Visualise the functions' evolutions through learning
 ----------------------------------------------------
 
@@ -89,7 +98,16 @@ For the **pytorch version** of Rational activations, we can use the classmethod
 :meth:`~rational_torch.Rational.save_all_inputs` to save the input distribution.
 
 .. literalinclude:: code/visualize2.py
-  :lines: 29-45
+  :lines: 30-46
 
 .. image:: images/rationals_evolution_with_input.gif
+  :width: 600
+
+If you want to see histograms instead of the KDE of it, you can use the
+:attr:`use_kde` of the :class:`~rational_torch.Rational` class:
+
+.. literalinclude:: code/visualize2.py
+  :lines: 29
+
+.. image:: images/rationals_evolution_with_input_hist.gif
   :width: 600

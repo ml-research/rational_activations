@@ -69,12 +69,11 @@ class Rational_base():
                     If not None, a title for the figure
                     Default ``None``
                 axes (matplotlib.pyplot.axis):
-                    axes to be plotted on. If None, creates them automatically \
-                    (see `layout`).
+                    On ax or a list of axes to be plotted on. \n
+                    If None, creates them automatically (see `layout`). \n
                     Default ``None``
                 layout (tuple or 'auto'):
-                    Grid layout of the figure. If "auto", one is generated.\
-                    (see `layout`).
+                    Grid layout of the figure. If "auto", one is generated.\n
                     Default ``"auto"``
         """
         if axes is None:
@@ -99,11 +98,14 @@ class Rational_base():
             for ax in axes.flatten()[len(cls.list):]:
                 ax.remove()
             axes = axes[:len(cls.list)]
+        elif isinstance(axes, plt.Axes):
+            axes = np.array([axes for _ in range(len(cls.list))])
+            fig = plt.gcf()
         for rat, ax in zip(cls.list, axes.flatten()):
             rat.show(x, fitted_function, other_func, False, tolerance,
-                     None, axis=ax)
-        if title is not None:
-            fig.suptitle(title, y=1.02)
+                     title, axis=ax)
+        # if title is not None:
+        #     fig.suptitle(title, y=1.02)
         fig.tight_layout()
         if display:
             plt.legend()
@@ -156,8 +158,6 @@ class Rational_base():
                             title)
             if not display:
                 return fig
-            else:
-                fig.show()
         else:
             snap.show(x, fitted_function, other_func, display, tolerance,
                       title, axis=axis)

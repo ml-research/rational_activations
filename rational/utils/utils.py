@@ -153,6 +153,7 @@ class Snapshot():
         self.use_kde = rational.use_kde
         self.range = None
         self.histogram = None
+        self.rat_name = rational.func_name
         if rational.distribution is not None and \
            not rational.distribution.is_empty:
             from copy import deepcopy
@@ -233,7 +234,7 @@ class Snapshot():
             ax = plt.gca()
         else:
             ax = axis
-        ax.plot(x, y_rat, label="Rational", zorder=2)
+        ax.plot(x, y_rat, label=f"{self.rat_name}", zorder=2)
         if fitted_function and self.best_fitted_function is not None:
             if '__name__' in dir(self.best_fitted_function):
                 func_label = self.best_fitted_function.__name__
