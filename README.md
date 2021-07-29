@@ -120,6 +120,8 @@ model = torch.nn.Sequential(
 )
 ~~~~
 
+Please also check [the documentation :notebook_with_decorative_cover:	](https://rational-activations.readthedocs.io/en/latest/) 
+
 ## 5. Cite Us in your paper
 ```
 @inproceedings{molina2019pade,

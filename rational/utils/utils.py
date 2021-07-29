@@ -153,6 +153,7 @@ class Snapshot():
         self.use_kde = rational.use_kde
         self.range = None
         self.histogram = None
+        self.rat_name = rational.func_name
         if rational.distribution is not None and \
            not rational.distribution.is_empty:
             from copy import deepcopy
@@ -233,7 +234,7 @@ class Snapshot():
             ax = plt.gca()
         else:
             ax = axis
-        ax.plot(x, y_rat, label="Rational", zorder=2)
+        ax.plot(x, y_rat, label=f"{self.rat_name}", zorder=2)
         if fitted_function and self.best_fitted_function is not None:
             if '__name__' in dir(self.best_fitted_function):
                 func_label = self.best_fitted_function.__name__
@@ -258,13 +259,18 @@ class Snapshot():
                     scipy_imported = False
                     self._SCIPY_WARNED = True
             if self.use_kde and scipy_imported:
-                resamples = np.random.choice((bins[:-1] + bins[1:])/2, size=weights.sum(), p=weights[1:]/weights[1:].sum())
-                rkde = sts.gaussian_kde(resamples)
-                rcurv = rkde.pdf(bins)
-                ax2.plot(bins, rcurv, lw=1)
-                ax2.fill_between(bins, rcurv, alpha = 0.3)
+                if len(bins) > 5:
+                    resamples = np.random.choice((bins[:-1] + bins[1:])/2, size=weights.sum(), p=weights[1:]/weights[1:].sum())
+                    rkde = sts.gaussian_kde(resamples)
+                    rcurv = rkde.pdf(bins)
+                    ax2.plot(bins, rcurv, lw=1)
+                    ax2.fill_between(bins, rcurv, alpha = 0.3)
+                else:
+                    print("The bin size is too big, bins contain too few "
+                          "elements.\nbins:", bins)
+                    ax2.bar([], []) # in case of remove needed
             else:
-                ax2.bar(bins, weights/weights.max(), width=bins[1] - bins[0], 
+                ax2.bar(bins, weights/weights.max(), width=bins[1] - bins[0],
                         linewidth=0, alpha=0.3)
             ax.set_zorder(ax2.get_zorder()+1) # put ax in front of ax2
             ax.patch.set_visible(False)
@@ -295,7 +301,7 @@ class Snapshot():
                 plt.show()
             else:
                 return plt.gcf()
-    
+
     def borders(self, x=None, fitted_function=True, other_func=None,
                 tolerance=0.001):
         """
@@ -458,7 +464,7 @@ def _erase_suffix(string):
         return string
 
 
-def _get_frontiers(snapshot_list, other_func=None, fitted_function=True, 
+def _get_frontiers(snapshot_list, other_func=None, fitted_function=True,
                    tolerance=0.001):
     x_min, x_max, y_min, y_max = np.inf, -np.inf, np.inf, -np.inf
     for snap in snapshot_list:

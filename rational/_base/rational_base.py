@@ -9,6 +9,7 @@ TensorFlow/Keras, and MXNET Rational Activation Functions.
 import matplotlib.pyplot as plt
 import numpy as np
 import warnings
+from tqdm import tqdm
 from rational.utils.utils import Snapshot, _path_for_multiple, \
     _get_auto_axis_layout, _get_frontiers, _erase_suffix, _increment_string, \
     _repair_path, _cleared_arrays
@@ -18,6 +19,7 @@ class Rational_base():
     count = 0
     list = []
     use_kde = True
+    _WARNED_EMPTY = False
 
     def __init__(self, name):
         super().__init__()
@@ -27,9 +29,9 @@ class Rational_base():
         self.best_fitted_function_params = None
         self.snapshot_list = list()
         self._verbose = True
-        if name in [rat.name for rat in self.list]:
+        if name in [rat.func_name for rat in self.list]:
             name = _increment_string(name)
-        self.name = name
+        self.func_name = name
         Rational_base.count += 1
         Rational_base.list.append(self)
 
@@ -67,12 +69,11 @@ class Rational_base():
                     If not None, a title for the figure
                     Default ``None``
                 axes (matplotlib.pyplot.axis):
-                    axes to be plotted on. If None, creates them automatically \
-                    (see `layout`).
+                    On ax or a list of axes to be plotted on. \n
+                    If None, creates them automatically (see `layout`). \n
                     Default ``None``
                 layout (tuple or 'auto'):
-                    Grid layout of the figure. If "auto", one is generated.\
-                    (see `layout`).
+                    Grid layout of the figure. If "auto", one is generated.\n
                     Default ``"auto"``
         """
         if axes is None:
@@ -97,11 +98,14 @@ class Rational_base():
             for ax in axes.flatten()[len(cls.list):]:
                 ax.remove()
             axes = axes[:len(cls.list)]
+        elif isinstance(axes, plt.Axes):
+            axes = np.array([axes for _ in range(len(cls.list))])
+            fig = plt.gcf()
         for rat, ax in zip(cls.list, axes.flatten()):
             rat.show(x, fitted_function, other_func, False, tolerance,
-                     None, axis=ax)
-        if title is not None:
-            fig.suptitle(title, y=1.02)
+                     title, axis=ax)
+        # if title is not None:
+        #     fig.suptitle(title, y=1.02)
         fig.tight_layout()
         if display:
             plt.legend()
@@ -146,16 +150,14 @@ class Rational_base():
         snap = self.capture(returns=True)
         # snap.histogram = self.distribution
         if title is None:
-            rats_names = [_erase_suffix(rat.name) for rat in self.list]
+            rats_names = [_erase_suffix(rat.func_name) for rat in self.list]
             if len(set(rats_names)) != 1:
-                title = self.name
+                title = self.func_name
         if axis is None:
             fig = snap.show(x, fitted_function, other_func, display, tolerance,
                             title)
             if not display:
                 return fig
-            else:
-                fig.show()
         else:
             snap.show(x, fitted_function, other_func, display, tolerance,
                       title, axis=axis)
@@ -260,8 +262,10 @@ class Rational_base():
                     Default ``None``
         """
         if not len(self.snapshot_list):
-            print("Cannot use the last snapshot as the snapshot_list \
-                  is empty, making a capture with default params")
+            if not Rational_base._WARNED_EMPTY:
+                print("Cannot use the last snapshot as the snapshot_list "
+                      "is empty, making a capture with default params")
+                Rational_base._WARNED_EMPTY = True
             self.capture()
         snap = self.snapshot_list[snap_number]
         snap.save(path=path, other_func=other_func)
@@ -326,9 +330,9 @@ class Rational_base():
             fig.clf()
         else:
             path = _path_for_multiple(path, "graphs")
-            for i, rat in enumerate(cls.list):
+            for i, rat in enumerate(tqdm(cls.list, desc="Saving Rationals")):
                 pos = path.rfind(".")
-                new_path = f"{path[pos:]}_{i}{path[:pos]}"
+                new_path = f"{path[:pos]}_{i}{path[pos:]}"
                 rat.export_graph(new_path)
 
     @classmethod
@@ -436,7 +440,8 @@ class Rational_base():
                                    append_images=gif_images[1:], optimize=False)
             else:
                 path = _path_for_multiple(path, "graphs")
-                for i, rat in enumerate(cls.list):
+                bar_title = "Saving Rationals' evolutions"
+                for i, rat in enumerate(tqdm(cls.list, desc=bar_title)):
                     pos = path.rfind(".")
                     if pos > 0:
                         new_path = f"{path[pos:]}_{i}{path[:pos]}"
