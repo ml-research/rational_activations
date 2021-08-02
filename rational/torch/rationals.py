@@ -343,11 +343,13 @@ class Rational(Rational_base, nn.Module):
         Stops retrieving the distribution of the input in `self.distribution`.
         """
         # print("Training mode, no longer retrieving the input.")
-        self._handle_retrieve_mode.remove()
-        self._handle_retrieve_mode = None
+        if self._handle_retrieve_mode is not None:
+            self._handle_retrieve_mode.remove()
+            self._handle_retrieve_mode = None
 
     @classmethod
-    def save_all_inputs(self, save, bin_width="auto"):
+    def save_all_inputs(self, save, auto_stop=False, max_saves=10000,
+                        bin_width="auto"):
         """
         Have every rational save every input.
 
@@ -355,6 +357,15 @@ class Rational(Rational_base, nn.Module):
                 save (bool):
                     If True, every instanciated rational function will \
                     retrieve its input, else, it won't.
+                auto_stop (bool):
+                    If True, the retrieving will stop after `max_saves` \
+                    calls to forward.\n
+                    Else, use :meth:`torch.Rational.training_mode`.\n
+                    Default ``True``
+                max_saves (int):
+                    The range on which the curves of the functions are fitted \
+                    together.\n
+                    Default ``10000``
                 bin_width (float or "auto"):
                     The size of the histogram's bin width to store the input \
                     in.\n
@@ -365,7 +376,8 @@ class Rational(Rational_base, nn.Module):
         if save:
             for rat in self.list:
                 rat._saving_input = True
-                rat.input_retrieve_mode(bin_width=bin_width)
+                rat.input_retrieve_mode(auto_stop, max_saves,
+                                        bin_width=bin_width)
         else:
             for rat in self.list:
                 rat._saving_input = False
@@ -525,20 +537,28 @@ class RationalNonSafe(Rational_base, nn.Module):
         clf.fit(np.array(), y)
 
 
-class EmbeddedRational(nn.Module):
+class EmbeddedRational(Rational, nn.Module):
     nb_rats = 2
+    list = []
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=None,
+                 version="A", *args, **kwargs):
         if not Rational.warned:
             print("\n\n\nUsing Embedded Rationals\n\n\n")
             Rational.warned = True
 
-        super().__init__()
+        super().__init__(approx_func)
+        self.init_approximation = approx_func
+        self.degrees=degrees
+        self.cuda = cuda
+        self.version = version
         self.successive_rats = []
         for i in range(self.nb_rats):
-            rat = Rational(*args, **kwargs)
+            rat = Rational(approx_func, degrees, cuda, version, *args,
+                           **kwargs)
             self.add_module(f"rat_{i}", rat)
             self.successive_rats.append(rat)
+        self.list.append(self)
 
     def forward(self, x):
         for rat in self.successive_rats:
@@ -553,6 +573,25 @@ class EmbeddedRational(nn.Module):
                     rat.device = device
                     break
         return super()._apply(fn)
+
+    def numpy(self):
+        from rational.numpy import EmbeddedRational as ERational_numpy
+        ERational_numpy.nb_rats = self.nb_rats
+        erational_n = ERational_numpy(self.init_approximation, self.degrees,
+                                      self.version)
+        for trat, nrat in zip(self.successive_rats, erational_n.successive_rats):
+            nrat.numerator = trat.numerator.tolist()
+            nrat.denominator = trat.denominator.tolist()
+        return erational_n
+
+    def __repr__(self):
+        return (f"Embedded Rational Activation Function (PYTORCH version "
+                f"{self.version}) of degrees {self.degrees} running on "
+                f"{self.device}")
+
+    # @property()
+    # def list(self):
+
 
 class RecurrentRational():
     """
@@ -628,7 +667,7 @@ class RecurrentRationalModule(nn.Module):
     def fit(self, function, x=None, show=False):
         return self.rational.fit(function=function, x=x, show=show)
 
-    def input_retrieve_mode(self, auto_stop=True, max_saves=1000,
+    def input_retrieve_mode(self, auto_stop=True, max_saves=10000,
                             bin_width=0.01):
         """
         Will retrieve the distribution of the input in self.distribution. \n
@@ -644,7 +683,7 @@ class RecurrentRationalModule(nn.Module):
                 max_saves (int):
                     The range on which the curves of the functions are fitted \
                     together.\n
-                    Default ``1000``
+                    Default ``10000``
         """
         if self._handle_retrieve_mode is not None:
             # print("Already in retrieve mode")

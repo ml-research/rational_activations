@@ -170,6 +170,27 @@ class Rational():
         else:
             return plt.gcf()
 
+class EmbeddedRational():
+    nb_rats = 2
+
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        self.successive_rats = []
+        for i in range(self.nb_rats):
+            rat = Rational(*args, **kwargs)
+            self.successive_rats.append(rat)
+
+    def __call__(self, x):
+        if type(x) is int:
+            x = float(x)
+        for srat in self.successive_rats:
+            x = srat.activation_function(x, srat.numerator, srat.denominator)
+        return x
+
+    def __repr__(self):
+        return (f"EmbeddedRational Activation Function (Numpy version "
+                f"{self.version}) of degrees {self.degrees}")
+
 
 def Rational_version_A(x, w_array, d_array):
     xi = np.ones_like(x)

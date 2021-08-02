@@ -429,7 +429,7 @@ class Rational_base():
                     buf.seek(0)
                     gif_images.append(Image.open(buf))
                     for i, ax in enumerate(fig.axes):
-                        if i < len(axes.flatten()) - 1:
+                        if i <= len(axes.flatten()):
                             ax.cla()
                         else:
                             ax.remove()
@@ -444,7 +444,7 @@ class Rational_base():
                 for i, rat in enumerate(tqdm(cls.list, desc=bar_title)):
                     pos = path.rfind(".")
                     if pos > 0:
-                        new_path = f"{path[pos:]}_{i}{path[:pos]}"
+                        new_path = f"{path[:pos]}_{i}{path[pos:]}"
                     else:
                         new_path = f"{path}_{i}"
                     rat.export_evolution_graph(new_path, True, other_func)
