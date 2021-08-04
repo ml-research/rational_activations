@@ -9,6 +9,7 @@ import torch
 from torch._C import device
 import torch.nn as nn
 from torch.cuda import is_available as torch_cuda_available
+import warnings
 from rational.utils.get_weights import get_parameters
 from rational._base.rational_base import Rational_base
 from rational.torch.rational_pytorch_functions import Rational_PYTORCH_A_F, \
@@ -541,13 +542,15 @@ class EmbeddedRational(Rational, nn.Module):
     nb_rats = 2
     list = []
 
-    def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=None,
+    def __init__(self, approx_func="leaky_relu", degrees=(3, 2), cuda=None,
                  version="A", *args, **kwargs):
         if not Rational.warned:
-            print("\n\n\nUsing Embedded Rationals\n\n\n")
             Rational.warned = True
 
-        super().__init__(approx_func)
+        super().__init__(approx_func, degrees)
+        if approx_func == "leaky_relu":
+            approx_func += "_0.1"
+            warnings.warn("Using a leaky_relu_0.1 to make EmbeddedRational approx leaky_relu")
         self.init_approximation = approx_func
         self.degrees=degrees
         self.cuda = cuda
@@ -559,6 +562,10 @@ class EmbeddedRational(Rational, nn.Module):
             self.add_module(f"rat_{i}", rat)
             self.successive_rats.append(rat)
         self.list.append(self)
+        del self.numerator
+        del self.denominator
+        self.numerators = [rat.numerator for rat in self.successive_rats]
+        self.denominators = [rat.denominator for rat in self.successive_rats]
 
     def forward(self, x):
         for rat in self.successive_rats:
