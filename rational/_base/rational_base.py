@@ -409,6 +409,8 @@ class Rational_base():
                 else:
                     figs = tuple(np.flip(np.array(layout) * (4, 6)))
                     fig, axes = plt.subplots(*layout, figsize=figs)
+                for ax in axes.flatten()[len(cls.list):]:
+                    ax.remove()  # removes empty axes
                 for i in range(nb_sn):
                     for rat, ax, lim in zip(cls.list, axes.flatten(), limits):
                         x_min, x_max, y_min, y_max = lim
@@ -418,18 +420,13 @@ class Rational_base():
                                   display=False, axis=ax)
                         ax.set_xlim([x_min, x_max])
                         ax.set_ylim([y_min, y_max])
-                    for ax in axes.flatten()[len(cls.list):]:
-                        try:
-                            ax.remove()  # removes empty axes
-                        except KeyError:
-                            pass
                     buf = io.BytesIO()
                     fig.set_tight_layout(True)
                     plt.savefig(buf, format='png')
                     buf.seek(0)
                     gif_images.append(Image.open(buf))
                     for i, ax in enumerate(fig.axes):
-                        if i <= len(axes.flatten()):
+                        if i < len(cls.list):
                             ax.cla()
                         else:
                             ax.remove()

@@ -260,11 +260,9 @@ class Snapshot():
                     self._SCIPY_WARNED = True
             if self.use_kde and scipy_imported:
                 if len(bins) > 5:
-                    resamples = np.random.choice((bins[:-1] + bins[1:])/2, size=weights.sum(), p=weights[1:]/weights[1:].sum())
-                    rkde = sts.gaussian_kde(resamples)
-                    rcurv = rkde.pdf(bins)
-                    ax2.plot(bins, rcurv, lw=1)
-                    ax2.fill_between(bins, rcurv, alpha = 0.3)
+                    kde_curv = self.histogram.kde()(bins)
+                    ax2.plot(bins, kde_curv, lw=1)
+                    ax2.fill_between(bins, kde_curv, alpha = 0.3)
                 else:
                     print("The bin size is too big, bins contain too few "
                           "elements.\nbins:", bins)

@@ -559,7 +559,7 @@ class EmbeddedRational(Rational, nn.Module):
         for i in range(self.nb_rats):
             rat = Rational(approx_func, degrees, cuda, version, *args,
                            **kwargs)
-            self.add_module(f"rat_{i}", rat)
+            self.add_module(f"rational_{i}", rat)
             self.successive_rats.append(rat)
         self.list.append(self)
         del self.numerator
