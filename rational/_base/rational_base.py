@@ -8,18 +8,18 @@ TensorFlow/Keras, and MXNET Rational Activation Functions.
 """
 import matplotlib.pyplot as plt
 import numpy as np
-import warnings
 from tqdm import tqdm
 from rational.utils.utils import Snapshot, _path_for_multiple, \
     _get_auto_axis_layout, _get_frontiers, _erase_suffix, _increment_string, \
     _repair_path, _cleared_arrays
+from rational.utils.warnings import RationalWarning, \
+    RationalImportSeabornWarning
 
 
 class Rational_base():
     count = 0
     list = []
     use_kde = True
-    _WARNED_EMPTY = False
 
     def __init__(self, name):
         super().__init__()
@@ -88,11 +88,7 @@ class Rational_base():
                 with sns.axes_style("whitegrid"):
                     fig, axes = plt.subplots(*layout)
             except ImportError:
-                if not Snapshot._SEABORN_WARNED:
-                    msg = "Seaborn not found on computer, install it " \
-                          "for better visualisation"
-                    warnings.warn(msg)
-                    Snapshot._SEABORN_WARNED = True
+                RationalImportSeabornWarning.warn()
                 fig, axes = plt.subplots(*layout)
             # if display:
             for ax in axes.flatten()[len(cls.list):]:
@@ -262,10 +258,9 @@ class Rational_base():
                     Default ``None``
         """
         if not len(self.snapshot_list):
-            if not Rational_base._WARNED_EMPTY:
-                print("Cannot use the last snapshot as the snapshot_list "
-                      "is empty, making a capture with default params")
-                Rational_base._WARNED_EMPTY = True
+            mes =("Cannot use the last snapshot as the snapshot_list "
+                  "is empty, making a capture with default params")
+            RationalWarning.warn(mes)
             self.capture()
         snap = self.snapshot_list[snap_number]
         snap.save(path=path, other_func=other_func)
@@ -316,11 +311,7 @@ class Rational_base():
                 with sns.axes_style("whitegrid"):
                     fig, axes = plt.subplots(*layout)
             except ImportError:
-                if not Snapshot._SEABORN_WARNED:
-                    msg = "Seaborn not found on computer, install it " \
-                          "for better visualisation"
-                    warnings.warn(msg)
-                    Snapshot._SEABORN_WARNED = True
+                RationalImportSeabornWarning.warn()
             for rat, ax in zip(cls.list, axes.flatten()):
                 snap = rat.snapshot_list[snap_number]
                 snap.show(display=False, axis=ax, other_func=other_func)
@@ -372,7 +363,7 @@ class Rational_base():
                 if any([len(rat.snapshot_list) != nb_sn for rat in cls.list]):
                     msg = "Seems that not all rationals have the same " \
                           "number of snapshots."
-                    warnings.warn(msg)
+                    RationalWarning.warn(msg)
                 import io
                 from PIL import Image
                 limits = []
@@ -397,11 +388,7 @@ class Rational_base():
                     import seaborn as sns
                 except ImportError:
                     seaborn_installed = False
-                    if not Snapshot._SEABORN_WARNED:
-                        msg = "Seaborn not found on computer, install it " \
-                              "for better visualisation"
-                        warnings.warn(msg)
-                        Snapshot._SEABORN_WARNED = True
+                    RationalImportSeabornWarning.warn()
                 if seaborn_installed:
                     with sns.axes_style("whitegrid"):
                         figs = tuple(np.flip(np.array(layout) * (4, 6)))
@@ -454,7 +441,7 @@ class Rational_base():
                 if any([len(rat.snapshot_list) != nb_sn for rat in cls.list]):
                     msg = "Seems that not all rationals have the " \
                           "same number of snapshots."
-                    warnings.warn(msg)
+                    RationalWarning.warn(msg)
                 for snap_number in range(nb_sn):
                     if "." in path:
                         ext = path.split(".")[-1]

@@ -1,10 +1,9 @@
-import warnings
 import numpy as np
 from numpy import zeros, inf
 import matplotlib.pyplot as plt
-# from numpy.lib.financial import ipmt
+from .warnings import RationalWarning, \
+    RationalImportSeabornWarning, RationalImportScipyWarning
 
-# np.random.seed(0)
 
 def _wrap_func(func, xdata, ydata, degrees):
     def func_wrapped(params):
@@ -68,8 +67,8 @@ def _curve_fit(f, xdata, ydata, degrees, version, p0=None, absolute_sigma=False,
             warn_cov = True
 
     if warn_cov:
-        warnings.warn('Covariance of the parameters could not be estimated',
-                      category=OptimizeWarning)
+        RationalWarning.warn('Covariance of the parameters could not be estimated',
+                             category=OptimizeWarning)
 
     if return_full:
         return popt, pcov, infodict, errmsg, ier
@@ -158,10 +157,8 @@ class Snapshot():
            not rational.distribution.is_empty:
             from copy import deepcopy
             self.histogram = deepcopy(rational.distribution)
-            if not Snapshot._HIST_WARNED:
-                msg = "Automatically clearing the distribution after snapshot"
-                warnings.warn(msg)
-                Snapshot._HIST_WARNED = True
+            msg = "Automatically clearing the distribution after snapshot"
+            RationalWarning.warn(msg)
             rational.clear_hist()
         if fitted_function and rational.distribution is not None:
             self.best_fitted_function = rational.best_fitted_function
@@ -224,11 +221,7 @@ class Snapshot():
             import seaborn as sns
             sns.set_style("whitegrid")
         except ImportError:
-            if not self._SEABORN_WARNED:
-                msg = "Seaborn not found on computer, install it for " \
-                      "better visualisation"
-                warnings.warn(msg)
-                self._SEABORN_WARNED = True
+            RationalImportSeabornWarning.warn()
         #  Rational
         if axis is None:
             ax = plt.gca()
@@ -252,12 +245,7 @@ class Snapshot():
                 import scipy.stats as sts
                 scipy_imported = True
             except ImportError:
-                if not self._SCIPY_WARNED:
-                    msg = "Scipy not found on computer, install it for " \
-                        "better visualisation"
-                    warnings.warn(msg)
-                    scipy_imported = False
-                    self._SCIPY_WARNED = True
+                RationalImportScipyWarning.warn()
             if self.use_kde and scipy_imported:
                 if len(bins) > 5:
                     kde_curv = self.histogram.kde()(bins)

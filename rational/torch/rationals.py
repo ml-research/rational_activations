@@ -9,8 +9,8 @@ import torch
 from torch._C import device
 import torch.nn as nn
 from torch.cuda import is_available as torch_cuda_available
-import warnings
 from rational.utils.get_weights import get_parameters
+from rational.utils.warnings import RationalWarning
 from rational._base.rational_base import Rational_base
 from rational.torch.rational_pytorch_functions import Rational_PYTORCH_A_F, \
     Rational_PYTORCH_B_F, Rational_PYTORCH_C_F, Rational_PYTORCH_D_F, \
@@ -56,7 +56,6 @@ class Rational(Rational_base, nn.Module):
     Returns:
         Module: Rational module
     """
-    warned = False
 
     def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=None,
                  version="A", trainable=True, train_numerator=True,
@@ -544,13 +543,12 @@ class EmbeddedRational(Rational, nn.Module):
 
     def __init__(self, approx_func="leaky_relu", degrees=(3, 2), cuda=None,
                  version="A", *args, **kwargs):
-        if not Rational.warned:
-            Rational.warned = True
 
         super().__init__(approx_func, degrees)
         if approx_func == "leaky_relu":
             approx_func += "_0.1"
-            warnings.warn("Using a leaky_relu_0.1 to make EmbeddedRational approx leaky_relu")
+            RationalWarning.warn("Using a leaky_relu_0.1 to make " \
+                                 "EmbeddedRational approx leaky_relu")
         self.init_approximation = approx_func
         self.degrees=degrees
         self.cuda = cuda
