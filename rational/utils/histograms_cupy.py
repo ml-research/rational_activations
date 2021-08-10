@@ -1,5 +1,6 @@
 import cupy as cp
 from torch.utils.dlpack import to_dlpack
+import scipy.stats as sts
 
 
 class Histogram():
@@ -87,6 +88,12 @@ class Histogram():
                    self.bins
         else:
             return self.__weights / self.__weights.sum(), self.__bins
+
+    def kde(self):
+        kde = sts.gaussian_kde(self.bins, bw_method=0.13797296614612148,
+                               weights=self.weights)
+        return kde.pdf
+
 
 
 def concat_hists(weights1, bins1, weights2, bins2, bin_size, rd):

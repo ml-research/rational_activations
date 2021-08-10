@@ -127,10 +127,10 @@ if is_torch_cuda_available():
     generate_cpp_kernels_module(fname='rational/_cuda/rational_cuda_kernels.cu', template_contents=template_contents)
 
 
-with open("README.md", "r") as fh:
+with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-with open("requirements.txt", "r") as fh:
+with open("requirements.txt", "r", encoding="utf-8") as fh:
     requirements = fh.readlines()
 
 

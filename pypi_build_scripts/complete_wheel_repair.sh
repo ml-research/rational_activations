@@ -13,9 +13,12 @@ case $PYTHON_V in
   python3.8)
     PY_V="38"
     ;;
+  python3.9)
+    PY_V="39"
+    ;;
   *)
     printf "Please provide a python in \$PYTHON_V
-            \npython3.6 or python3.7 or python3.8"
+            \npython3.6 or python3.7 or python3.8 or python3.9"
     exit 1
     ;;
 esac
@@ -29,11 +32,11 @@ function log () {
 }
 
 
-printf "auditwheel repairing\n"
-auditwheel -v repair --plat manylinux2014_x86_64 dist/rational_activations_$CUDA_CP*$PY_V*linux_x86_64.whl # Repairing the wheel and puting it inside wheelhouse
+printf "\n\n\nauditwheel repairing\n"
+auditwheel -v repair --plat manylinux_2_17_x86_64 dist/rational_activations*$PY_V*.whl # Repairing the wheel and puting it inside wheelhouse
 cd wheelhouse/
-$PYTHON_V -m wheel unpack rational_activations_$CUDA_CP-*$PY_V*.whl
-cd rational_activations_$CUDA_CP*/rational_activations*.libs/
+$PYTHON_V -m wheel unpack rational_activations*$PY_V*manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+cd rational_activations*/rational_activations*.libs/
 CORRUPTED_FILES_DIR='corrupted_files/'
 mkdir -p $CORRUPTED_FILES_DIR
 CORRUPTED_FILES=`find . -maxdepth 1 -type f | grep .so | sed 's/.\///g' `
@@ -85,12 +88,14 @@ do
 done
 rm -rf $CORRUPTED_FILES_DIR
 cd ../../
-rm rational_activations_$CUDA_CP-*$PY_V*-manylinux2014_x86_64.whl
+rm rational_activations-*$PY_V*-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
 Rational_WHEEL_DIR=`find . -maxdepth 1 -type d | grep rational_activations`
 $PYTHON_V -m wheel pack $Rational_WHEEL_DIR  # creates the new wheel
+wname=`ls rational_activations-0.2.1-*$PY_V*.whl`
+mv $wname "${wname/manylinux2014_x86_64.manylinux_2_17_x86_64/manylinux_2_17_x86_64.manylinux2014_x86_64}"
 rm -R `ls -1 -d rational_activations*/`  # removes the rational directory only
 mkdir -p $CUDA_V
-mv rational_activations_$CUDA_CP-*$PY_V*-manylinux2014_x86_64.whl $CUDA_V
+mv rational_activations-*$PY_V*-manylinux_2_17_x86_64.manylinux2014_x86_64.whl $CUDA_V
 cd $cwd
 
 unset TORCH_LIB CUDA_LIB PY_V  # To be sure they are reseted
