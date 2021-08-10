@@ -20,6 +20,7 @@ class Rational_base():
     count = 0
     list = []
     use_kde = True
+    _step = 0
 
     def __init__(self, name):
         super().__init__()
@@ -34,11 +35,12 @@ class Rational_base():
         self.func_name = name
         Rational_base.count += 1
         Rational_base.list.append(self)
+        self._step = 0
 
     @classmethod
     def show_all(cls, x=None, fitted_function=True, other_func=None,
                  display=True, tolerance=0.001, title=None, axes=None,
-                 layout="auto"):
+                 layout="auto", writer=None, step=None):
         """
         Shows a graph of the all instanciated rational functions (or returns \
         it if ``returns=True``).
@@ -75,6 +77,14 @@ class Rational_base():
                 layout (tuple or 'auto'):
                     Grid layout of the figure. If "auto", one is generated.\n
                     Default ``"auto"``
+                writer (tensorboardX.SummaryWriter):
+                    A tensorboardX writer to give the image to, in case of
+                    debugging.
+                    Default ``None``
+                step (int):
+                    A step/epoch for tensorboardX writer.
+                    If None, incrementing itself.
+                    Default ``None``
         """
         if axes is None:
             if layout == "auto":
@@ -83,13 +93,14 @@ class Rational_base():
             if len(layout) != 2:
                 msg = 'layout should be either "auto" or a tuple of size 2'
                 raise TypeError(msg)
+            figs = tuple(np.flip(np.array(layout) * (4, 6)))
             try:
                 import seaborn as sns
                 with sns.axes_style("whitegrid"):
-                    fig, axes = plt.subplots(*layout)
+                    fig, axes = plt.subplots(*layout, figsize=figs)
             except ImportError:
                 RationalImportSeabornWarning.warn()
-                fig, axes = plt.subplots(*layout)
+                fig, axes = plt.subplots(*layout, figsize=figs)
             # if display:
             for ax in axes.flatten()[len(cls.list):]:
                 ax.remove()
@@ -99,18 +110,23 @@ class Rational_base():
             fig = plt.gcf()
         for rat, ax in zip(cls.list, axes.flatten()):
             rat.show(x, fitted_function, other_func, False, tolerance,
-                     title, axis=ax)
+                     title, axis=ax, writer=writer, step=step)
         # if title is not None:
         #     fig.suptitle(title, y=1.02)
         fig.tight_layout()
-        if display:
+        if writer is not None:
+            if step is None:
+                step = cls._step
+                cls._step += 1
+            writer.add_figure(title, fig, step)
+        elif display:
             plt.legend()
             plt.show()
         else:
             return fig
 
     def show(self, x=None, fitted_function=True, other_func=None, display=True,
-             tolerance=0.001, title=None, axis=None):
+             tolerance=0.001, title=None, axis=None, writer=None, step=None):
         """
         Shows a graph of the function (or returns it if ``returns=True``).
 
@@ -142,6 +158,14 @@ class Rational_base():
                 axis (matplotlib.pyplot.axis):
                     axis to be plotted on. If None, creates one automatically.
                     Default ``None``
+                writer (tensorboardX.SummaryWriter):
+                    A tensorboardX writer to give the image to, in case of
+                    debugging.
+                    Default ``None``
+                step (int):
+                    A step/epoch for tensorboardX writer.
+                    If None, incrementing itself.
+                    Default ``None``
         """
         snap = self.capture(returns=True)
         # snap.histogram = self.distribution
@@ -152,7 +176,15 @@ class Rational_base():
         if axis is None:
             fig = snap.show(x, fitted_function, other_func, display, tolerance,
                             title)
-            if not display:
+            if writer is not None:
+                if step is None:
+                    step = self._step
+                    self._step += 1
+                try:
+                    writer.add_figure(title, fig, step)
+                except AttributeError:
+                    print("Could not use the given SummaryWriter to add the Rational figure")
+            elif not display:
                 return fig
         else:
             snap.show(x, fitted_function, other_func, display, tolerance,
@@ -306,10 +338,11 @@ class Rational_base():
             if len(layout) != 2:
                 msg = 'layout should be either "auto" or a tuple of size 2'
                 raise TypeError(msg)
+            figs = tuple(np.flip(np.array(layout) * (4, 6)))
             try:
                 import seaborn as sns
                 with sns.axes_style("whitegrid"):
-                    fig, axes = plt.subplots(*layout)
+                    fig, axes = plt.subplots(*layout, figsize=figs)
             except ImportError:
                 RationalImportSeabornWarning.warn()
             for rat, ax in zip(cls.list, axes.flatten()):

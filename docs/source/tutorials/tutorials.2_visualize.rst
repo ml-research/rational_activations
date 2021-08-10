@@ -1,5 +1,5 @@
-Visualise the functions
-=======================
+Visualise and debug the functions
+=================================
 
 In this tutorial, we are going to visualise Rational Functions.
 
@@ -111,3 +111,24 @@ If you want to see histograms instead of the KDE of it, you can use the
 
 .. image:: images/rationals_evolution_with_input_hist.gif
   :width: 600
+
+Use a tensorboardX SummaryWriter to plot the evolutions
+-------------------------------------------------------
+
+You can also follow the learning of your functions by looking at evolutions
+of the function in a tensorboardX.SummaryWriter, to do so, give the writer to
+the :meth:`~rational_torch.Rational.show` or
+:meth:`~rational_torch.Rational.show_all` method and the evolution of the
+rational functions' shapes will be provided to the tensorboard webpage.
+
+An example code is:
+
+.. literalinclude:: code/visualize2.py
+  :lines: 1 - 23
+
+Provides on tensorboard webpage:
+
+.. image:: images/rats_in_tb.gif
+  :width: 600
+
+The code is taken from the `Rational_RL repository<https://github.com/ml-research/rational_rl>`_
