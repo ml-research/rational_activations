@@ -93,7 +93,7 @@ class Rational_base():
             if len(layout) != 2:
                 msg = 'layout should be either "auto" or a tuple of size 2'
                 raise TypeError(msg)
-            figs = tuple(np.flip(np.array(layout) * (4, 6)))
+            figs = tuple(np.flip(np.array(layout)* (2, 3)))
             try:
                 import seaborn as sns
                 with sns.axes_style("whitegrid"):
@@ -338,7 +338,7 @@ class Rational_base():
             if len(layout) != 2:
                 msg = 'layout should be either "auto" or a tuple of size 2'
                 raise TypeError(msg)
-            figs = tuple(np.flip(np.array(layout) * (4, 6)))
+            figs = tuple(np.flip(np.array(layout) * (2, 3)))
             try:
                 import seaborn as sns
                 with sns.axes_style("whitegrid"):
@@ -424,10 +424,10 @@ class Rational_base():
                     RationalImportSeabornWarning.warn()
                 if seaborn_installed:
                     with sns.axes_style("whitegrid"):
-                        figs = tuple(np.flip(np.array(layout) * (4, 6)))
+                        figs = tuple(np.flip(np.array(layout)* (2, 3)))
                         fig, axes = plt.subplots(*layout, figsize=figs)
                 else:
-                    figs = tuple(np.flip(np.array(layout) * (4, 6)))
+                    figs = tuple(np.flip(np.array(layout)* (2, 3)))
                     fig, axes = plt.subplots(*layout, figsize=figs)
                 for ax in axes.flatten()[len(cls.list):]:
                     ax.remove()  # removes empty axes
