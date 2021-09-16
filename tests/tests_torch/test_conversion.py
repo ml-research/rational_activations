@@ -117,3 +117,21 @@ def test_conversion_cpu_to_gpuD():
     new_res = rational(cuda_inp).clone().detach().cpu().numpy()
     coherent_compute = np.all(np.isclose(new_res, expected_res, atol=5e-02))
     assert params and cpu_f and coherent_compute
+
+
+def test_conversion_memory_consistency():
+    rational = Rational()
+    ori_nume_address = hex(id(rational.numerator))
+    ori_deno_address = hex(id(rational.denominator))
+    rational.cpu()
+    assert ori_nume_address == hex(id(rational.numerator))
+    assert ori_deno_address == hex(id(rational.denominator))
+    rational.cuda()
+    assert ori_nume_address == hex(id(rational.numerator))
+    assert ori_deno_address == hex(id(rational.denominator))
+    rational.to("cpu")
+    assert ori_nume_address == hex(id(rational.numerator))
+    assert ori_deno_address == hex(id(rational.denominator))
+    rational.to("cuda")
+    assert ori_nume_address == hex(id(rational.numerator))
+    assert ori_deno_address == hex(id(rational.denominator))
