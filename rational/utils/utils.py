@@ -160,7 +160,8 @@ class Snapshot():
             msg = "Automatically clearing the distribution after snapshot"
             RationalWarning.warn(msg)
             rational.clear_hist()
-        if fitted_function and rational.distribution is not None:
+        if fitted_function and rational.distribution is not None \
+            and "best_fitted_function" in dir(rational):
             self.best_fitted_function = rational.best_fitted_function
             self.best_fitted_function_params = \
                 rational.best_fitted_function_params

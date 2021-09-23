@@ -345,6 +345,7 @@ class Rational_base():
                     fig, axes = plt.subplots(*layout, figsize=figs)
             except ImportError:
                 RationalImportSeabornWarning.warn()
+                fig, axes = plt.subplots(*layout, figsize=figs)
             for rat, ax in zip(cls.list, axes.flatten()):
                 snap = rat.snapshot_list[snap_number]
                 snap.show(display=False, axis=ax, other_func=other_func)

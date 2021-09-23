@@ -101,7 +101,8 @@ class Rational(Rational_base, nn.Module):
             elif version == "D":
                 rational_func = Rational_CUDA_D_F
             elif version == "N":
-                rational_func = Rational_CUDA_NONSAFE_F
+                self.activation_function = Rational_NONSAFE_F
+                return
             else:
                 raise NotImplementedError(f"version {version} not implemented")
             if 'apply' in dir(rational_func):
@@ -253,6 +254,7 @@ class Rational(Rational_base, nn.Module):
             self.activation_function = rational_func
 
         self._handle_retrieve_mode = None
+        self._handle_gradient_retrieve_mode = None
         self.distribution = None
         return self
 
@@ -545,6 +547,7 @@ class EmbeddedRational(Rational, nn.Module):
                  version="A", *args, **kwargs):
 
         super().__init__(approx_func, degrees)
+        print("\n\nJust initialized embedded Rat")
         if approx_func == "leaky_relu":
             approx_func += "_0.1"
             RationalWarning.warn("Using a leaky_relu_0.1 to make " \
@@ -703,6 +706,37 @@ class RecurrentRationalModule(nn.Module):
         else:
             self._handle_retrieve_mode = self.register_forward_hook(_save_input)
 
+    def gradient_retrieve_mode(self, auto_stop=True, max_saves=10000,
+                               bin_width=0.01):
+        """
+        Will retrieve the distribution of the input in self.distribution. \n
+        This will slow down the function, as it has to retrieve the input \
+        dist.\n
+
+        Arguments:
+                auto_stop (bool):
+                    If True, the retrieving will stop after `max_saves` \
+                    calls to forward.\n
+                    Else, use :meth:`torch.Rational.training_mode`.\n
+                    Default ``True``
+                max_saves (int):
+                    The range on which the curves of the functions are fitted \
+                    together.\n
+                    Default ``10000``
+        """
+        if self._handle_gradient_retrieve_mode is not None:
+            # print("Already in retrieve mode")
+            return
+        from rational.utils.histograms_cupy import Histogram as hist1
+        self.gradient_distribution = hist1(bin_width)
+        # print("Retrieving input from now on.")
+        if auto_stop:
+            self.inputs_saved = 0
+            self._handle_gradient_retrieve_mode = self.register_forward_hook(_save_gradient_auto_stop)
+            self._max_saves = max_saves
+        else:
+            self._handle_gradient_retrieve_mode = self.register_forward_hook(_save_gradient)
+
     def training_mode(self):
         """
         Stops retrieving the distribution of the input in `self.distribution`.
@@ -710,6 +744,10 @@ class RecurrentRationalModule(nn.Module):
         print("Training mode, no longer retrieving the input.")
         self._handle_retrieve_mode.remove()
         self._handle_retrieve_mode = None
+
+    def stop_saving_gradients(self):
+        self._handle_gradient_retrieve_mode.remove()
+        self._handle_gradient_retrieve_mode = None
 
     def show(self, input_range=None, display=True):
         return self.rational.show(input_range=input_range, display=display)
@@ -724,3 +762,14 @@ def _save_input_auto_stop(self, input, output):
     self.distribution.fill_n(input[0])
     if self.inputs_saved > self._max_saves:
         self.training_mode()
+
+
+def _save_gradient(self, gradient):
+    self.gradient_distribution.fill_n(gradient)
+
+
+def _save_gradient_auto_stop(self, gradient):
+    self.inputs_saved += 1
+    self.gradient_distribution.fill_n(gradient)
+    if self.inputs_saved > self._max_saves:
+        self.stop_saving_gradients()

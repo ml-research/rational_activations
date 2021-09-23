@@ -40,7 +40,7 @@ class Rational():
             rational_func = Rational_version_B
         elif version == "C":
             rational_func = Rational_version_C
-        elif version == "# NOTE: ":
+        elif version == "N":
             rational_func = Rational_version_N
         else:
             raise ValueError("version %s not implemented" % version)
