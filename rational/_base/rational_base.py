@@ -113,6 +113,7 @@ class Rational_base():
                      title, axis=ax, writer=writer, step=step)
         # if title is not None:
         #     fig.suptitle(title, y=1.02)
+        fig = plt.gcf()
         fig.tight_layout()
         if writer is not None:
             if step is None:

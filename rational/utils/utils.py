@@ -205,7 +205,9 @@ class Snapshot():
                     Default ``None``
         """
         if x is not None:
-            if x.dtype != float:
+            if "tensor" in str(x).lower():
+                x = x.detach().cpu().numpy()
+            elif x.dtype != float:
                 x = x.astype(float)
             if not isinstance(x, np.ndarray):
                 x = np.array(x)
