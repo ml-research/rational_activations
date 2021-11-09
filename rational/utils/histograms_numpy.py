@@ -50,7 +50,7 @@ class Histogram():
         return self._empty
 
     def __repr__(self):
-        if self._empty:
+        if self.is_empty:
             rtrn = "Empty Histogram"
         else:
             rtrn = f"Histogram on range {self.bins[0]}, {self.bins[-1]}, of " + \
@@ -63,6 +63,12 @@ class Histogram():
     @property
     def total(self):
         return self.weights.sum()
+
+    @property
+    def is_empty(self):
+        if self._empty is True and len(self.bins) > 0:
+            self._empty = False
+        return self._empty
 
     def normalize(self, numpy=True, nb_output=100):
         """

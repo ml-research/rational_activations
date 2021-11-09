@@ -9,8 +9,9 @@ import torch
 from torch._C import device
 import torch.nn as nn
 from torch.cuda import is_available as torch_cuda_available
+from rational.utils.utils import _cupy_installed
 from rational.utils.get_weights import get_parameters
-from rational.utils.warnings import RationalWarning
+from rational.utils.warnings import RationalWarning, RationalLoadWarning
 from rational._base.rational_base import Rational_base
 from rational.torch.rational_pytorch_functions import Rational_PYTORCH_A_F, \
     Rational_PYTORCH_B_F, Rational_PYTORCH_C_F, Rational_PYTORCH_D_F, \
@@ -350,7 +351,7 @@ class Rational(Rational_base, nn.Module):
             self._handle_retrieve_mode = None
 
     @classmethod
-    def save_all_inputs(self, save, auto_stop=False, max_saves=10000,
+    def save_all_inputs(self, save=True, auto_stop=False, max_saves=10000,
                         bin_width="auto"):
         """
         Have every rational save every input.
@@ -359,6 +360,7 @@ class Rational(Rational_base, nn.Module):
                 save (bool):
                     If True, every instanciated rational function will \
                     retrieve its input, else, it won't.
+                    Default ``True``
                 auto_stop (bool):
                     If True, the retrieving will stop after `max_saves` \
                     calls to forward.\n
@@ -384,6 +386,28 @@ class Rational(Rational_base, nn.Module):
             for rat in self.list:
                 rat._saving_input = False
                 rat.training_mode()
+
+    def load_state_dict(self, state_dict):
+        if "distribution" in state_dict.keys():
+            _distribution = state_dict.pop("distribution")
+            if "cuda" in self.device and _cupy_installed():
+                msg = f"Loading input distribution on {self.device} using cupy"
+                RationalLoadWarning.warn(msg)
+                from rational.utils.histograms_cupy import Histogram
+                self.distribution = Histogram()
+            else:
+                from rational.utils.histograms_numpy import Histogram
+                self.distribution = Histogram()
+            self.distribution.bins = _distribution["bins"]
+            self.distribution.weights = _distribution["weights"]
+        super().load_state_dict(state_dict)
+
+    def state_dict(self, destination=None):
+        _state_dict = super().state_dict(destination)
+        if self.distribution is not None:
+            _state_dict["distribution"] = {"bins": self.distribution.bins,
+                                           "weights": self.distribution.weights}
+        return _state_dict
 
     @property
     def saving_input(self):

@@ -20,6 +20,7 @@ class Rational_base():
     count = 0
     list = []
     use_kde = True
+    use_multiple_axis = False
     _step = 0
 
     def __init__(self, name):
@@ -40,7 +41,7 @@ class Rational_base():
     @classmethod
     def show_all(cls, x=None, fitted_function=True, other_func=None,
                  display=True, tolerance=0.001, title=None, axes=None,
-                 layout="auto", writer=None, step=None):
+                 layout="auto", writer=None, step=None, hist_color="#1f77b4"):
         """
         Shows a graph of the all instanciated rational functions (or returns \
         it if ``returns=True``).
@@ -108,9 +109,16 @@ class Rational_base():
         elif isinstance(axes, plt.Axes):
             axes = np.array([axes for _ in range(len(cls.list))])
             fig = plt.gcf()
-        for rat, ax in zip(cls.list, axes.flatten()):
-            rat.show(x, fitted_function, other_func, False, tolerance,
-                     title, axis=ax, writer=writer, step=step)
+        if isinstance(x, list):
+            for rat, ax, x_rat in zip(cls.list, axes.flatten(), x):
+                rat.show(x_rat, fitted_function, other_func, False, tolerance,
+                         title, axis=ax, writer=writer, step=step,
+                         hist_color=hist_color)
+        else:
+            for rat, ax in zip(cls.list, axes.flatten()):
+                rat.show(x, fitted_function, other_func, False, tolerance,
+                         title, axis=ax, writer=writer, step=step,
+                         hist_color=hist_color)
         # if title is not None:
         #     fig.suptitle(title, y=1.02)
         fig = plt.gcf()
@@ -127,7 +135,8 @@ class Rational_base():
             return fig
 
     def show(self, x=None, fitted_function=True, other_func=None, display=True,
-             tolerance=0.001, title=None, axis=None, writer=None, step=None):
+             tolerance=0.001, title=None, axis=None, writer=None, step=None,
+             hist_color="#1f77b4"):
         """
         Shows a graph of the function (or returns it if ``returns=True``).
 
@@ -176,7 +185,7 @@ class Rational_base():
                 title = self.func_name
         if axis is None:
             fig = snap.show(x, fitted_function, other_func, display, tolerance,
-                            title)
+                            title, duplicate_axis=self.use_multiple_axis)
             if writer is not None:
                 if step is None:
                     step = self._step
@@ -189,7 +198,8 @@ class Rational_base():
                 return fig
         else:
             snap.show(x, fitted_function, other_func, display, tolerance,
-                      title, axis=axis)
+                      title, axis=axis, duplicate_axis=self.use_multiple_axis,
+                      hist_color=hist_color)
 
     @classmethod
     def capture_all(cls, name="snapshot_0", x=None, fitted_function=True,
@@ -349,7 +359,8 @@ class Rational_base():
                 fig, axes = plt.subplots(*layout, figsize=figs)
             for rat, ax in zip(cls.list, axes.flatten()):
                 snap = rat.snapshot_list[snap_number]
-                snap.show(display=False, axis=ax, other_func=other_func)
+                snap.show(display=False, axis=ax, other_func=other_func,
+                          duplicate_axis=cls.use_multiple_axis)
             for ax in axes.flatten()[len(cls.list):]:
                 ax.remove()
             fig.savefig(_repair_path(path))
@@ -439,7 +450,8 @@ class Rational_base():
                         input = np.arange(x_min, x_max, (x_max - x_min)/10000)
                         snap = rat.snapshot_list[i]
                         snap.show(x=input, other_func=other_func,
-                                  display=False, axis=ax)
+                                  display=False, axis=ax,
+                                  duplicate_axis=cls.use_multiple_axis)
                         ax.set_xlim([x_min, x_max])
                         ax.set_ylim([y_min, y_max])
                     buf = io.BytesIO()
@@ -526,7 +538,8 @@ class Rational_base():
             input = np.arange(x_min, x_max, (x_max - x_min)/10000)
             gif_images = []
             for i, snap in enumerate(self.snapshot_list):
-                fig = snap.show(x=input, other_func=other_func, display=False)
+                fig = snap.show(x=input, other_func=other_func, display=False,
+                                duplicate_axis=self.use_multiple_axis)
                 ax0 = fig.axes[0]
                 ax0.set_xlim([x_min, x_max])
                 ax0.set_ylim([y_min, y_max])

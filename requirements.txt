@@ -1,7 +1,7 @@
 numpy
 scipy
 matplotlib
-torch==1.9.0
+torch
 tqdm
 termcolor
 # tensorflow>=2.0.0

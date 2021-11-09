@@ -1,7 +1,7 @@
 import cupy as cp
 from torch.utils.dlpack import to_dlpack
 import scipy.stats as sts
-
+import numpy as np
 
 class Histogram():
     """
@@ -47,7 +47,7 @@ class Histogram():
                                                    self.bin_size, self._rd)
 
     def __repr__(self):
-        if self._empty:
+        if self.is_empty:
             rtrn = "Empty Histogram"
         else:
             rtrn = f"Histogram on range {self.bins[0]}, {self.bins[-1]}, of " + \
@@ -63,7 +63,10 @@ class Histogram():
 
     @bins.setter
     def bins(self, var):
-        self.__bins = var
+        if isinstance(var, np.ndarray):
+            self.__bins = cp.array(var)
+        else:
+            self.__bins = var
 
     @property
     def weights(self):
@@ -71,6 +74,8 @@ class Histogram():
 
     @property
     def is_empty(self):
+        if self._empty is True and len(self.bins) > 0:
+            self._empty = False
         return self._empty
 
     @property
@@ -79,8 +84,10 @@ class Histogram():
 
     @weights.setter
     def weights(self, var):
-        self.__weights = var
-
+        if isinstance(var, np.ndarray):
+            self.__weights = cp.array(var)
+        else:
+            self.__weights = var
 
     def normalize(self, numpy=True):
         if numpy:
@@ -93,7 +100,6 @@ class Histogram():
         kde = sts.gaussian_kde(self.bins, bw_method=0.13797296614612148,
                                weights=self.weights)
         return kde.pdf
-
 
 
 def concat_hists(weights1, bins1, weights2, bins2, bin_size, rd):

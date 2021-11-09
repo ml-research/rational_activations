@@ -8,6 +8,7 @@ except ImportError:
                          "colors", ImportWarning,
                          "warnings.py", "7")
     termc_installed = False
+    colored = lambda msg, col: msg
 
 
 class RationalWarning(UserWarning):
@@ -18,10 +19,13 @@ class RationalWarning(UserWarning):
         pass
 
     @classmethod
-    def warn(cls, message=None, category=None):
+    def warn(cls, message=None, category=None, url=None):
         if message not in cls.done_list:
             if message is None:
                 message = cls.message
+            if url is not None:
+                url = colored(url, "blue")
+                message += f"\n -> More info: {url}"
             cls.done_list.append(message)
             if termc_installed:
                 message = colored(message, "yellow")
@@ -34,6 +38,8 @@ class RationalWarning(UserWarning):
 class RationalImportWarning(RationalWarning):
     base_category = ImportWarning
 
+class RationalLoadWarning(RationalWarning):
+    base_category = ImportWarning
 
 class RationalImportSeabornWarning(RationalImportWarning):
     message = "Could not find Seaborn installed, please install it for " \

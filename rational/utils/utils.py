@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import zeros, inf
 import matplotlib.pyplot as plt
-from .warnings import RationalWarning, \
+from .warnings import RationalWarning, RationalImportWarning, \
     RationalImportSeabornWarning, RationalImportScipyWarning
 
 
@@ -171,7 +171,8 @@ class Snapshot():
         self.other_func = other_func
 
     def show(self, x=None, fitted_function=True, other_func=None,
-             display=True, tolerance=0.001, title=None, axis=None):
+             display=True, tolerance=0.0001, title=None, axis=None,
+             duplicate_axis=False, hist_color="#1f77b4"):
         """
         Show the function using `matplotlib`.
 
@@ -230,6 +231,12 @@ class Snapshot():
             ax = plt.gca()
         else:
             ax = axis
+        # if duplicate_axis:
+        #     oax = ax
+        #     ax = ax.twinx()
+        #     ax.set_zorder(oax.get_zorder()+1) # put ax in front of ax2
+        #     ax.set_yticks([])
+        #     ax.plot(x, y_rat, label=f"{self.rat_name}", zorder=2)
         ax.plot(x, y_rat, label=f"{self.rat_name}", zorder=2)
         if fitted_function and self.best_fitted_function is not None:
             if '__name__' in dir(self.best_fitted_function):
@@ -240,8 +247,8 @@ class Snapshot():
             y_bff = a * numpify(self.best_fitted_function, c * x + d) + b
             ax.plot(x, y_bff, "r-", label=f"Fitted {func_label}", zorder=2)
         #  Histogram
-        if self.histogram is not None:
-            weights, bins = _cleared_arrays(self.histogram, tolerance)
+        if self.histogram is not None and hist_color is not None:
+            weights = _cleared_arrays(self.histogram, tolerance)[1]
             ax2 = ax.twinx()
             ax2.set_yticks([])
             try:
@@ -250,16 +257,18 @@ class Snapshot():
             except ImportError:
                 RationalImportScipyWarning.warn()
             if self.use_kde and scipy_imported:
-                if len(bins) > 5:
-                    kde_curv = self.histogram.kde()(bins)
-                    ax2.plot(bins, kde_curv, lw=1)
-                    ax2.fill_between(bins, kde_curv, alpha = 0.3)
+                if len(x) > 5:
+                    refined_bins = np.linspace(x[0], x[-1], 200)
+                    kde_curv = self.histogram.kde()(refined_bins)
+                    # ax2.plot(refined_bins, kde_curv, lw=0.1)
+                    ax2.fill_between(refined_bins, kde_curv, alpha=0.15,
+                                     color=hist_color)
                 else:
                     print("The bin size is too big, bins contain too few "
-                          "elements.\nbins:", bins)
+                          "elements.\nbins:", x)
                     ax2.bar([], []) # in case of remove needed
             else:
-                ax2.bar(bins, weights/weights.max(), width=bins[1] - bins[0],
+                ax2.bar(x, weights/weights.max(), width=x[1] - x[0],
                         linewidth=0, alpha=0.3)
             ax.set_zorder(ax2.get_zorder()+1) # put ax in front of ax2
             ax.patch.set_visible(False)
@@ -512,3 +521,14 @@ def _path_for_multiple(path, suffix):
     save_folder = _repair_path(f"{path_root}_{suffix}")
     makedirs(save_folder)
     return f"{save_folder}/{main_part}{path_ext}"
+
+
+def _cupy_installed():
+    try:
+        import cupy as cp
+        return True
+    except ModuleNotFoundError:
+        msg = "CuPy not found, please install it for fast input processing."
+        url = "https://cupy.dev/"
+        RationalImportWarning.warn(msg, url=url)
+        return False
