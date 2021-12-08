@@ -102,6 +102,8 @@ class Rational_base():
             except ImportError:
                 RationalImportSeabornWarning.warn()
                 fig, axes = plt.subplots(*layout, figsize=figs)
+            if isinstance(axes, plt.Axes):
+                axes = np.array([axes])
             # if display:
             for ax in axes.flatten()[len(cls.list):]:
                 ax.remove()
