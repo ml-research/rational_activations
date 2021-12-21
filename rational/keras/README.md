@@ -18,7 +18,7 @@ If you wish to customize your `Rational` instance, feel free to play around with
 ```python
 from rational.keras import Rational
 
-my_costum_fun = Rational(version='C', approx_func='tanh')
+my_costum_fun = Rational(approx_func='tanh')
 ```
 
 ## Integrating a `Rational` instance into a neural network

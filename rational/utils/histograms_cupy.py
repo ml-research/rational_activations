@@ -1,52 +1,98 @@
 import cupy as cp
 from torch.utils.dlpack import to_dlpack
+import scipy.stats as sts
 
 
 class Histogram():
-    def __init__(self, bin_size=0.1, random_select=False):
+    """
+    Input Histograms, used to retrieve the input of Rational Activations
+    """
+    def __init__(self, bin_size="auto", random_select=False):
         self.bins = cp.array([])
-        self.weights = cp.array([], dtype=cp.int)
-        self.bin_size = bin_size
+        self.weights = cp.array([], dtype=cp.uint32)
         self._empty = True
-        self._rd = int(cp.log10(1./bin_size).item())
+        self._verbose = False
+        if bin_size == "auto":
+            self._auto_bs = True
+            self.bin_size = 0.0001
+            self._rd = 4
+        else:
+            self._auto_bs = False
+            self.bin_size = bin_size
+            self._rd = int(cp.log10(1./bin_size).item())
 
     def fill_n(self, input):
         self._update_hist(cp.fromDlpack(to_dlpack(input)))
 
     def _update_hist(self, new_input):
-        range_ext = cp.around(new_input.min() - self.bin_size / 2, 1), \
-                    cp.around(new_input.max() + self.bin_size / 2, 1)
+        range_ext = cp.around(new_input.min() - self.bin_size / 2, self._rd), \
+                    cp.around(new_input.max() + self.bin_size / 2, self._rd)
         bins_array = cp.arange(range_ext[0], range_ext[1] + self.bin_size,
                                self.bin_size)
         weights, bins = cp.histogram(new_input, bins_array)
         if self._empty:
+            if self._auto_bs:
+                self._rd = int(cp.log10(1./(range_ext[1] - range_ext[0])).item()) + 2
+                self.bin_size = 1./(10**self._rd)
+                range_ext = cp.around(new_input.min() - self.bin_size / 2, self._rd), \
+                            cp.around(new_input.max() + self.bin_size / 2, self._rd)
+                bins_array = cp.arange(range_ext[0], range_ext[1] + self.bin_size,
+                                       self.bin_size)
+                weights, bins = cp.histogram(new_input, bins_array)
             self.weights, self.bins = weights, bins[:-1]
             self._empty = False
         else: #  update the hist
-            self.weights, self.bins = concat_hists(self.weights, self.bins,
+            self.weights, self.bins = concat_hists(self.__weights, self.__bins,
                                                    weights, bins[:-1],
                                                    self.bin_size, self._rd)
 
     def __repr__(self):
         if self._empty:
-            return "Empty Histogram"
-        return f"Histogram on range {self.bins[0]}, {self.bins[-1]}, of " + \
-               f"bin_size {self.bin_size}, with {self.weights.sum()} total" + \
-               f"elements"
+            rtrn = "Empty Histogram"
+        else:
+            rtrn = f"Histogram on range {self.bins[0]}, {self.bins[-1]}, of " + \
+                   f"bin_size {self.bin_size}, with {self.weights.sum()} total" + \
+                   f"elements"
+        if self._verbose:
+            rtrn += f" {hex(id(self))}"
+        return rtrn
+
+    @property
+    def bins(self):
+        return self.__bins.get().flatten()
+
+    @bins.setter
+    def bins(self, var):
+        self.__bins = var
+
+    @property
+    def weights(self):
+        return self.__weights.get().flatten()
+
+    @property
+    def is_empty(self):
+        return self._empty
+
+    @property
+    def total(self):
+        return self.weights.sum()
+
+    @weights.setter
+    def weights(self, var):
+        self.__weights = var
+
 
     def normalize(self, numpy=True):
         if numpy:
-            return (self.weights / self.weights.sum()).get().flatten(), \
-                   self.bins.get().flatten()
+            return (self.__weights / self.__weights.sum()).get().flatten(), \
+                   self.bins
         else:
-            return self.weights / self.weights.sum(), self.bins
+            return self.__weights / self.__weights.sum(), self.__bins
 
-    def _from_physt(self, phystogram):
-        if (phystogram.bin_sizes == phystogram.bin_sizes[0]).all():
-            self.bin_size = phystogram.bin_sizes[0]
-        self.bins = cp.array(phystogram.bin_left_edges)
-        self.weights = cp.array(phystogram.frequencies)
-        return self
+    def kde(self):
+        kde = sts.gaussian_kde(self.bins, bw_method=0.13797296614612148,
+                               weights=self.weights)
+        return kde.pdf
 
 
 

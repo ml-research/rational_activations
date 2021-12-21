@@ -40,6 +40,8 @@ class Rational():
             rational_func = Rational_version_B
         elif version == "C":
             rational_func = Rational_version_C
+        elif version == "# NOTE: ":
+            rational_func = Rational_version_N
         else:
             raise ValueError("version %s not implemented" % version)
         self.activation_function = rational_func
@@ -115,6 +117,9 @@ class Rational():
         return (f"Rational Activation Function (Numpy version "
                 f"{self.version}) of degrees {self.degrees}")
 
+    def numpy(self):
+        return self
+
     def show(self, input_range=None, display=True, distribution=None):
         """
         Show the function using `matplotlib`.
@@ -165,6 +170,27 @@ class Rational():
         else:
             return plt.gcf()
 
+class EmbeddedRational():
+    nb_rats = 2
+
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        self.successive_rats = []
+        for i in range(self.nb_rats):
+            rat = Rational(*args, **kwargs)
+            self.successive_rats.append(rat)
+
+    def __call__(self, x):
+        if type(x) is int:
+            x = float(x)
+        for srat in self.successive_rats:
+            x = srat.activation_function(x, srat.numerator, srat.denominator)
+        return x
+
+    def __repr__(self):
+        return (f"EmbeddedRational Activation Function (Numpy version "
+                f"{self.version}) of degrees {self.degrees}")
+
 
 def Rational_version_A(x, w_array, d_array):
     xi = np.ones_like(x)
@@ -208,3 +234,36 @@ def Rational_version_C(x, w_array, d_array):
         xi *= x
     Q = np.abs(Q) + np.full_like(Q, 0.1)
     return P/Q
+
+
+def Rational_version_N(x, w_array, d_array):
+    """
+    Non safe version, original rational without norm
+    """
+    xi = np.ones_like(x)
+    P = np.ones_like(x) * w_array[0]
+    for i in range(len(w_array) - 1):
+        xi *= x
+        P += w_array[i+1] * xi
+    xi = np.ones_like(x)
+    Q = np.zeros_like(x)
+    for i in range(len(d_array)):
+        xi *= x
+        Q += d_array[i] * xi
+    Q = Q + np.ones_like(Q)
+    return P/Q
+
+#if __name__ == '__main__':
+#    def crazy_func(x):
+#        outp = (100 - 50*x - 100*x**2)/(1 - 10*x - 10*x**2)
+#        disc = outp[:-1] * outp[1:] < -5
+#        idx = [-1] + [i for i, x in enumerate(disc) if x] + [len(outp)]
+#        return ([x[s+1:e+1] for s, e in zip(idx[:-1], idx[1:])], \
+#             [outp[s+1:e+1] for s, e in zip(idx[:-1], idx[1:])])
+#    import matplotlib.pyplot as plt
+#    inp = np.arange(-3, 3, 0.01)
+#    ax = plt.gca()
+#    arrs = crazy_func(inp)
+#    for i in range(len(arrs[0])):
+#        ax.plot(arrs[0][i], arrs[1][i], 'r')
+#    plt.show()

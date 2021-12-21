@@ -5,19 +5,597 @@ Rational Activation Functions for Pytorch
 This module allows you to create Rational Neural Networks using Learnable
 Rational activation functions with Pytorch networks.
 """
+import torch
+from torch._C import device
 import torch.nn as nn
 from torch.cuda import is_available as torch_cuda_available
 from rational.utils.get_weights import get_parameters
+from rational.utils.warnings import RationalWarning
+from rational._base.rational_base import Rational_base
+from rational.torch.rational_pytorch_functions import Rational_PYTORCH_A_F, \
+    Rational_PYTORCH_B_F, Rational_PYTORCH_C_F, Rational_PYTORCH_D_F, \
+    Rational_NONSAFE_F, Rational_CUDA_NONSAFE_F, _get_xps
+
 
 if torch_cuda_available():
     try:
-        from rational.torch.rational_cuda_functions import *
-    except ImportError as ImpErr:
-        print('\n\nError importing rational_cuda, is cuda not available?\n\n')
-        print(ImpErr)
-        exit(1)
+        from rational.torch.rational_cuda_functions import Rational_CUDA_A_F, \
+            Rational_CUDA_B_F, Rational_CUDA_C_F, Rational_CUDA_D_F
+    except ImportError:
+        pass
 
-from rational.torch.rational_pytorch_functions import *
+
+class Rational(Rational_base, nn.Module):
+    """
+    Rational activation function inherited from ``torch.nn.Module``.
+
+    Arguments:
+            approx_func (str):
+                The name of the approximated function for initialisation. \
+                The different initialable functions are available in \
+                `rational.rationals_config.json`. \n
+                Default ``leaky_relu``.
+            degrees (tuple of int):
+                The degrees of the numerator (P) and denominator (Q).\n
+                Default ``(5, 4)``
+            cuda (bool):
+                Use GPU CUDA version. \n
+                If ``None``, use cuda if available on the machine\n
+                Default ``None``
+            version (str):
+                Version of Rational to use. Rational(x) = P(x)/Q(x)\n
+                `A`: Q(x) = 1 + \|b_1.x\| + \|b_2.x\| + ... + \|b_n.x\|\n
+                `B`: Q(x) = 1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
+                `C`: Q(x) = 0.1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
+                `D`: like `B` with noise\n
+                Default ``A``
+            trainable (bool):
+                If the weights are trainable, i.e, if they are updated during \
+                backward pass\n
+                Default ``True``
+    Returns:
+        Module: Rational module
+    """
+
+    def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=None,
+                 version="A", trainable=True, train_numerator=True,
+                 train_denominator=True, name=None):
+
+        if name is None:
+            name = approx_func
+        super().__init__(name)
+
+        if cuda is None:
+            cuda = torch_cuda_available()
+        if cuda is True:
+            device = "cuda"
+        elif cuda is False:
+            device = "cpu"
+        else:
+            device = cuda
+
+        w_numerator, w_denominator = get_parameters(version, degrees,
+                                                    approx_func)
+
+        self.numerator = nn.Parameter(torch.FloatTensor(w_numerator).to(device),
+                                      requires_grad=trainable and train_numerator)
+        self.denominator = nn.Parameter(torch.FloatTensor(w_denominator).to(device),
+                                        requires_grad=trainable and train_denominator)
+        self.register_parameter("numerator", self.numerator)
+        self.register_parameter("denominator", self.denominator)
+        self.device = device
+        self.degrees = degrees
+        self.version = version
+        self.training = trainable
+
+        self.init_approximation = approx_func
+        self._saving_input = False
+
+        if "cuda" in str(device):
+            if version == "A":
+                rational_func = Rational_CUDA_A_F
+            elif version == "B":
+                rational_func = Rational_CUDA_B_F
+            elif version == "C":
+                rational_func = Rational_CUDA_C_F
+            elif version == "D":
+                rational_func = Rational_CUDA_D_F
+            elif version == "N":
+                rational_func = Rational_CUDA_NONSAFE_F
+            else:
+                raise NotImplementedError(f"version {version} not implemented")
+            if 'apply' in dir(rational_func):
+                self.activation_function = rational_func.apply
+            else:
+                self.activation_function = rational_func
+        else:
+            if version == "A":
+                rational_func = Rational_PYTORCH_A_F
+            elif version == "B":
+                rational_func = Rational_PYTORCH_B_F
+            elif version == "C":
+                rational_func = Rational_PYTORCH_C_F
+            elif version == "D":
+                rational_func = Rational_PYTORCH_D_F
+            elif version == "N":
+                rational_func = Rational_NONSAFE_F
+            else:
+                raise NotImplementedError(f"version {version} not implemented")
+
+            self.activation_function = rational_func
+
+    def forward(self, x):
+        return self.activation_function(x, self.numerator, self.denominator,
+                                        self.training)
+
+    def _cpu(self):
+        if self.version == "A":
+            rational_func = Rational_PYTORCH_A_F
+        elif self.version == "B":
+            rational_func = Rational_PYTORCH_B_F
+        elif self.version == "C":
+            rational_func = Rational_PYTORCH_C_F
+        elif self.version == "D":
+            rational_func = Rational_PYTORCH_D_F
+        elif self.version == "N":
+            rational_func = Rational_NONSAFE_F
+        else:
+            raise ValueError("version %s not implemented" % self.version)
+        self.activation_function = rational_func
+        self.device = "cpu"
+
+    def _cuda(self, device):
+        if self.version == "A":
+            rational_func = Rational_CUDA_A_F
+        elif self.version == "B":
+            rational_func = Rational_CUDA_B_F
+        elif self.version == "C":
+            rational_func = Rational_CUDA_C_F
+        elif self.version == "D":
+            rational_func = Rational_CUDA_D_F
+        elif self.version == "N":
+            rational_func = Rational_CUDA_NONSAFE_F
+        else:
+            raise ValueError("version %s not implemented" % self.version)
+        if "cuda" in str(device):
+            self.device = f"{device}"
+        else:
+            self.device = f"cuda:{device}"
+        if 'apply' in dir(rational_func):
+            self.activation_function = rational_func.apply
+        else:
+            self.activation_function = rational_func
+
+    def _to(self, device):
+        """
+        Moves the rational function to its specific device. \n
+
+        Arguments:
+                device (torch device):
+                    The device for the rational
+        """
+        if "cpu" in str(device):
+            self.cpu()
+        elif "cuda" in str(device):
+            self.cuda(device)
+
+    def _apply(self, fn):
+        if "Module.cpu" in str(fn):
+            self._cpu()
+        elif "Module.cuda" in str(fn):
+            device = fn.__closure__[0].cell_contents
+            self._cuda(device)
+        elif "Module.to" in str(fn):
+            for clos in fn.__closure__:
+                if type(clos.cell_contents) is torch.device:
+                    device = clos.cell_contents
+                    self.device = str(device)
+                    self._to(device)
+                    break
+        return super()._apply(fn)
+
+    def numpy(self):
+        """
+        Returns a numpy version of this activation function.
+        """
+        from rational.numpy import Rational as Rational_numpy
+        rational_n = Rational_numpy(self.init_approximation, self.degrees,
+                                    self.version)
+        rational_n.numerator = self.numerator.tolist()
+        rational_n.denominator = self.denominator.tolist()
+        return rational_n
+
+
+    def _from_old(self, old_rational_func):
+        self.version = old_rational_func.version
+        self.degrees = old_rational_func.degrees
+        self.numerator = old_rational_func.numerator
+        self.denominator = old_rational_func.denominator
+        if "center" in dir(old_rational_func) and old_rational_func.center != 0:
+            print("Found a non zero center, please adapt the bias of the",
+                  "previous layer to have an equivalent neural network")
+        self.training = old_rational_func.training
+        if "init_approximation" not in dir("init_approximation"):
+            self.init_approximation = "leaky_relu"
+        else:
+            self.init_approximation = old_rational_func.init_approximation
+        if "cuda" in str(self.device):
+            if self.version == "A":
+                rational_func = Rational_CUDA_A_F
+            elif self.version == "B":
+                self.rational_func = Rational_CUDA_B_F
+            elif self.version == "C":
+                rational_func = Rational_CUDA_C_F
+            elif self.version == "D":
+                rational_func = Rational_CUDA_D_F
+            elif self.version == "N":
+                rational_func = Rational_CUDA_NONSAFE_F
+            else:
+                raise ValueError("version %s not implemented" % self.version)
+
+            if 'apply' in dir(rational_func):
+                self.activation_function = rational_func.apply
+            else:
+                self.activation_function = rational_func
+        else:
+            if self.version == "A":
+                rational_func = Rational_PYTORCH_A_F
+            elif self.version == "B":
+                rational_func = Rational_PYTORCH_B_F
+            elif self.version == "C":
+                rational_func = Rational_PYTORCH_C_F
+            elif self.version == "D":
+                rational_func = Rational_PYTORCH_D_F
+            elif self.version == "N":
+                rational_func = Rational_NONSAFE_F
+            else:
+                raise ValueError("version %s not implemented" % self.version)
+            self.activation_function = rational_func
+
+        self._handle_retrieve_mode = None
+        self.distribution = None
+        return self
+
+    def change_version(self, version):
+        assert version in ["A", "B", "C", "D"]
+        if version == self.version:
+            print(f"This Rational function has already the correct type {self.version}")
+            return
+        if "cuda" in str(self.device):
+            if version == "A":
+                rational_func = Rational_CUDA_A_F
+            elif version == "B":
+                rational_func = Rational_CUDA_B_F
+            elif version == "C":
+                rational_func = Rational_CUDA_C_F
+            elif version == "D":
+                rational_func = Rational_CUDA_D_F
+            elif self.version == "N":
+                rational_func = Rational_CUDA_NONSAFE_F
+            else:
+                raise ValueError("version %s not implemented" % version)
+            if 'apply' in dir(rational_func):
+                self.activation_function = rational_func.apply
+            else:
+                self.activation_function = rational_func
+            self.version = version
+        else:
+            if version == "A":
+                rational_func = Rational_PYTORCH_A_F
+            elif version == "B":
+                rational_func = Rational_PYTORCH_B_F
+            elif version == "C":
+                rational_func = Rational_PYTORCH_C_F
+            elif version == "D":
+                rational_func = Rational_PYTORCH_D_F
+            elif self.version == "N":
+                rational_func = Rational_NONSAFE_F
+            else:
+                raise ValueError("version %s not implemented" % self.version)
+            self.activation_function = rational_func
+            self.version = version
+
+    def input_retrieve_mode(self, auto_stop=False, max_saves=1000,
+                            bin_width=0.1):
+        """
+        Will retrieve the distribution of the input in self.distribution. \n
+        This will slow down the function, as it has to retrieve the input \
+        dist.\n
+
+        Arguments:
+                auto_stop (bool):
+                    If True, the retrieving will stop after `max_saves` \
+                    calls to forward.\n
+                    Else, use :meth:`torch.Rational.training_mode`.\n
+                    Default ``False``
+                max_saves (int):
+                    The range on which the curves of the functions are fitted \
+                    together.\n
+                    Default ``1000``
+        """
+        if self._handle_retrieve_mode is not None:
+            # print("Already in retrieve mode")
+            return
+        if "cuda" in self.device:
+            from rational.utils.histograms_cupy import Histogram
+        else:
+            from rational.utils.histograms_numpy import Histogram
+        self.distribution = Histogram(bin_width)
+        # print("Retrieving input from now on.")
+        if auto_stop:
+            self.inputs_saved = 0
+            self._handle_retrieve_mode = self.register_forward_hook(_save_input_auto_stop)
+            self._max_saves = max_saves
+        else:
+            self._handle_retrieve_mode = self.register_forward_hook(_save_input)
+
+    def clear_hist(self):
+        self.inputs_saved = 0
+        bin_width = self.distribution.bin_size
+        if "cuda" in self.device:
+            from rational.utils.histograms_cupy import Histogram
+        else:
+            from rational.utils.histograms_numpy import Histogram
+        self.distribution = Histogram(bin_width)
+
+    def training_mode(self):
+        """
+        Stops retrieving the distribution of the input in `self.distribution`.
+        """
+        # print("Training mode, no longer retrieving the input.")
+        if self._handle_retrieve_mode is not None:
+            self._handle_retrieve_mode.remove()
+            self._handle_retrieve_mode = None
+
+    @classmethod
+    def save_all_inputs(self, save, auto_stop=False, max_saves=10000,
+                        bin_width="auto"):
+        """
+        Have every rational save every input.
+
+        Arguments:
+                save (bool):
+                    If True, every instanciated rational function will \
+                    retrieve its input, else, it won't.
+                auto_stop (bool):
+                    If True, the retrieving will stop after `max_saves` \
+                    calls to forward.\n
+                    Else, use :meth:`torch.Rational.training_mode`.\n
+                    Default ``True``
+                max_saves (int):
+                    The range on which the curves of the functions are fitted \
+                    together.\n
+                    Default ``10000``
+                bin_width (float or "auto"):
+                    The size of the histogram's bin width to store the input \
+                    in.\n
+                    If `"auto"`, then automatically determines the bin width \
+                    to have ~100 bins.\n
+                    Default ``"auto"``
+        """
+        if save:
+            for rat in self.list:
+                rat._saving_input = True
+                rat.input_retrieve_mode(auto_stop, max_saves,
+                                        bin_width=bin_width)
+        else:
+            for rat in self.list:
+                rat._saving_input = False
+                rat.training_mode()
+
+    @property
+    def saving_input(self):
+        return self._saving_input
+
+    @saving_input.setter
+    def saving_input(self, new_value):
+        if new_value is True:
+            self._saving_input = True
+            self.input_retrieve_mode()
+        elif new_value is False:
+            self._saving_input = False
+            self.training_mode()
+        else:
+            print("saving_input of rationals should be set with booleans")
+
+
+class AugmentedRational(nn.Module):
+    """
+    Augmented Rational activation function inherited from ``Rational``
+
+    Arguments:
+            approx_func (str):
+                The name of the approximated function for initialisation. \
+                The different initialable functions are available in
+                `rational.rationals_config.json`. \n
+                Default ``leaky_relu``.
+            degrees (tuple of int):
+                The degrees of the numerator (P) and denominator (Q).\n
+                Default ``(5, 4)``
+            cuda (bool):
+                Use GPU CUDA version. If None, use cuda if available on the
+                machine\n
+                Default ``None``
+            version (str):
+                Version of Rational to use. Rational(x) = P(x)/Q(x)\n
+                `A`: Q(x) = 1 + \|b_1.x\| + \|b_2.x\| + ... + \|b_n.x\|\n
+                `B`: Q(x) = 1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
+                `C`: Q(x) = 0.1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
+                `D`: like `B` with noise\n
+                Default ``A``
+            trainable (bool):
+                If the weights are trainable, i.e, if they are updated during
+                backward pass\n
+                Default ``True``
+    Returns:
+        Module: Augmented Rational module
+    """
+
+    def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=None,
+                 version="A", trainable=True, train_numerator=True,
+                 train_denominator=True):
+        super(AugmentedRational, self).__init__()
+        self.in_bias = nn.Parameter(torch.FloatTensor([0.0]))
+        self.out_bias = nn.Parameter(torch.FloatTensor([0.0]))
+        self.vertical_scale = nn.Parameter(torch.FloatTensor([1.0]))
+        self.horizontal_scale = nn.Parameter(torch.FloatTensor([1.0]))
+
+    def forward(self, x):
+        x = self.horizontal_scale * x + self.in_bias
+        out = self.activation_function(x, self.numerator, self.denominator,
+                                       self.training)
+        return self.vertical_scale * out + self.out_bias
+
+
+class RationalNonSafe(Rational_base, nn.Module):
+    """
+    Rational activation function inherited from ``torch.nn.Module``
+
+    Arguments:
+            approx_func (str):
+                The name of the approximated function for initialisation. \
+                The different initialable functions are available in \
+                `rational.rationals_config.json`. \n
+                Default ``leaky_relu``.
+            degrees (tuple of int):
+                The degrees of the numerator (P) and denominator (Q).\n
+                Default ``(5, 4)``
+            cuda (bool):
+                Use GPU CUDA version. \n
+                If ``None``, use cuda if available on the machine\n
+                Default ``None``
+            version (str):
+                Version of Rational to use. Rational(x) = P(x)/Q(x)\n
+                `A`: Q(x) = 1 + \|b_1.x\| + \|b_2.x\| + ... + \|b_n.x\|\n
+                `B`: Q(x) = 1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
+                `C`: Q(x) = 0.1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
+                `D`: like `B` with noise\n
+                Default ``A``
+            trainable (bool):
+                If the weights are trainable, i.e, if they are updated during \
+                backward pass\n
+                Default ``True``
+    Returns:
+        Module: Rational module
+    """
+
+    def __init__(self, degrees=(5, 4), cuda=None, trainable=True, train_numerator=True,
+                 train_denominator=True):
+        super().__init__()
+
+        if cuda is None:
+            cuda = torch_cuda_available()
+        if cuda is True:
+            device = "cuda"
+        elif cuda is False:
+            device = "cpu"
+        else:
+            device = cuda
+
+        self.numerator = nn.Parameter(torch.tensor([ 0.,  1.01130152, -0.25022214, -0.10285302,  0.02551535]).to(device),
+                                      requires_grad=True)
+        self.denominator = nn.Parameter(torch.tensor([-0.24248419,  0.07964891, -0.02110156]).to(device),
+                                        requires_grad=True)
+        # self.numerator = nn.Parameter(torch.ones(degrees[0]+1).to(device),
+        #                               requires_grad=True)
+        # self.denominator = nn.Parameter(torch.ones(degrees[1]).to(device),
+        #                                 requires_grad=True)
+        self.register_parameter("numerator", self.numerator)
+        self.register_parameter("denominator", self.denominator)
+        self.device = device
+        self.degrees = degrees
+        self.training = trainable
+        self.version = "NonSafe"
+
+    #
+    # def forward(self, x, y):
+    #     z = x.view(-1)
+    #     len_num, len_deno = len(self.numerator), len(self.denominator)
+    #     # xps = torch.vander(z, max(len_num, len_deno), increasing=True)
+    #     xps = _get_xps(z, len_num, len_deno).to(self.numerator.device)
+    #     numerator = xps.mul(self.numerator).sum(1)
+    #     denominator = xps[:, 1:len_deno+1].mul(self.denominator).sum(1) * y.to(self.numerator.device)
+    #     return (numerator - denominator).view(x.shape)
+
+    def forward(self, x):
+        z = x.view(-1)
+        len_num, len_deno = len(self.numerator), len(self.denominator)
+        # xps = torch.vander(z, max(len_num, len_deno), increasing=True)
+        xps = _get_xps(z, len_num, len_deno).to(self.numerator.device)
+        numerator = xps.mul(self.numerator).sum(1)
+        denominator = xps[:, 1:len_deno+1].mul(self.denominator).sum(1)
+        return numerator.div(1 + denominator).view(x.shape)
+
+    def fit(self, x, y):
+        """
+        Linear regression trick to calculate the numerator and denominator \
+        based on x and y
+        """
+        from sklearn import linear_model
+        clf = linear_model.LinearRegression(fit_intercept=False)
+        [np.ones_like(x), x, x**2, x**3, x**4, -y*x, -y*x**2, -y*x**3].T
+        clf.fit(np.array(), y)
+
+
+class EmbeddedRational(Rational, nn.Module):
+    nb_rats = 2
+    list = []
+
+    def __init__(self, approx_func="leaky_relu", degrees=(3, 2), cuda=None,
+                 version="A", *args, **kwargs):
+
+        super().__init__(approx_func, degrees)
+        if approx_func == "leaky_relu":
+            approx_func += "_0.1"
+            RationalWarning.warn("Using a leaky_relu_0.1 to make " \
+                                 "EmbeddedRational approx leaky_relu")
+        self.init_approximation = approx_func
+        self.degrees=degrees
+        self.cuda = cuda
+        self.version = version
+        self.successive_rats = []
+        for i in range(self.nb_rats):
+            rat = Rational(approx_func, degrees, cuda, version, *args,
+                           **kwargs)
+            self.add_module(f"rational_{i}", rat)
+            self.successive_rats.append(rat)
+        self.list.append(self)
+        del self.numerator
+        del self.denominator
+        self.numerators = [rat.numerator for rat in self.successive_rats]
+        self.denominators = [rat.denominator for rat in self.successive_rats]
+
+    def forward(self, x):
+        for rat in self.successive_rats:
+            x = rat(x)
+        return x
+
+    def _apply(self, fn):
+        for rat in self.successive_rats:
+            for clos in fn.__closure__:
+                if type(clos.cell_contents) is torch.device:
+                    device = clos.cell_contents
+                    rat.device = device
+                    break
+        return super()._apply(fn)
+
+    def numpy(self):
+        from rational.numpy import EmbeddedRational as ERational_numpy
+        ERational_numpy.nb_rats = self.nb_rats
+        erational_n = ERational_numpy(self.init_approximation, self.degrees,
+                                      self.version)
+        for trat, nrat in zip(self.successive_rats, erational_n.successive_rats):
+            nrat.numerator = trat.numerator.tolist()
+            nrat.denominator = trat.denominator.tolist()
+        return erational_n
+
+    def __repr__(self):
+        return (f"Embedded Rational Activation Function (PYTORCH version "
+                f"{self.version}) of degrees {self.degrees} running on "
+                f"{self.device}")
+
+    # @property()
+    # def list(self):
 
 
 class RecurrentRational():
@@ -94,7 +672,8 @@ class RecurrentRationalModule(nn.Module):
     def fit(self, function, x=None, show=False):
         return self.rational.fit(function=function, x=x, show=show)
 
-    def input_retrieve_mode(self, auto_stop=True, max_saves=1000, bin_width=0.1):
+    def input_retrieve_mode(self, auto_stop=True, max_saves=10000,
+                            bin_width=0.01):
         """
         Will retrieve the distribution of the input in self.distribution. \n
         This will slow down the function, as it has to retrieve the input \
@@ -109,14 +688,14 @@ class RecurrentRationalModule(nn.Module):
                 max_saves (int):
                     The range on which the curves of the functions are fitted \
                     together.\n
-                    Default ``1000``
+                    Default ``10000``
         """
         if self._handle_retrieve_mode is not None:
-            print("Already in retrieve mode")
+            # print("Already in retrieve mode")
             return
         from rational.utils.histograms_cupy import Histogram as hist1
         self.distribution = hist1(bin_width)
-        print("Retrieving input from now on.")
+        # print("Retrieving input from now on.")
         if auto_stop:
             self.inputs_saved = 0
             self._handle_retrieve_mode = self.register_forward_hook(_save_input_auto_stop)
@@ -136,462 +715,6 @@ class RecurrentRationalModule(nn.Module):
         return self.rational.show(input_range=input_range, display=display)
 
 
-class Rational(nn.Module):
-    """
-    Rational activation function inherited from ``torch.nn.Module``
-
-    Arguments:
-            approx_func (str):
-                The name of the approximated function for initialisation. \
-                The different initialable functions are available in \
-                `rational.rationals_config.json`. \n
-                Default ``leaky_relu``.
-            degrees (tuple of int):
-                The degrees of the numerator (P) and denominator (Q).\n
-                Default ``(5, 4)``
-            cuda (bool):
-                Use GPU CUDA version. \n
-                If ``None``, use cuda if available on the machine\n
-                Default ``None``
-            version (str):
-                Version of Rational to use. Rational(x) = P(x)/Q(x)\n
-                `A`: Q(x) = 1 + \|b_1.x\| + \|b_2.x\| + ... + \|b_n.x\|\n
-                `B`: Q(x) = 1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
-                `C`: Q(x) = 0.1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
-                `D`: like `B` with noise\n
-                Default ``A``
-            trainable (bool):
-                If the weights are trainable, i.e, if they are updated during \
-                backward pass\n
-                Default ``True``
-    Returns:
-        Module: Rational module
-    """
-
-    def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=None,
-                 version="A", trainable=True, train_numerator=True,
-                 train_denominator=True):
-        super(Rational, self).__init__()
-
-        if cuda is None:
-            cuda = torch_cuda_available()
-        if cuda is True:
-            device = "cuda"
-        elif cuda is False:
-            device = "cpu"
-        else:
-            device = cuda
-
-        w_numerator, w_denominator = get_parameters(version, degrees,
-                                                    approx_func)
-
-        self.numerator = nn.Parameter(torch.FloatTensor(w_numerator).to(device),
-                                      requires_grad=trainable and train_numerator)
-        self.denominator = nn.Parameter(torch.FloatTensor(w_denominator).to(device),
-                                        requires_grad=trainable and train_denominator)
-        self.register_parameter("numerator", self.numerator)
-        self.register_parameter("denominator", self.denominator)
-        self.device = device
-        self.degrees = degrees
-        self.version = version
-        self.training = trainable
-
-        self.init_approximation = approx_func
-
-        if "cuda" in str(device):
-            if version == "A":
-                rational_func = Rational_CUDA_A_F
-            elif version == "B":
-                rational_func = Rational_CUDA_B_F
-            elif version == "C":
-                rational_func = Rational_CUDA_C_F
-            elif version == "D":
-                rational_func = Rational_CUDA_D_F
-            else:
-                raise ValueError("version %s not implemented" % version)
-
-            self.activation_function = rational_func.apply
-        else:
-            if version == "A":
-                rational_func = Rational_PYTORCH_A_F
-            elif version == "B":
-                rational_func = Rational_PYTORCH_B_F
-            elif version == "C":
-                rational_func = Rational_PYTORCH_C_F
-            elif version == "D":
-                rational_func = Rational_PYTORCH_D_F
-            else:
-                raise ValueError("version %s not implemented" % version)
-
-            self.activation_function = rational_func
-        self._handle_retrieve_mode = None
-        self.distribution = None
-        self.best_fitted_function = None
-        self.best_fitted_function_params = None
-
-    def forward(self, x):
-        return self.activation_function(x, self.numerator, self.denominator,
-                                        self.training)
-
-    def __repr__(self):
-        return (f"Rational Activation Function (PYTORCH version "
-                f"{self.version}) of degrees {self.degrees} running on "
-                f"{self.device}"
-                f"\n{self.numerator.device}: {hex(id(self.numerator))}")
-
-    def _cpu(self):
-        if self.version == "A":
-            rational_func = Rational_PYTORCH_A_F
-        elif self.version == "B":
-            rational_func = Rational_PYTORCH_B_F
-        elif self.version == "C":
-            rational_func = Rational_PYTORCH_C_F
-        elif self.version == "D":
-            rational_func = Rational_PYTORCH_D_F
-        else:
-            raise ValueError("version %s not implemented" % self.version)
-        self.activation_function = rational_func
-        self.device = "cpu"
-
-    def _cuda(self, device="0"):
-        if self.version == "A":
-            rational_func = Rational_CUDA_A_F
-        elif self.version == "B":
-            rational_func = Rational_CUDA_B_F
-        elif self.version == "C":
-            rational_func = Rational_CUDA_C_F
-        elif self.version == "D":
-            rational_func = Rational_CUDA_D_F
-        else:
-            raise ValueError("version %s not implemented" % self.version)
-        if "cuda" in str(device):
-            self.device = f"{device}"
-        else:
-            self.device = f"cuda:{device}"
-        self.activation_function = rational_func.apply
-
-    def _to(self, device):
-        """
-        Moves the rational function to its specific device. \n
-
-        Arguments:
-                device (torch device):
-                    The device for the rational
-        """
-        if "cpu" in str(device):
-            self.cpu()
-        elif "cuda" in str(device):
-            self.cuda(device)
-
-    def _apply(self, fn):
-        if "Module.cpu" in str(fn):
-            self._cpu()
-        elif "Module.cuda" in str(fn):
-            self._cuda()
-        elif "Module.to" in str(fn):
-            device = fn.__closure__[1].cell_contents
-            assert type(device) == torch.device  # otherwise loop on __closure__
-            self._to(device)
-        return super()._apply(fn)
-
-    def numpy(self):
-        """
-        Returns a numpy version of this activation function.
-        """
-        from rational.numpy import Rational as Rational_numpy
-        rational_n = Rational_numpy(self.init_approximation, self.degrees,
-                                    self.version)
-        rational_n.numerator = self.numerator.tolist()
-        rational_n.denominator = self.denominator.tolist()
-        return rational_n
-
-    def fit(self, function, x=None, show=False):
-        """
-        Compute the parameters a, b, c, and d to have the neurally equivalent \
-        function of the provided one as close as possible to this rational \
-        function.
-
-        Arguments:
-                function (callable):
-                    The function you want to fit to rational.\n
-                x (array):
-                    The range on which the curves of the functions are fitted
-                    together.\n
-                    Default ``True``
-                show (bool):
-                    If  ``True``, plots the final fitted function and \
-                    rational (using matplotlib).\n
-                    Default ``False``
-        Returns:
-            tuple: ((a, b, c, d), dist) with: \n
-            a, b, c, d: the parameters to adjust the function \
-                (vertical and horizontal scales and bias) \n
-            dist: The final distance between the rational function and the \
-            fitted one
-        """
-        if type(function) is Rational:
-            function = function.numpy()
-        used_dist = False
-        rational_numpy = self.numpy()
-        if x is not None:
-            (a, b, c, d), distance = rational_numpy.fit(function, x)
-        else:
-            if self.distribution is not None:
-                freq, bins = _cleared_arrays(self.distribution)
-                x = bins
-                used_dist = True
-            else:
-                import numpy as np
-                x = np.arange(-3., 3., 0.1)
-            (a, b, c, d), distance = rational_numpy.fit(function, x)
-        if show:
-            import matplotlib.pyplot as plt
-            import torch
-            ax = plt.gca()
-            ax.plot(x, rational_numpy(x), label="Rational (self)")
-            if '__name__' in dir(function):
-                func_label = function.__name__
-            else:
-                func_label = str(function)
-            result = a * function(c * torch.tensor(x) + d) + b
-            ax.plot(x, result, label=f"Fitted {func_label}")
-            if used_dist:
-                ax2 = ax.twinx()
-                ax2.set_yticks([])
-                grey_color = (0.5, 0.5, 0.5, 0.6)
-                ax2.bar(bins, freq, width=bins[1] - bins[0],
-                        color=grey_color, edgecolor=grey_color)
-            ax.legend()
-            plt.show()
-        if self.best_fitted_function is None:
-            self.best_fitted_function = function
-            self.best_fitted_function_params = (a, b, c, d)
-        return (a, b, c, d), distance
-
-    def best_fit(self, functions_list, x=None, shows=False):
-        if self.distribution is not None:
-            freq, bins = _cleared_arrays(self.distribution)
-            x = bins
-        (a, b, c, d), distance = self.fit(functions_list[0], x=x, show=shows)
-        min_dist = distance
-        print(f"{functions_list[0]}: {distance:>3}")
-        params = (a, b, c, d)
-        final_function = functions_list[0]
-        for func in functions_list[1:]:
-            (a, b, c, d), distance = self.fit(func, x=x, show=shows)
-            print(f"{func}: {distance:>3}")
-            if min_dist > distance:
-                min_dist = distance
-                params = (a, b, c, d)
-                final_func = func
-                print(f"{func} is the new best fitted function")
-        self.best_fitted_function = final_func
-        self.best_fitted_function_params = params
-        return final_func, (a, b, c, d)
-
-
-    def _from_old(self, old_rational_func):
-        self.version = old_rational_func.version
-        self.degrees = old_rational_func.degrees
-        self.numerator = old_rational_func.numerator
-        self.denominator = old_rational_func.denominator
-        if "center" in dir(old_rational_func) and old_rational_func.center != 0:
-            print("Found a non zero center, please adapt the bias of the",
-                  "previous layer to have an equivalent neural network")
-        self.training = old_rational_func.training
-        if "init_approximation" not in dir("init_approximation"):
-            self.init_approximation = "leaky_relu"
-        else:
-            self.init_approximation = old_rational_func.init_approximation
-        if "cuda" in str(self.device):
-            if self.version == "A":
-                rational_func = Rational_CUDA_A_F
-            elif self.version == "B":
-                self.rational_func = Rational_CUDA_B_F
-            elif self.version == "C":
-                rational_func = Rational_CUDA_C_F
-            elif self.version == "D":
-                rational_func = Rational_CUDA_D_F
-            else:
-                raise ValueError("version %s not implemented" % self.version)
-
-            self.activation_function = rational_func.apply
-        else:
-            if self.version == "A":
-                rational_func = Rational_PYTORCH_A_F
-            elif self.version == "B":
-                rational_func = Rational_PYTORCH_B_F
-            elif self.version == "C":
-                rational_func = Rational_PYTORCH_C_F
-            elif self.version == "D":
-                rational_func = Rational_PYTORCH_D_F
-            else:
-                raise ValueError("version %s not implemented" % self.version)
-            self.activation_function = rational_func
-
-        self._handle_retrieve_mode = None
-        self.distribution = None
-        return self
-
-    def change_version(self, version):
-        assert version in ["A", "B", "C", "D"]
-        if version == self.version:
-            print(f"This Rational function has already the correct type {self.version}")
-            return
-        if "cuda" in str(self.device):
-            if version == "A":
-                rational_func = Rational_CUDA_A_F
-            elif version == "B":
-                rational_func = Rational_CUDA_B_F
-            elif version == "C":
-                rational_func = Rational_CUDA_C_F
-            elif version == "D":
-                rational_func = Rational_CUDA_D_F
-            else:
-                raise ValueError("version %s not implemented" % version)
-            self.activation_function = rational_func.apply
-            self.version = version
-        else:
-            if version == "A":
-                rational_func = Rational_PYTORCH_A_F
-            elif version == "B":
-                rational_func = Rational_PYTORCH_B_F
-            elif version == "C":
-                rational_func = Rational_PYTORCH_C_F
-            elif version == "D":
-                rational_func = Rational_PYTORCH_D_F
-            else:
-                raise ValueError("version %s not implemented" % self.version)
-            self.activation_function = rational_func
-            self.version = version
-
-    def input_retrieve_mode(self, auto_stop=True, max_saves=1000, bin_width=0.1):
-        """
-        Will retrieve the distribution of the input in self.distribution. \n
-        This will slow down the function, as it has to retrieve the input \
-        dist.\n
-
-        Arguments:
-                auto_stop (bool):
-                    If True, the retrieving will stop after `max_saves` \
-                    calls to forward.\n
-                    Else, use :meth:`torch.Rational.training_mode`.\n
-                    Default ``True``
-                max_saves (int):
-                    The range on which the curves of the functions are fitted \
-                    together.\n
-                    Default ``1000``
-        """
-        if self._handle_retrieve_mode is not None:
-            print("Already in retrieve mode")
-            return
-        from rational.utils.histograms_cupy import Histogram as hist1
-        self.distribution = hist1(bin_width)
-        # from physt import h1 as hist1
-        # self.distribution = hist1(None, "fixed_width", bin_width=bin_width,
-        #                           adaptive=True)
-        print("Retrieving input from now on.")
-        if auto_stop:
-            self.inputs_saved = 0
-            self._handle_retrieve_mode = self.register_forward_hook(_save_input_auto_stop)
-            self._max_saves = max_saves
-        else:
-            self._handle_retrieve_mode = self.register_forward_hook(_save_input)
-        self.forward(torch.tensor([1., 2.]).cuda())
-        self(torch.tensor([1., 2.]).cuda())
-
-
-    def training_mode(self):
-        """
-        Stops retrieving the distribution of the input in `self.distribution`.
-        """
-        print("Training mode, no longer retrieving the input.")
-        self._handle_retrieve_mode.remove()
-        self._handle_retrieve_mode = None
-
-    def show(self, input_range=None, fitted_function=True, display=True,
-             tolerance=0.001, exclude_zero=False):
-        """
-        Show the function using `matplotlib`.
-
-        Arguments:
-                input_range (range):
-                    The range to print the function on.\n
-                    Default ``None``
-                fitted_function (bool):
-                    If ``True``, displays the best fitted function if searched.
-                    Otherwise, returns it. \n
-                    Default ``True``
-                display (bool):
-                    If ``True``, displays the graph.
-                    Otherwise, returns a dictionary with functions informations. \n
-                    Default ``True``
-                tolerance (float):
-                    Tolerance the bins frequency.
-                    If tolerance is 0.001, every frequency smaller than 0.001. will be cutted out of the histogram.\n
-                    Default ``True``
-        """
-        freq = None
-        if input_range is None and self.distribution is None:
-            input_range = torch.arange(-3, 3, 0.01, device=self.device)
-        elif self.distribution is not None and len(self.distribution.bins) > 0:
-            freq, bins = _cleared_arrays(self.distribution, tolerance)
-            if freq is not None:
-                input_range = torch.tensor(bins, device=self.device).float()
-        else:
-            input_range = torch.tensor(input_range, device=self.device).float()
-        outputs = self.activation_function(input_range, self.numerator,
-                                           self.denominator, False)
-        inputs_np = input_range.detach().cpu().numpy()
-        outputs_np = outputs.detach().cpu().numpy()
-        if display:
-            import matplotlib.pyplot as plt
-            try:
-                import seaborn as sns
-                sns.set_style("whitegrid")
-            except ImportError:
-                print("Seaborn not found on computer, install it for better",
-                      "visualisation")
-            ax = plt.gca()
-            if freq is not None:
-                ax2 = ax.twinx()
-                ax2.set_yticks([])
-                grey_color = (0.5, 0.5, 0.5, 0.6)
-                if exclude_zero:
-                    bins = bins[1:]
-                    freq = freq[1:]
-                ax2.bar(bins, freq, width=bins[1] - bins[0],
-                        color=grey_color, edgecolor=grey_color)
-            ax.plot(inputs_np, outputs_np, label="Rational (self)")
-            if self.best_fitted_function is not None:
-                if '__name__' in dir(self.best_fitted_function):
-                    func_label = self.best_fitted_function.__name__
-                else:
-                    func_label = str(self.best_fitted_function)
-                a, b, c, d = self.best_fitted_function_params
-                result = a * self.best_fitted_function(c * torch.tensor(inputs_np).to(self.device) + d) + b
-                ax.plot(inputs_np, result.detach().cpu().numpy(), "r-", label=f"Fitted {func_label}")
-            ax.legend()
-            plt.show()
-        else:
-            if freq is None:
-                hist_dict = None
-            else:
-                hist_dict = {"bins": bins, "freq": freq,
-                             "width": bins[1] - bins[0]}
-            if "best_fitted_function" not in dir(self) or self.best_fitted_function is None:
-                fitted_function = None
-            else:
-                a, b, c, d = self.best_fitted_function_params
-                result = a * self.best_fitted_function(c * torch.tensor(inputs_np).to(self.device) + d) + b
-                fitted_function = {"function": self.best_fitted_function,
-                                   "params": (a, b, c, d),
-                                   "y": result.detach().cpu().numpy()}
-            return {"hist": hist_dict,
-                    "line": {"x": inputs_np, "y": outputs_np},
-                    "fitted_function": fitted_function}
-
-
 def _save_input(self, input, output):
     self.distribution.fill_n(input[0])
 
@@ -601,60 +724,3 @@ def _save_input_auto_stop(self, input, output):
     self.distribution.fill_n(input[0])
     if self.inputs_saved > self._max_saves:
         self.training_mode()
-
-
-def _cleared_arrays(hist, tolerance=0.001):
-    freq, bins = hist.normalize()
-    first = (freq > tolerance).argmax()
-    last = - (freq > tolerance)[::-1].argmax()
-    if last == 0:
-        return freq[first:], bins[first:]
-    return freq[first:last], bins[first:last]
-
-
-class AugmentedRational(nn.Module):
-    """
-    Augmented Rational activation function inherited from ``Rational``
-
-    Arguments:
-            approx_func (str):
-                The name of the approximated function for initialisation. \
-                The different initialable functions are available in
-                `rational.rationals_config.json`. \n
-                Default ``leaky_relu``.
-            degrees (tuple of int):
-                The degrees of the numerator (P) and denominator (Q).\n
-                Default ``(5, 4)``
-            cuda (bool):
-                Use GPU CUDA version. If None, use cuda if available on the
-                machine\n
-                Default ``None``
-            version (str):
-                Version of Rational to use. Rational(x) = P(x)/Q(x)\n
-                `A`: Q(x) = 1 + \|b_1.x\| + \|b_2.x\| + ... + \|b_n.x\|\n
-                `B`: Q(x) = 1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
-                `C`: Q(x) = 0.1 + \|b_1.x + b_2.x + ... + b_n.x\|\n
-                `D`: like `B` with noise\n
-                Default ``A``
-            trainable (bool):
-                If the weights are trainable, i.e, if they are updated during
-                backward pass\n
-                Default ``True``
-    Returns:
-        Module: Augmented Rational module
-    """
-
-    def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=None,
-                 version="A", trainable=True, train_numerator=True,
-                 train_denominator=True):
-        super(AugmentedRational, self).__init__()
-        self.in_bias = nn.Parameter(torch.FloatTensor([0.0]))
-        self.out_bias = nn.Parameter(torch.FloatTensor([0.0]))
-        self.vertical_scale = nn.Parameter(torch.FloatTensor([1.0]))
-        self.horizontal_scale = nn.Parameter(torch.FloatTensor([1.0]))
-
-    def forward(self, x):
-        x = self.horizontal_scale * x + self.in_bias
-        out = self.activation_function(x, self.numerator, self.denominator,
-                                       self.training)
-        return self.vertical_scale * out + self.out_bias
