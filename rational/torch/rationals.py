@@ -402,8 +402,8 @@ class Rational(Rational_base, nn.Module):
             self.distribution.weights = _distribution["weights"]
         super().load_state_dict(state_dict)
 
-    def state_dict(self, destination=None):
-        _state_dict = super().state_dict(destination)
+    def state_dict(self, destination=None, *args, **kwargs):
+        _state_dict = super().state_dict(destination, *args, **kwargs)
         if self.distribution is not None:
             _state_dict["distribution"] = {"bins": self.distribution.bins,
                                            "weights": self.distribution.weights}

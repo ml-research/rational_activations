@@ -681,3 +681,7 @@ class Rational_base():
             return (f"Rational Activation Function "
                     f"({self.version}) of degrees {self.degrees} running on "
                     f"{self.device}")
+
+    def __str__(self):
+        deg = f"{self.degrees[0]}_{self.degrees[1]}"
+        return f"Rational_{deg}_{self.func_name}"
