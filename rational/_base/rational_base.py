@@ -24,7 +24,8 @@ class Rational_base():
     _step = 0
 
     def __init__(self, name):
-        super().__init__()
+        print("In Base")
+        # super().__init__()
         self._handle_retrieve_mode = None
         self.distribution = None
         self.best_fitted_function = None

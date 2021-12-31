@@ -16,6 +16,7 @@ from rational._base.rational_base import Rational_base
 from rational.torch.rational_pytorch_functions import Rational_PYTORCH_A_F, \
     Rational_PYTORCH_B_F, Rational_PYTORCH_C_F, Rational_PYTORCH_D_F, \
     Rational_NONSAFE_F, Rational_CUDA_NONSAFE_F, _get_xps
+from .functions import ActivationModule
 
 
 if torch_cuda_available():
@@ -26,7 +27,7 @@ if torch_cuda_available():
         pass
 
 
-class Rational(Rational_base, nn.Module):
+class Rational(ActivationModule, Rational_base):
     """
     Rational activation function inherited from ``torch.nn.Module``.
 
@@ -61,10 +62,11 @@ class Rational(Rational_base, nn.Module):
     def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=None,
                  version="A", trainable=True, train_numerator=True,
                  train_denominator=True, name=None):
-
+        print("In Rational")
         if name is None:
             name = approx_func
-        super().__init__(name)
+        ActivationModule.__init__(self, name)
+        Rational_base.__init__(self, name)
 
         if cuda is None:
             cuda = torch_cuda_available()
@@ -298,39 +300,39 @@ class Rational(Rational_base, nn.Module):
             self.activation_function = rational_func
             self.version = version
 
-    def input_retrieve_mode(self, auto_stop=False, max_saves=1000,
-                            bin_width=0.1):
-        """
-        Will retrieve the distribution of the input in self.distribution. \n
-        This will slow down the function, as it has to retrieve the input \
-        dist.\n
-
-        Arguments:
-                auto_stop (bool):
-                    If True, the retrieving will stop after `max_saves` \
-                    calls to forward.\n
-                    Else, use :meth:`torch.Rational.training_mode`.\n
-                    Default ``False``
-                max_saves (int):
-                    The range on which the curves of the functions are fitted \
-                    together.\n
-                    Default ``1000``
-        """
-        if self._handle_retrieve_mode is not None:
-            # print("Already in retrieve mode")
-            return
-        if "cuda" in self.device:
-            from rational.utils.histograms_cupy import Histogram
-        else:
-            from rational.utils.histograms_numpy import Histogram
-        self.distribution = Histogram(bin_width)
-        # print("Retrieving input from now on.")
-        if auto_stop:
-            self.inputs_saved = 0
-            self._handle_retrieve_mode = self.register_forward_hook(_save_input_auto_stop)
-            self._max_saves = max_saves
-        else:
-            self._handle_retrieve_mode = self.register_forward_hook(_save_input)
+    # def input_retrieve_mode(self, auto_stop=False, max_saves=1000,
+    #                         bin_width=0.1):
+    #     """
+    #     Will retrieve the distribution of the input in self.distribution. \n
+    #     This will slow down the function, as it has to retrieve the input \
+    #     dist.\n
+    #
+    #     Arguments:
+    #             auto_stop (bool):
+    #                 If True, the retrieving will stop after `max_saves` \
+    #                 calls to forward.\n
+    #                 Else, use :meth:`torch.Rational.training_mode`.\n
+    #                 Default ``False``
+    #             max_saves (int):
+    #                 The range on which the curves of the functions are fitted \
+    #                 together.\n
+    #                 Default ``1000``
+    #     """
+    #     if self._handle_retrieve_mode is not None:
+    #         # print("Already in retrieve mode")
+    #         return
+    #     if "cuda" in self.device:
+    #         from rational.utils.histograms_cupy import Histogram
+    #     else:
+    #         from rational.utils.histograms_numpy import Histogram
+    #     self.distribution = Histogram(bin_width)
+    #     # print("Retrieving input from now on.")
+    #     if auto_stop:
+    #         self.inputs_saved = 0
+    #         self._handle_retrieve_mode = self.register_forward_hook(_save_input_auto_stop)
+    #         self._max_saves = max_saves
+    #     else:
+    #         self._handle_retrieve_mode = self.register_forward_hook(_save_input)
 
     def clear_hist(self):
         self.inputs_saved = 0
@@ -699,36 +701,36 @@ class RecurrentRationalModule(nn.Module):
     def fit(self, function, x=None, show=False):
         return self.rational.fit(function=function, x=x, show=show)
 
-    def input_retrieve_mode(self, auto_stop=True, max_saves=10000,
-                            bin_width=0.01):
-        """
-        Will retrieve the distribution of the input in self.distribution. \n
-        This will slow down the function, as it has to retrieve the input \
-        dist.\n
-
-        Arguments:
-                auto_stop (bool):
-                    If True, the retrieving will stop after `max_saves` \
-                    calls to forward.\n
-                    Else, use :meth:`torch.Rational.training_mode`.\n
-                    Default ``True``
-                max_saves (int):
-                    The range on which the curves of the functions are fitted \
-                    together.\n
-                    Default ``10000``
-        """
-        if self._handle_retrieve_mode is not None:
-            # print("Already in retrieve mode")
-            return
-        from rational.utils.histograms_cupy import Histogram as hist1
-        self.distribution = hist1(bin_width)
-        # print("Retrieving input from now on.")
-        if auto_stop:
-            self.inputs_saved = 0
-            self._handle_retrieve_mode = self.register_forward_hook(_save_input_auto_stop)
-            self._max_saves = max_saves
-        else:
-            self._handle_retrieve_mode = self.register_forward_hook(_save_input)
+    # def input_retrieve_mode(self, auto_stop=True, max_saves=10000,
+    #                         bin_width=0.01):
+    #     """
+    #     Will retrieve the distribution of the input in self.distribution. \n
+    #     This will slow down the function, as it has to retrieve the input \
+    #     dist.\n
+    #
+    #     Arguments:
+    #             auto_stop (bool):
+    #                 If True, the retrieving will stop after `max_saves` \
+    #                 calls to forward.\n
+    #                 Else, use :meth:`torch.Rational.training_mode`.\n
+    #                 Default ``True``
+    #             max_saves (int):
+    #                 The range on which the curves of the functions are fitted \
+    #                 together.\n
+    #                 Default ``10000``
+    #     """
+    #     if self._handle_retrieve_mode is not None:
+    #         # print("Already in retrieve mode")
+    #         return
+    #     from rational.utils.histograms_cupy import Histogram as hist1
+    #     self.distribution = hist1(bin_width)
+    #     # print("Retrieving input from now on.")
+    #     if auto_stop:
+    #         self.inputs_saved = 0
+    #         self._handle_retrieve_mode = self.register_forward_hook(_save_input_auto_stop)
+    #         self._max_saves = max_saves
+    #     else:
+    #         self._handle_retrieve_mode = self.register_forward_hook(_save_input)
 
     def gradient_retrieve_mode(self, auto_stop=True, max_saves=10000,
                                bin_width=0.01):
@@ -777,15 +779,15 @@ class RecurrentRationalModule(nn.Module):
         return self.rational.show(input_range=input_range, display=display)
 
 
-def _save_input(self, input, output):
-    self.distribution.fill_n(input[0])
-
-
-def _save_input_auto_stop(self, input, output):
-    self.inputs_saved += 1
-    self.distribution.fill_n(input[0])
-    if self.inputs_saved > self._max_saves:
-        self.training_mode()
+# def _save_input(self, input, output):
+#     self.distribution.fill_n(input[0])
+#
+#
+# def _save_input_auto_stop(self, input, output):
+#     self.inputs_saved += 1
+#     self.distribution.fill_n(input[0])
+#     if self.inputs_saved > self._max_saves:
+#         self.training_mode()
 
 
 def _save_gradient(self, gradient):
