@@ -12,7 +12,7 @@ def get_parameters(rational_version, degrees, approx_func):
     with open(os.path.join(config_file_dir, config_file)) as json_file:
         rationals_dict = json.load(json_file)
     if rational_full_name not in rationals_dict:
-        config_not_found = f"{rational_full_name} approximating {approx_func} not found in {config_file}.\
+        config_not_found = f"{rational_full_name} approximating \"{approx_func}\" not found in {config_file}.\
                               \nPlease add it (modify and run find_init_weights.py)"
         url = "https://rational-activations.readthedocs.io/en/latest/tutorials/tutorials.1_find_weights_for_initialization.html"
         raise RationalImportError(config_not_found, url)
