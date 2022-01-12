@@ -26,6 +26,9 @@ if torch_cuda_available():
     except ImportError:
         pass
 
+def _save_input(self, input, output):
+    self._selected_distribution.fill_n(input[0])
+
 
 class Rational(ActivationModule, Rational_base):
     """
@@ -62,7 +65,7 @@ class Rational(ActivationModule, Rational_base):
     def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=None,
                  version="A", trainable=True, train_numerator=True,
                  train_denominator=True, name=None):
-        print("In Rational")
+        # print("coucou"); exit()
         if name is None:
             name = approx_func
         ActivationModule.__init__(self, name)
@@ -334,14 +337,14 @@ class Rational(ActivationModule, Rational_base):
     #     else:
     #         self._handle_retrieve_mode = self.register_forward_hook(_save_input)
 
-    def clear_hist(self):
-        self.inputs_saved = 0
-        bin_width = self.distribution.bin_size
-        if "cuda" in self.device:
-            from rational.utils.histograms_cupy import Histogram
-        else:
-            from rational.utils.histograms_numpy import Histogram
-        self.distribution = Histogram(bin_width)
+    # def clear_hist(self):
+    #     self.inputs_saved = 0
+    #     bin_width = self.distribution.bin_size
+    #     if "cuda" in self.device:
+    #         from rational.utils.histograms_cupy import Histogram
+    #     else:
+    #         from rational.utils.histograms_numpy import Histogram
+    #     self.distribution = Histogram(bin_width)
 
     def training_mode(self):
         """
@@ -388,28 +391,6 @@ class Rational(ActivationModule, Rational_base):
             for rat in self.list:
                 rat._saving_input = False
                 rat.training_mode()
-
-    def load_state_dict(self, state_dict):
-        if "distribution" in state_dict.keys():
-            _distribution = state_dict.pop("distribution")
-            if "cuda" in self.device and _cupy_installed():
-                msg = f"Loading input distribution on {self.device} using cupy"
-                RationalLoadWarning.warn(msg)
-                from rational.utils.histograms_cupy import Histogram
-                self.distribution = Histogram()
-            else:
-                from rational.utils.histograms_numpy import Histogram
-                self.distribution = Histogram()
-            self.distribution.bins = _distribution["bins"]
-            self.distribution.weights = _distribution["weights"]
-        super().load_state_dict(state_dict)
-
-    def state_dict(self, destination=None, *args, **kwargs):
-        _state_dict = super().state_dict(destination, *args, **kwargs)
-        if self.distribution is not None:
-            _state_dict["distribution"] = {"bins": self.distribution.bins,
-                                           "weights": self.distribution.weights}
-        return _state_dict
 
     @property
     def saving_input(self):

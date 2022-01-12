@@ -6,6 +6,10 @@ from .warnings import RationalImportError
 
 def get_parameters(rational_version, degrees, approx_func):
     nd, dd = degrees
+    if approx_func == "identity":
+        return [0., 1.] + [0.] * (nd - 1), [0.] * dd
+    elif approx_func == "ones":
+        return [1.] * (nd + 1), [1.] * dd
     rational_full_name = f"Rational_version_{rational_version}{nd}/{dd}"
     config_file = '../rationals_config.json'
     config_file_dir = str(Path(os.path.abspath(__file__)).parent)

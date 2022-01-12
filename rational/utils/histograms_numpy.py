@@ -45,10 +45,6 @@ class Histogram():
                                                    weights, bins[:-1],
                                                    self.bin_size, self._rd)
 
-    @property
-    def is_empty(self):
-        return self._empty
-
     def __repr__(self):
         if self.is_empty:
             rtrn = "Empty Histogram"
@@ -103,7 +99,6 @@ class Histogram():
         kde = sts.gaussian_kde(self.bins, bw_method=0.13797296614612148,
                                weights=self.weights)
         return kde.pdf
-
 
 
 def concat_hists(weights1, bins1, weights2, bins2, bin_size, rd):

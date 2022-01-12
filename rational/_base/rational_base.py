@@ -19,13 +19,11 @@ from rational.utils.warnings import RationalWarning, \
 class Rational_base():
     count = 0
     list = []
-    use_kde = True
+    distribution_display_mode = "kde"
     use_multiple_axis = False
     _step = 0
 
     def __init__(self, name):
-        print("In Base")
-        # super().__init__()
         self._handle_retrieve_mode = None
         self.distribution = None
         self.best_fitted_function = None
@@ -42,7 +40,7 @@ class Rational_base():
     @classmethod
     def show_all(cls, x=None, fitted_function=True, other_func=None,
                  display=True, tolerance=0.001, title=None, axes=None,
-                 layout="auto", writer=None, step=None, hist_color="#1f77b4"):
+                 layout="auto", writer=None, step=None, colors="#1f77b4"):
         """
         Shows a graph of the all instanciated rational functions (or returns \
         it if ``returns=True``).
@@ -112,18 +110,20 @@ class Rational_base():
         elif isinstance(axes, plt.Axes):
             axes = np.array([axes for _ in range(len(cls.list))])
             fig = plt.gcf()
+        if isinstance(colors, str):
+            colors = [colors]*len(axes.flatten())
         if isinstance(x, list):
-            for rat, ax, x_rat in zip(cls.list, axes.flatten(), x):
+            for rat, ax, x_rat, color in zip(cls.list, axes.flatten(), x, colors):
                 rat.show(x_rat, fitted_function, other_func, False, tolerance,
                          title, axis=ax, writer=writer, step=step,
-                         hist_color=hist_color)
+                         color=color)
         else:
-            for rat, ax in zip(cls.list, axes.flatten()):
+            for rat, ax, color in zip(cls.list, axes.flatten(), colors):
                 rat.show(x, fitted_function, other_func, False, tolerance,
                          title, axis=ax, writer=writer, step=step,
-                         hist_color=hist_color)
-        # if title is not None:
-        #     fig.suptitle(title, y=1.02)
+                         color=color)
+        if title is not None:
+            fig.suptitle(title, y=0.95)
         fig = plt.gcf()
         fig.tight_layout()
         if writer is not None:
@@ -132,77 +132,77 @@ class Rational_base():
                 cls._step += 1
             writer.add_figure(title, fig, step)
         elif display:
-            plt.legend()
+            # plt.legend()
             plt.show()
         else:
             return fig
 
-    def show(self, x=None, fitted_function=True, other_func=None, display=True,
-             tolerance=0.001, title=None, axis=None, writer=None, step=None,
-             hist_color="#1f77b4"):
-        """
-        Shows a graph of the function (or returns it if ``returns=True``).
-
-        Arguments:
-                x (range):
-                    The range to print the function on.\n
-                    Default ``None``
-                fitted_function (bool):
-                    If ``True``, displays the best fitted function if searched.
-                    Otherwise, returns it. \n
-                    Default ``True``
-                other_funcs (callable):
-                    another function to be plotted or a list of other callable
-                    functions or a dictionary with the function name as key
-                    and the callable as value.
-                display (bool):
-                    If ``True``, displays the plot.
-                    Otherwise, returns the figure. \n
-                    Default ``False``
-                tolerance (float):
-                    If the input histogram is used, it will be pruned. \n
-                    Every bin containg less than `tolerance` of the total \
-                    input is pruned out.
-                    (Reduces noise).
-                    Default ``0.001``
-                title (str):
-                    If not None, a title for the figure
-                    Default ``None``
-                axis (matplotlib.pyplot.axis):
-                    axis to be plotted on. If None, creates one automatically.
-                    Default ``None``
-                writer (tensorboardX.SummaryWriter):
-                    A tensorboardX writer to give the image to, in case of
-                    debugging.
-                    Default ``None``
-                step (int):
-                    A step/epoch for tensorboardX writer.
-                    If None, incrementing itself.
-                    Default ``None``
-        """
-        snap = self.capture(returns=True)
-        # snap.histogram = self.distribution
-        if title is None:
-            rats_names = [_erase_suffix(rat.func_name) for rat in self.list]
-            if len(set(rats_names)) != 1:
-                title = self.func_name
-        if axis is None:
-            fig = snap.show(x, fitted_function, other_func, display, tolerance,
-                            title, duplicate_axis=self.use_multiple_axis)
-            if writer is not None:
-                if step is None:
-                    step = self._step
-                    self._step += 1
-                try:
-                    writer.add_figure(title, fig, step)
-                except AttributeError:
-                    print("Could not use the given SummaryWriter to add the Rational figure")
-            elif not display:
-                return fig
-        else:
-            snap.show(x, fitted_function, other_func, display, tolerance,
-                      title, axis=axis, duplicate_axis=self.use_multiple_axis,
-                      hist_color=hist_color)
+    # def show(self, x=None, fitted_function=True, other_func=None, display=True,
+    #          tolerance=0.001, title=None, axis=None, writer=None, step=None,
+    #          color="#1f77b4"):
+    #     """
+    #     Shows a graph of the function (or returns it if ``returns=True``).
+    #
+    #     Arguments:
+    #             x (range):
+    #                 The range to print the function on.\n
+    #                 Default ``None``
+    #             fitted_function (bool):
+    #                 If ``True``, displays the best fitted function if searched.
+    #                 Otherwise, returns it. \n
+    #                 Default ``True``
+    #             other_funcs (callable):
+    #                 another function to be plotted or a list of other callable
+    #                 functions or a dictionary with the function name as key
+    #                 and the callable as value.
+    #             display (bool):
+    #                 If ``True``, displays the plot.
+    #                 Otherwise, returns the figure. \n
+    #                 Default ``False``
+    #             tolerance (float):
+    #                 If the input histogram is used, it will be pruned. \n
+    #                 Every bin containg less than `tolerance` of the total \
+    #                 input is pruned out.
+    #                 (Reduces noise).
+    #                 Default ``0.001``
+    #             title (str):
+    #                 If not None, a title for the figure
+    #                 Default ``None``
+    #             axis (matplotlib.pyplot.axis):
+    #                 axis to be plotted on. If None, creates one automatically.
+    #                 Default ``None``
+    #             writer (tensorboardX.SummaryWriter):
+    #                 A tensorboardX writer to give the image to, in case of
+    #                 debugging.
+    #                 Default ``None``
+    #             step (int):
+    #                 A step/epoch for tensorboardX writer.
+    #                 If None, incrementing itself.
+    #                 Default ``None``
+    #     """
+    #     snap = self.capture(returns=True)
+    #     # snap.histogram = self.distribution
+    #     if title is None:
+    #         rats_names = [_erase_suffix(rat.func_name) for rat in self.list]
+    #         if len(set(rats_names)) != 1:
+    #             title = self.func_name
+    #     if axis is None:
+    #         fig = snap.show(x, fitted_function, other_func, display, tolerance,
+    #                         title, duplicate_axis=self.use_multiple_axis)
+    #         if writer is not None:
+    #             if step is None:
+    #                 step = self._step
+    #                 self._step += 1
+    #             try:
+    #                 writer.add_figure(title, fig, step)
+    #             except AttributeError:
+    #                 print("Could not use the given SummaryWriter to add the Rational figure")
+    #         elif not display:
+    #             return fig
+    #     else:
+    #         snap.show(x, fitted_function, other_func, display, tolerance,
+    #                   title, axis=axis, duplicate_axis=self.use_multiple_axis,
+    #                   color=color)
 
     @classmethod
     def capture_all(cls, name="snapshot_0", x=None, fitted_function=True,

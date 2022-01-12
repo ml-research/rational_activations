@@ -414,8 +414,8 @@ class Snapshot():
 #         return freq[first:], bins[first:]
 #     return freq[first:last], bins[first:last]
 
-def _cleared_arrays(hist, tolerance=0.001):
-    weights, bins = hist.weights, hist.bins
+def _cleared_arrays(weights, bins, tolerance=0.001):
+    # weights, bins = hist.weights, hist.bins
     total = weights.sum()
     first = (weights > tolerance*total).argmax()
     last = - (weights > tolerance*total)[::-1].argmax()
