@@ -63,7 +63,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
         self.use_kde = True
 
     def input_retrieve_mode(self, auto_stop=False, max_saves=1000,
-                            bin_width=0.01, mode="all", category_name=0):
+                            bin_width=0.01, mode="all", category_name=None):
         """
         Will retrieve the distribution of the input in self.distribution. \n
         This will slow down the function, as it has to retrieve the input \
@@ -102,10 +102,16 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
         else:
             from rational.utils.histograms_numpy import Histogram
         if "categor" in mode.lower():
-            self._selected_distribution_name = category_name
-            self.categories = [category_name]
-            self._selected_distribution = Histogram(bin_width)
-            self.distributions = [self._selected_distribution]
+            if category_name is None:
+                self._selected_distribution_name = None
+                self.categories = []
+                self._selected_distribution = None
+                self.distributions = []
+            else:
+                self._selected_distribution_name = category_name
+                self.categories = [category_name]
+                self._selected_distribution = Histogram(bin_width)
+                self.distributions = [self._selected_distribution]
         else:
             self._selected_distribution_name = "distribution"
             self.categories = ["distribution"]
@@ -208,25 +214,32 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
         elif not(isinstance(colors, list) or isinstance(colors, tuple)):
             colors = [colors] * len(self.distributions)
         for distribution, inp_label, color in zip(self.distributions, self.categories, colors):
-            weights, x = _cleared_arrays(distribution.weights, distribution.bins, 0.0001)
-            # weights, x = distribution.weights, distribution.bins
-            if self.distribution_display_mode == "kde" and scipy_imported:
-                if len(x) > 5:
-                    refined_bins = np.linspace(x[0], x[-1], 200)
-                    kde_curv = distribution.kde()(refined_bins)
-                    # ax.plot(refined_bins, kde_curv, lw=0.1)
-                    fill = ax.fill_between(refined_bins, kde_curv, alpha=0.45,
-                                           color=color, label=inp_label)
+            if distribution.is_empty:
+                if self.distribution_display_mode == "kde" and scipy_imported:
+                    fill = ax.fill_between([], [], label=inp_label,  alpha=0.)
                 else:
-                    print("The bin size is too big, bins contain too few "
-                          "elements.\nbins:", x)
-                    ax.bar([], []) # in case of remove needed
+                    fill = ax.bar([], [], label=inp_label,  alpha=0.)
+                dists_fb.append(fill)
             else:
-                fill = ax.bar(x, weights/weights.max(), width=x[1] - x[0],
-                              linewidth=0, alpha=0.3, label=inp_label)
-            dists_fb.append(fill)
-            x_min, x_max = min(x_min, x[0]), max(x_max, x[-1])
-            size = x[1] - x[0]
+                weights, x = _cleared_arrays(distribution.weights, distribution.bins, 0.0001)
+                # weights, x = distribution.weights, distribution.bins
+                if self.distribution_display_mode == "kde" and scipy_imported:
+                    if len(x) > 5:
+                        refined_bins = np.linspace(x[0], x[-1], 200)
+                        kde_curv = distribution.kde()(refined_bins)
+                        # ax.plot(refined_bins, kde_curv, lw=0.1)
+                        fill = ax.fill_between(refined_bins, kde_curv, alpha=0.45,
+                                               color=color, label=inp_label)
+                    else:
+                        print("The bin size is too big, bins contain too few "
+                              "elements.\nbins:", x)
+                        fill = ax.bar([], []) # in case of remove needed
+                else:
+                    fill = ax.bar(x, weights/weights.max(), width=x[1] - x[0],
+                                  linewidth=0, alpha=0.3, label=inp_label)
+                dists_fb.append(fill)
+                x_min, x_max = min(x_min, x[0]), max(x_max, x[-1])
+                size = x[1] - x[0]
         if self.distribution_display_mode in ["kde", "bar"]:
             leg = ax.legend(fancybox=True, shadow=True)
             leg.get_frame().set_alpha(0.4)
@@ -242,7 +255,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
                 if "get_visible" in dir(orig):
                     vis = not orig.get_visible()
                     orig.set_visible(vis)
-                    color = orig.get_facecolors()
+                    color = orig.get_facecolors()[0]
                 else:
                     vis = not orig.patches[0].get_visible()
                     color = orig.patches[0].get_facecolor()
@@ -370,7 +383,7 @@ if __name__ == '__main__':
         gaussian = lambda x: torch.exp(-0.5*x**2) / _2pi_sqrt
         gaussian.__name__ = "gaussian"
         gau = ActivationModule(gaussian)
-        gau.input_retrieve_mode(mode=mode, category_name="neg")
+        gau.input_retrieve_mode(mode=mode, category_name="neg") # Wrong
         inp = torch.stack([(torch.rand(10000)-(i+1))*2 for i in range(5)], 1)
         gau(inp.cuda())
         # gau(inp.cuda())

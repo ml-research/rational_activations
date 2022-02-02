@@ -2,7 +2,7 @@ import cupy as cp
 from torch.utils.dlpack import to_dlpack
 import scipy.stats as sts
 import numpy as np
-
+from termcolor import colored
 
 class Histogram():
     """
@@ -120,12 +120,13 @@ class LayerHistogram():
     """
     Input Histograms, used to retrieve the input of Rational Activations
     """
-    def __init__(self, bin_size="auto", random_select=False, nb_neurons=5):
-        self.__bins = [cp.array([]) for _ in range(nb_neurons)]
-        self.__weights = [cp.array([], dtype=cp.uint32) for _ in range(nb_neurons)]
+    def __init__(self, bin_size="auto", random_select=False, nb_neurons="auto"):
         self._empty = True
         self._verbose = False
         self.nb_neurons = nb_neurons
+        if nb_neurons != "auto":
+            self.__bins = [cp.array([]) for _ in range(nb_neurons)]
+            self.__weights = [cp.array([], dtype=cp.uint32) for _ in range(nb_neurons)]
         if bin_size == "auto":
             self._auto_bin_size = True
             self.bin_size = 0.0001
@@ -140,6 +141,15 @@ class LayerHistogram():
         self._fill_iplm(cp.fromDlpack(to_dlpack(input.T)))
 
     def _first_time_fill(self, new_input):
+        n_neurs = new_input.shape[0]
+        if n_neurs != self.nb_neurons:
+            if self.nb_neurons != "auto":
+                msg = f"It seems that the layer currently has {n_neurs} neurons.\n"
+                msg += "Automatically changing."
+                print(colored(msg, "yellow"))
+            self.nb_neurons = n_neurs
+            self.__bins = [cp.array([]) for _ in range(n_neurs)]
+            self.__weights = [cp.array([], dtype=cp.uint32) for _ in range(n_neurs)]
         if self._auto_bin_size:
             # on the complete input to get the total range
             range_ext = cp.around(new_input.min() - self.bin_size / 2, self._rd), \
