@@ -4,7 +4,7 @@ import torch
 def _get_xps(z, len_numerator, len_denominator):
     xps = list()
     xps.append(z)
-    for _ in range(max(len_numerator, len_denominator) - 2):
+    for _ in range(max(len_numerator, len_denominator+1) - 2):
         xps.append(xps[-1].mul(z))
     xps.insert(0, torch.ones_like(z))
     return torch.stack(xps, 1)
@@ -67,6 +67,7 @@ def Rational_PYTORCH_D_F(x, weight_numerator, weight_denominator, training, rand
     denominator = xps[:, 1:len_deno+1].mul(weight_denominator).sum(1).abs()
     return numerator.div(1 + denominator).view(x.shape)
 
+
 def Rational_NONSAFE_F(x, weight_numerator, weight_denominator, training):
     # P(X) / Q(X) = a_0 + a_1 * X + ... + a_n * X^n /
     #               1 + b_1 * X + b_1 * X^2 + ... + b_m * X^m
@@ -77,6 +78,19 @@ def Rational_NONSAFE_F(x, weight_numerator, weight_denominator, training):
     numerator = xps.mul(weight_numerator).sum(1)
     denominator = xps[:, 1:len_deno+1].mul(weight_denominator).sum(1)
     return numerator.div(1 + denominator).view(x.shape)
+
+
+def Rational_TENT_F(x, weight_numerator, weight_denominator, training):
+    # P(X) / Q(X) = (X - ~a_0) * (X + ~a0) * (a0 + a1*x + ... + a_n-1 * X^n-2) /
+    #               1 + b_1 * X + b_1 * X^2 + ... + b_m * X^m
+    k = weight_numerator[0]
+    z = x.view(-1)
+    len_num, len_deno = len(weight_numerator), len(weight_denominator)
+    xps = _get_xps(z, len_num-2, len_deno).to(weight_numerator.device)
+    numerator = (xps[:, :len_num-1].mul(weight_numerator[1:]).sum(1)).mul(torch.relu(z+k)).mul(-torch.relu(-z+k))
+    denominator = xps[:, 1:len_deno+1].mul(weight_denominator).sum(1).abs()
+    return numerator.div(1 + denominator).view(x.shape)
+
 
 class Rational_CUDA_NONSAFE_F():
     def __init__(self):

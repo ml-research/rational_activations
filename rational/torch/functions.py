@@ -9,15 +9,8 @@ import seaborn as sns
 import numpy as np
 from termcolor import colored
 
-_2pi_sqrt = 2.5066
-tanh = torch.tanh
-relu = F.relu
-leaky_relu = F.leaky_relu
-gaussian = lambda x: torch.exp(-0.5*x**2) / _2pi_sqrt
-gaussian.__name__ = "gaussian"
-lined = dict()
-loc = 1
-CONNECTED = False
+_LINED = dict()
+
 
 def _save_input(self, input, output):
     self._selected_distribution.fill_n(input[0])
@@ -40,10 +33,11 @@ class Metaclass(type):
         type.__setattr__(self, key, value)
 
 
-class ActivationModule(torch.nn.Module, metaclass=Metaclass):
+class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
     # histograms_colors = plt.get_cmap('Pastel1').colors
+    instances = {}
     histograms_colors = ["red", "green", "black"]
-
+    distribution_display_mode = "kde"
 
     def __init__(self, function, device=None):
         if isinstance(function, str):
@@ -108,16 +102,15 @@ class ActivationModule(torch.nn.Module, metaclass=Metaclass):
         else:
             from rational.utils.histograms_numpy import Histogram
         if "categor" in mode.lower():
-            self._selected_distribution_name = None
-            self.categories = []
-            self._selected_distribution = None
-            self.distributions = []
+            self._selected_distribution_name = category_name
+            self.categories = [category_name]
+            self._selected_distribution = Histogram(bin_width)
+            self.distributions = [self._selected_distribution]
         else:
             self._selected_distribution_name = "distribution"
             self.categories = ["distribution"]
             self._selected_distribution = Histogram(bin_width)
             self.distributions = [self._selected_distribution]
-        # print("Retrieving input from now on.")
         self._irm = mode
         self._inp_bin_width = bin_width
         if auto_stop:
@@ -162,8 +155,8 @@ class ActivationModule(torch.nn.Module, metaclass=Metaclass):
                     x = self.plot_layer_distributions(ax2)
                 else:
                     x = self.plot_distributions(ax2, color)
-                axis.set_zorder(ax2.get_zorder()+1)
-                axis.patch.set_visible(False)
+                # axis.set_zorder(ax2.get_zorder()+1)
+                # axis.patch.set_visible(False)
             elif self.distribution_display_mode == "points":
                 x0, x_last, _ = self.get_distributions_range()
                 x_edges = torch.tensor([x0, x_last]).float()
@@ -224,7 +217,6 @@ class ActivationModule(torch.nn.Module, metaclass=Metaclass):
                     # ax.plot(refined_bins, kde_curv, lw=0.1)
                     fill = ax.fill_between(refined_bins, kde_curv, alpha=0.45,
                                            color=color, label=inp_label)
-                    fill = None
                 else:
                     print("The bin size is too big, bins contain too few "
                           "elements.\nbins:", x)
@@ -236,17 +228,17 @@ class ActivationModule(torch.nn.Module, metaclass=Metaclass):
             x_min, x_max = min(x_min, x[0]), max(x_max, x[-1])
             size = x[1] - x[0]
         if self.distribution_display_mode in ["kde", "bar"]:
-            # ax.set_zorder(ax.get_zorder()+1) # put a x in front of ax
-            ax.patch.set_visible(False)
             leg = ax.legend(fancybox=True, shadow=True)
-            leg.get_frame().set_alpha(1)
+            leg.get_frame().set_alpha(0.4)
             for legline, origline in zip(leg.get_patches(), dists_fb):
                 legline.set_picker(5)  # 5 pts tolerance
-                lined[legline] = origline
+                _LINED[legline] = origline
             fig = plt.gcf()
             def toggle_fill_between(event):
+                # on the pick event, find the orig line corresponding to the
+                # legend proxy line, and toggle the visibility
                 leg = event.artist
-                orig = lined[leg]
+                orig = _LINED[leg]
                 if "get_visible" in dir(orig):
                     vis = not orig.get_visible()
                     orig.set_visible(vis)
@@ -256,9 +248,10 @@ class ActivationModule(torch.nn.Module, metaclass=Metaclass):
                     color = orig.patches[0].get_facecolor()
                     for p in orig.patches:
                         p.set_visible(vis)
-
+                # Change the alpha on the line in the legend so we can see what lines
+                # have been toggled
                 if vis:
-                    leg.set_alpha(0.45)
+                    leg.set_alpha(0.4)
                 else:
                     leg.set_alpha(0.)
                 leg.set_facecolor(color)
@@ -287,29 +280,30 @@ class ActivationModule(torch.nn.Module, metaclass=Metaclass):
                         kde_curv = distribution.kde(n)(refined_bins)
                         # ax.plot(refined_bins, kde_curv, lw=0.1)
                         fill = ax.fill_between(refined_bins, kde_curv, alpha=0.4,
-                                                color=color, label=f"Class {inp_label} ({n})")
+                                                color=color, label=f"{inp_label} ({n})")
                     else:
                         print("The bin size is too big, bins contain too few "
                               "elements.\nbins:", x)
-                        ax.bar([], []) # in case of remove needed
+                        fill = ax.bar([], []) # in case of remove needed
                 else:
                     fill = ax.bar(x, weights/weights.max(), width=x[1] - x[0],
-                            linewidth=0, alpha=0.4, color=color, label=f"Class {inp_label} ({n})")
+                                  linewidth=0, alpha=0.4, color=color,
+                                  label=f"{inp_label} ({n})")
                 dists_fb.append(fill)
         ax.set_zorder(ax.get_zorder()+1) # put a x in front of ax
         # ax.patch.set_visible(False)
         if self.distribution_display_mode in ["kde", "bar"]:
             leg = ax.legend(fancybox=True, shadow=True)
-            leg.get_frame().set_alpha(1)
+            leg.get_frame().set_alpha(0.4)
             for legline, origline in zip(leg.get_patches(), dists_fb):
                 legline.set_picker(5)  # 5 pts tolerance
-                lined[legline] = origline
+                _LINED[legline] = origline
             fig = plt.gcf()
             def toggle_fill_between(event):
                 # on the pick event, find the orig line corresponding to the
                 # legend proxy line, and toggle the visibility
                 leg = event.artist
-                orig = lined[leg]
+                orig = _LINED[leg]
                 if "get_visible" in dir(orig):
                     vis = not orig.get_visible()
                     orig.set_visible(vis)
@@ -322,13 +316,13 @@ class ActivationModule(torch.nn.Module, metaclass=Metaclass):
                 # Change the alpha on the line in the legend so we can see what lines
                 # have been toggled
                 if vis:
-                    leg.set_alpha(1)
+                    leg.set_alpha(0.4)
                 else:
                     leg.set_alpha(0.)
                 leg.set_facecolor(color)
                 fig.canvas.draw()
             fig.canvas.mpl_connect('pick_event', toggle_fill_between)
-            return torch.arange(*self.get_distributions_range())
+        return torch.arange(*self.get_distributions_range())
 
     def get_distributions_range(self):
         x_min, x_max = np.inf, -np.inf
@@ -340,14 +334,14 @@ class ActivationModule(torch.nn.Module, metaclass=Metaclass):
             return -3, 3, 0.01
         return x_min, x_max, size
 
-    def __setattr__(self, key, value):
-        if not hasattr(self, key):
-            key_str = colored(key, "red")
-            self_name_str = colored(self.__class__, "red")
-            msg = colored(f"Setting new attribute {key_str}", "yellow") + \
-                  colored(f" of instance of {self_name_str}", "yellow")
-            print(msg)
-        object.__setattr__(self, key, value)
+    # def __setattr__(self, key, value):
+    #     if not hasattr(self, key):
+    #         key_str = colored(key, "red")
+    #         self_name_str = colored(self.__class__, "red")
+    #         msg = colored(f"Setting new attribute {key_str}", "yellow") + \
+    #               colored(f" of instance of {self_name_str}", "yellow")
+    #         print(msg)
+    #     object.__setattr__(self, key, value)
 
 
     # def load_state_dict(self, state_dict):
@@ -367,14 +361,23 @@ class ActivationModule(torch.nn.Module, metaclass=Metaclass):
 
 
 
-
 if __name__ == '__main__':
-    gau = ActivationModule(gaussian)
-    print(gau)
-    gau.input_retrieve_mode(mode="categories", category_name="neg")
-    inp = (torch.rand(10000)-1)*2
-    gau(inp.cuda())
-    gau.current_inp_category = "pos"
-    inp = (torch.rand(10000)+1)*2
-    gau(inp.cuda())
-    gau.show()
+    def plot_gaussian(mode):
+        _2pi_sqrt = 2.5066
+        tanh = torch.tanh
+        relu = F.relu
+        leaky_relu = F.leaky_relu
+        gaussian = lambda x: torch.exp(-0.5*x**2) / _2pi_sqrt
+        gaussian.__name__ = "gaussian"
+        gau = ActivationModule(gaussian)
+        gau.input_retrieve_mode(mode=mode, category_name="neg")
+        inp = torch.stack([(torch.rand(10000)-(i+1))*2 for i in range(5)], 1)
+        gau(inp.cuda())
+        if "categories" in mode:
+            gau.current_inp_category = "pos"
+            inp = torch.stack([(torch.rand(10000)+(i+1))*2 for i in range(5)], 1)
+            gau(inp.cuda())
+        gau.show()
+
+    for mode in ["categories", "layer", "layer_categories"]:
+        plot_gaussian(mode)

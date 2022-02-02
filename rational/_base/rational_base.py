@@ -19,7 +19,7 @@ from rational.utils.warnings import RationalWarning, \
 class Rational_base():
     count = 0
     list = []
-    distribution_display_mode = "kde"
+    # distribution_display_mode = "kde"
     use_multiple_axis = False
     _step = 0
 

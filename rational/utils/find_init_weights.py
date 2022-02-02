@@ -16,11 +16,12 @@ from rational.numpy.rationals import Rational_version_A, Rational_version_B, \
 def plot_result(x_array, rational_array, target_array,
                 original_func_name="Original function"):
     import matplotlib.pyplot as plt
-    plt.plot(x_array, rational_array, label="Rational approx")
-    plt.plot(x_array, target_array, label=original_func_name)
-    plt.legend()
-    plt.grid()
-    plt.show()
+    fig, ax = plt.subplots()
+    ax.plot(x_array, rational_array, label="Rational approx")
+    ax.plot(x_array, target_array, label=original_func_name)
+    ax.legend()
+    ax.grid()
+    fig.show()
 
 
 def append_to_config_file(params, approx_name, w_params, d_params, overwrite=None):
