@@ -15,16 +15,35 @@ class Histogram():
         self._empty = True
         self._verbose = False
         if bin_size == "auto":
-            self._auto_bs = True
+            self._auto_bin_size = True
             self.bin_size = 0.0001
             self._rd = 4
         else:
-            self._auto_bs = False
+            self._auto_bin_size = False
             self.bin_size = bin_size
             self._rd = int(cp.log10(1./bin_size).item())
+            self._fill_iplm = self._first_time_fill
 
     def fill_n(self, input):
-        self._update_hist(cp.fromDlpack(to_dlpack(input)))
+        self._fill_iplm(cp.fromDlpack(to_dlpack(input)))
+
+    def _first_time_fill(self, new_input):
+        range_ext = cp.around(new_input.min() - self.bin_size / 2, self._rd), \
+                    cp.around(new_input.max() + self.bin_size / 2, self._rd)
+        bins_array = cp.arange(range_ext[0], range_ext[1] + self.bin_size,
+                               self.bin_size)
+        weights, bins = cp.histogram(new_input, bins_array)
+        if self._auto_bin_size:
+            self._rd = int(cp.log10(1./(range_ext[1] - range_ext[0])).item()) + 2
+            self.bin_size = 1./(10**self._rd)
+            range_ext = cp.around(new_input.min() - self.bin_size / 2, self._rd), \
+                        cp.around(new_input.max() + self.bin_size / 2, self._rd)
+            bins_array = cp.arange(range_ext[0], range_ext[1] + self.bin_size,
+                                   self.bin_size)
+            weights, bins = cp.histogram(new_input, bins_array)
+        self.weights, self.bins = weights, bins[:-1]
+        self._empty = False
+        self._fill_iplm = self._update_hist
 
     def _update_hist(self, new_input):
         range_ext = cp.around(new_input.min() - self.bin_size / 2, self._rd), \
@@ -32,21 +51,9 @@ class Histogram():
         bins_array = cp.arange(range_ext[0], range_ext[1] + self.bin_size,
                                self.bin_size)
         weights, bins = cp.histogram(new_input, bins_array)
-        if self._empty:
-            if self._auto_bs:
-                self._rd = int(cp.log10(1./(range_ext[1] - range_ext[0])).item()) + 2
-                self.bin_size = 1./(10**self._rd)
-                range_ext = cp.around(new_input.min() - self.bin_size / 2, self._rd), \
-                            cp.around(new_input.max() + self.bin_size / 2, self._rd)
-                bins_array = cp.arange(range_ext[0], range_ext[1] + self.bin_size,
-                                       self.bin_size)
-                weights, bins = cp.histogram(new_input, bins_array)
-            self.weights, self.bins = weights, bins[:-1]
-            self._empty = False
-        else: #  update the hist
-            self.weights, self.bins = concat_hists(self.__weights, self.__bins,
-                                                   weights, bins[:-1],
-                                                   self.bin_size, self._rd)
+        self.weights, self.bins = concat_hists(self.__weights, self.__bins,
+                                               weights, bins[:-1],
+                                               self.bin_size, self._rd)
 
     def __repr__(self):
         if self.is_empty:
@@ -120,40 +127,49 @@ class LayerHistogram():
         self._verbose = False
         self.nb_neurons = nb_neurons
         if bin_size == "auto":
-            self._auto_bs = True
+            self._auto_bin_size = True
             self.bin_size = 0.0001
             self._rd = 4
         else:
-            self._auto_bs = False
+            self._auto_bin_size = False
             self.bin_size = bin_size
             self._rd = int(cp.log10(1./bin_size).item())
+        self._fill_iplm = self._first_time_fill
 
     def fill_n(self, input):
-        for n, (neur_inp, neur_b, neur_w) in enumerate(zip(input.T, self.__bins, self.__weights)):
-            self._update_hist(cp.fromDlpack(to_dlpack(neur_inp)), neur_b, neur_w, n)
-        self._empty = False
+        self._fill_iplm(cp.fromDlpack(to_dlpack(input.T)))
 
-    def _update_hist(self, new_input, neur_bin, neur_weight, n):
-        range_ext = cp.around(new_input.min() - self.bin_size / 2, self._rd), \
-                    cp.around(new_input.max() + self.bin_size / 2, self._rd)
-        bins_array = cp.arange(range_ext[0], range_ext[1] + self.bin_size,
-                               self.bin_size)
-        weights, bins = cp.histogram(new_input, bins_array)
-        if self._empty:
-            if self._auto_bs:
-                self._rd = int(cp.log10(1./(range_ext[1] - range_ext[0])).item()) + 2
-                self.bin_size = 1./(10**self._rd)
-                range_ext = cp.around(new_input.min() - self.bin_size / 2, self._rd), \
-                            cp.around(new_input.max() + self.bin_size / 2, self._rd)
-                bins_array = cp.arange(range_ext[0], range_ext[1] + self.bin_size,
-                                       self.bin_size)
-                weights, bins = cp.histogram(new_input, bins_array)
+    def _first_time_fill(self, new_input):
+        if self._auto_bin_size:
+            # on the complete input to get the total range
+            range_ext = cp.around(new_input.min() - self.bin_size / 2, self._rd), \
+                        cp.around(new_input.max() + self.bin_size / 2, self._rd)
+            self._rd = int(cp.log10(1./(range_ext[1] - range_ext[0])).item()) + 2
+            self.bin_size = 1./(10**self._rd)
+            range_ext = cp.around(new_input.min() - self.bin_size / 2, self._rd), \
+                        cp.around(new_input.max() + self.bin_size / 2, self._rd)
+            bins_array = cp.arange(range_ext[0], range_ext[1] + self.bin_size,
+                                   self.bin_size)
+        for n, neur_inp in enumerate(new_input):
+            range_ext = cp.around(neur_inp.min() - self.bin_size / 2, self._rd), \
+                        cp.around(neur_inp.max() + self.bin_size / 2, self._rd)
+            bins_array = cp.arange(range_ext[0], range_ext[1] + self.bin_size,
+                                   self.bin_size)
+            weights, bins = cp.histogram(neur_inp, bins_array)
             self.__weights[n], self.__bins[n] = weights, bins[:-1]
-            # self._empty = False
-        else: #  update the hist
-            self.__weights[n], self.__bins[n] = concat_hists(neur_weight, neur_bin,
-                                                         weights, bins[:-1],
-                                                         self.bin_size, self._rd)
+        self._empty = False
+        self._fill_iplm = self._update_hist
+
+    def _update_hist(self, new_input):
+        for n, (neur_inp, neur_b, neur_w) in enumerate(zip(new_input, self.__bins, self.__weights)):
+            range_ext = cp.around(new_input.min() - self.bin_size / 2, self._rd), \
+                        cp.around(new_input.max() + self.bin_size / 2, self._rd)
+            bins_array = cp.arange(range_ext[0], range_ext[1] + self.bin_size,
+                                   self.bin_size)
+            weights, bins = cp.histogram(new_input, bins_array)
+            self.__weights[n], self.__bins[n] = concat_hists(neur_w, neur_b,
+                                                             weights, bins[:-1],
+                                                             self.bin_size, self._rd)
 
     def __repr__(self):
         if self.is_empty:

@@ -12,11 +12,11 @@ class Histogram():
         self._empty = True
         self._verbose = False
         if bin_size == "auto":
-            self._auto_bs = True
+            self._auto_bin_size = True
             self.bin_size = 0.0001
             self._rd = 4
         else:
-            self._auto_bs = False
+            self._auto_bin_size = False
             self.bin_size = bin_size
             self._rd = int(np.log10(1./bin_size).item())
 
@@ -30,7 +30,7 @@ class Histogram():
                                self.bin_size)
         weights, bins = np.histogram(new_input, bins_array)
         if self._empty:
-            if self._auto_bs:
+            if self._auto_bin_size:
                 self._rd = int(np.log10(1./(range_ext[1] - range_ext[0])).item()) + 2
                 self.bin_size = 1./(10**self._rd)
                 range_ext = np.around(new_input.min() - self.bin_size / 2, self._rd), \

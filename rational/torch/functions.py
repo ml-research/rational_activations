@@ -373,11 +373,14 @@ if __name__ == '__main__':
         gau.input_retrieve_mode(mode=mode, category_name="neg")
         inp = torch.stack([(torch.rand(10000)-(i+1))*2 for i in range(5)], 1)
         gau(inp.cuda())
+        # gau(inp.cuda())
         if "categories" in mode:
             gau.current_inp_category = "pos"
             inp = torch.stack([(torch.rand(10000)+(i+1))*2 for i in range(5)], 1)
             gau(inp.cuda())
+            # gau(inp.cuda())
         gau.show()
 
     for mode in ["categories", "layer", "layer_categories"]:
+    # for mode in ["layer_categories"]:
         plot_gaussian(mode)
