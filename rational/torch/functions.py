@@ -173,7 +173,12 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
             axis.plot(x, y, label=label, color=color)
         else:
             axis.plot(x, y, color=color)
-        if display:
+        if writer is not None:
+            try:
+                writer.add_figure(title, fig, step)
+            except AttributeError:
+                print("Could not use the given SummaryWriter to add the Rational figure")
+        elif display:
             plt.show()
 
     @property
