@@ -252,18 +252,3 @@ def Rational_version_N(x, w_array, d_array):
         Q += d_array[i] * xi
     Q = Q + np.ones_like(Q)
     return P/Q
-
-#if __name__ == '__main__':
-#    def crazy_func(x):
-#        outp = (100 - 50*x - 100*x**2)/(1 - 10*x - 10*x**2)
-#        disc = outp[:-1] * outp[1:] < -5
-#        idx = [-1] + [i for i, x in enumerate(disc) if x] + [len(outp)]
-#        return ([x[s+1:e+1] for s, e in zip(idx[:-1], idx[1:])], \
-#             [outp[s+1:e+1] for s, e in zip(idx[:-1], idx[1:])])
-#    import matplotlib.pyplot as plt
-#    inp = np.arange(-3, 3, 0.01)
-#    ax = plt.gca()
-#    arrs = crazy_func(inp)
-#    for i in range(len(arrs[0])):
-#        ax.plot(arrs[0][i], arrs[1][i], 'r')
-#    plt.show()

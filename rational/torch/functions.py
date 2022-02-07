@@ -22,6 +22,7 @@ def _save_input_auto_stop(self, input, output):
     if self.inputs_saved > self._max_saves:
         self.training_mode()
 
+
 class Metaclass(type):
     def __setattr__(self, key, value):
         if not hasattr(self, key):
@@ -59,7 +60,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
         if device is None:
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
         else:
-            device = device
+            self.device = device
         self.use_kde = True
 
     def input_retrieve_mode(self, auto_stop=False, max_saves=1000,
@@ -100,7 +101,10 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
             else:
                 from rational.utils.histograms_cupy import Histogram
         else:
-            from rational.utils.histograms_numpy import Histogram
+            if "layer" in mode.lower():
+                from rational.utils.histograms_numpy import LayerHistogram as Histogram
+            else:
+                from rational.utils.histograms_numpy import Histogram
         if "categor" in mode.lower():
             if category_name is None:
                 self._selected_distribution_name = None
@@ -117,7 +121,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
             self.categories = ["distribution"]
             self._selected_distribution = Histogram(bin_width)
             self.distributions = [self._selected_distribution]
-        self._irm = mode
+        self._irm = mode  # input retrieval mode
         self._inp_bin_width = bin_width
         if auto_stop:
             self.inputs_saved = 0
@@ -180,6 +184,8 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
                 print("Could not use the given SummaryWriter to add the Rational figure")
         elif display:
             plt.show()
+        else:
+            return fig
 
     @property
     def current_inp_category(self):
@@ -195,7 +201,10 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
             else:
                 from rational.utils.histograms_cupy import Histogram
         else:
-            from rational.utils.histograms_numpy import Histogram
+            if "layer" in self._irm.lower():
+                from rational.utils.histograms_numpy import LayerHistogram as Histogram
+            else:
+                from rational.utils.histograms_numpy import Histogram
         self._selected_distribution = Histogram(self._inp_bin_width)
         self.distributions.append(self._selected_distribution)
         self.categories.append(value)
@@ -290,6 +299,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
         except ImportError:
             RationalImportScipyWarning.warn()
         dists_fb = []
+        import ipdb; ipdb.set_trace()
         for distribution, inp_label, color in zip(self.distributions, self.categories, self.histograms_colors):
             for n, (weights, x) in enumerate(zip(distribution.weights, distribution.bins)):
                 if self.use_kde and scipy_imported:
@@ -325,7 +335,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
                 if "get_visible" in dir(orig):
                     vis = not orig.get_visible()
                     orig.set_visible(vis)
-                    color = orig.get_facecolors()
+                    color = orig.get_facecolors()[0]
                 else:
                     vis = not orig.patches[0].get_visible()
                     color = orig.patches[0].get_facecolor()
@@ -380,25 +390,25 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
 
 
 if __name__ == '__main__':
-    def plot_gaussian(mode):
+    def plot_gaussian(mode, device):
         _2pi_sqrt = 2.5066
         tanh = torch.tanh
         relu = F.relu
         leaky_relu = F.leaky_relu
         gaussian = lambda x: torch.exp(-0.5*x**2) / _2pi_sqrt
         gaussian.__name__ = "gaussian"
-        gau = ActivationModule(gaussian)
+        gau = ActivationModule(gaussian, device=device)
         gau.input_retrieve_mode(mode=mode, category_name="neg") # Wrong
         inp = torch.stack([(torch.rand(10000)-(i+1))*2 for i in range(5)], 1)
-        gau(inp.cuda())
-        # gau(inp.cuda())
+        gau(inp.to(device))
         if "categories" in mode:
             gau.current_inp_category = "pos"
             inp = torch.stack([(torch.rand(10000)+(i+1))*2 for i in range(5)], 1)
-            gau(inp.cuda())
+            gau(inp.to(device))
             # gau(inp.cuda())
         gau.show()
 
-    for mode in ["categories", "layer", "layer_categories"]:
-    # for mode in ["layer_categories"]:
-        plot_gaussian(mode)
+    # for device in ["cuda:0", "cpu"]:
+    for device in ["cpu"]:
+        for mode in ["categories", "layer", "layer_categories"]:
+            plot_gaussian(mode, device)

@@ -19,9 +19,28 @@ class Histogram():
             self._auto_bin_size = False
             self.bin_size = bin_size
             self._rd = int(np.log10(1./bin_size).item())
+            self._fill_iplm = self._first_time_fill
 
     def fill_n(self, input):
-        self._update_hist(input.detach().numpy())
+        self._fill_iplm(input.detach().numpy())
+
+    def _first_time_fill(self, new_input):
+        range_ext = np.around(new_input.min() - self.bin_size / 2, self._rd), \
+                    np.around(new_input.max() + self.bin_size / 2, self._rd)
+        bins_array = np.arange(range_ext[0], range_ext[1] + self.bin_size,
+                               self.bin_size)
+        weights, bins = np.histogram(new_input, bins_array)
+        if self._auto_bin_size:
+            self._rd = int(np.log10(1./(range_ext[1] - range_ext[0])).item()) + 2
+            self.bin_size = 1./(10**self._rd)
+            range_ext = np.around(new_input.min() - self.bin_size / 2, self._rd), \
+                        np.around(new_input.max() + self.bin_size / 2, self._rd)
+            bins_array = np.arange(range_ext[0], range_ext[1] + self.bin_size,
+                                   self.bin_size)
+            weights, bins = np.histogram(new_input, bins_array)
+        self.weights, self.bins = weights, bins[:-1]
+        self._empty = False
+        self._fill_iplm = self._update_hist
 
     def _update_hist(self, new_input):
         range_ext = np.around(new_input.min() - self.bin_size / 2, self._rd), \
@@ -29,21 +48,9 @@ class Histogram():
         bins_array = np.arange(range_ext[0], range_ext[1] + self.bin_size,
                                self.bin_size)
         weights, bins = np.histogram(new_input, bins_array)
-        if self._empty:
-            if self._auto_bin_size:
-                self._rd = int(np.log10(1./(range_ext[1] - range_ext[0])).item()) + 2
-                self.bin_size = 1./(10**self._rd)
-                range_ext = np.around(new_input.min() - self.bin_size / 2, self._rd), \
-                            np.around(new_input.max() + self.bin_size / 2, self._rd)
-                bins_array = np.arange(range_ext[0], range_ext[1] + self.bin_size,
-                                       self.bin_size)
-                weights, bins = np.histogram(new_input, bins_array)
-            self.weights, self.bins = weights, bins[:-1]
-            self._empty = False
-        else: #  update the hist
-            self.weights, self.bins = concat_hists(self.weights, self.bins,
-                                                   weights, bins[:-1],
-                                                   self.bin_size, self._rd)
+        self.weights, self.bins = concat_hists(self.weights, self.bins,
+                                               weights, bins[:-1],
+                                               self.bin_size, self._rd)
 
     def __repr__(self):
         if self.is_empty:
@@ -76,7 +83,6 @@ class Histogram():
                 weights = np.nanmean(self.weights.reshape(-1, div), axis=1)
                 last = self.bins[-1]
             else:
-                import ipdb; ipdb.set_trace()
                 to_add = div - self.weights.size % div
                 padded = np.pad(self.weights, (0, to_add), mode='constant',
                                 constant_values=np.NaN).reshape(-1, div)
@@ -98,6 +104,131 @@ class Histogram():
     def kde(self):
         kde = sts.gaussian_kde(self.bins, bw_method=0.13797296614612148,
                                weights=self.weights)
+        return kde.pdf
+
+
+class LayerHistogram():
+    """
+    Input Histograms, used to retrieve the input of Rational Activations
+    """
+    def __init__(self, bin_size="auto", random_select=False, nb_neurons="auto"):
+        self._empty = True
+        self._verbose = False
+        self.nb_neurons = nb_neurons
+        if nb_neurons != "auto":
+            self.__bins = [np.array([]) for _ in range(nb_neurons)]
+            self.__weights = [np.array([], dtype=np.uint32) for _ in range(nb_neurons)]
+        if bin_size == "auto":
+            self._auto_bin_size = True
+            self.bin_size = 0.0001
+            self._rd = 4
+        else:
+            self._auto_bin_size = False
+            self.bin_size = bin_size
+            self._rd = int(np.log10(1./bin_size).item())
+        self._fill_iplm = self._first_time_fill
+
+    def fill_n(self, input):
+        self._fill_iplm(input.T.detach().numpy())
+
+    def _first_time_fill(self, new_input):
+        n_neurs = new_input.shape[0]
+        if n_neurs != self.nb_neurons:
+            if self.nb_neurons != "auto":
+                msg = f"It seems that the layer currently has {n_neurs} neurons.\n"
+                msg += "Automatically changing."
+                print(colored(msg, "yellow"))
+            self.nb_neurons = n_neurs
+            self.__bins = [np.array([]) for _ in range(n_neurs)]
+            self.__weights = [np.array([], dtype=np.uint32) for _ in range(n_neurs)]
+        if self._auto_bin_size:
+            # on the complete input to get the total range
+            range_ext = np.around(new_input.min() - self.bin_size / 2, self._rd), \
+                        np.around(new_input.max() + self.bin_size / 2, self._rd)
+            self._rd = int(np.log10(1./(range_ext[1] - range_ext[0])).item()) + 2
+            self.bin_size = 1./(10**self._rd)
+            range_ext = np.around(new_input.min() - self.bin_size / 2, self._rd), \
+                        np.around(new_input.max() + self.bin_size / 2, self._rd)
+            bins_array = np.arange(range_ext[0], range_ext[1] + self.bin_size,
+                                   self.bin_size)
+        for n, neur_inp in enumerate(new_input):
+            range_ext = np.around(neur_inp.min() - self.bin_size / 2, self._rd), \
+                        np.around(neur_inp.max() + self.bin_size / 2, self._rd)
+            bins_array = np.arange(range_ext[0], range_ext[1] + self.bin_size,
+                                   self.bin_size)
+            weights, bins = np.histogram(neur_inp, bins_array)
+            self.__weights[n], self.__bins[n] = weights, bins[:-1]
+        self._empty = False
+        self._fill_iplm = self._update_hist
+
+    def _update_hist(self, new_input):
+        for n, (neur_inp, neur_b, neur_w) in enumerate(zip(new_input, self.__bins, self.__weights)):
+            range_ext = np.around(new_input.min() - self.bin_size / 2, self._rd), \
+                        np.around(new_input.max() + self.bin_size / 2, self._rd)
+            bins_array = np.arange(range_ext[0], range_ext[1] + self.bin_size,
+                                   self.bin_size)
+            weights, bins = np.histogram(new_input, bins_array)
+            self.__weights[n], self.__bins[n] = concat_hists(neur_w, neur_b,
+                                                             weights, bins[:-1],
+                                                             self.bin_size, self._rd)
+
+    def __repr__(self):
+        if self.is_empty:
+            rtrn = "Empty Layer Histogram"
+        else:
+            rtrn = f"Layer histogram on {self.nb_neurons} neurons"
+        if self._verbose:
+            rtrn += f" {hex(id(self))}"
+        return rtrn
+
+    @property
+    def range(self):
+        x_min = float(min([b[0] for b in self.__bins]))
+        x_max = float(max([b[-1] for b in self.__bins]))
+        return np.arange(x_min, x_max, self.bin_size/100)
+
+    @property
+    def bins(self):
+        return [b.flatten() for b in self.__bins]
+
+    # @bins.setter
+    # def bins(self, var):
+    #     if isinstance(var, np.ndarray):
+    #         self.__bins = cp.array(var)
+    #     else:
+    #         self.__bins = var
+
+    @property
+    def weights(self):
+        return [w.flatten() for w in self.__weights]
+
+    @property
+    def is_empty(self):
+        if self._empty is True and len(self.__bins[0]) > 0:
+            self._empty = False
+        return self._empty
+
+    @property
+    def total(self):
+        return self.__weights.sum()
+
+    # @weights.setter
+    # def weights(self, var):
+    #     if isinstance(var, np.ndarray):
+    #         self.__weights = cp.array(var)
+    #     else:
+    #         self.__weights = var
+
+    def normalize(self, numpy=True):
+        if numpy:
+            return (self.__weights / self.__weights.sum()).flatten(), \
+                   self.__bins
+        else:
+            return self.__weights / self.__weights.sum(), self.__bins
+
+    def kde(self, n):
+        kde = sts.gaussian_kde(self.__bins[n], bw_method=0.13797296614612148,
+                               weights=self.__weights[n])
         return kde.pdf
 
 
