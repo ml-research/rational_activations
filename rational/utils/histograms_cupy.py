@@ -20,7 +20,7 @@ class Histogram():
             self._rd = 4
         else:
             self._auto_bin_size = False
-            self.bin_size = bin_size
+            self.bin_size = float(bin_size)
             self._rd = int(cp.log10(1./bin_size).item())
             self._fill_iplm = self._first_time_fill
 

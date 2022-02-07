@@ -13,11 +13,11 @@ class Histogram():
         self._verbose = False
         if bin_size == "auto":
             self._auto_bin_size = True
-            self.bin_size = 0.0001
+            self._bin_size = 0.0001
             self._rd = 4
         else:
             self._auto_bin_size = False
-            self.bin_size = bin_size
+            self._bin_size = float(bin_size)
             self._rd = int(np.log10(1./bin_size).item())
             self._fill_iplm = self._first_time_fill
 
@@ -25,39 +25,39 @@ class Histogram():
         self._fill_iplm(input.detach().numpy())
 
     def _first_time_fill(self, new_input):
-        range_ext = np.around(new_input.min() - self.bin_size / 2, self._rd), \
-                    np.around(new_input.max() + self.bin_size / 2, self._rd)
-        bins_array = np.arange(range_ext[0], range_ext[1] + self.bin_size,
-                               self.bin_size)
+        range_ext = np.around(new_input.min() - self._bin_size / 2, self._rd), \
+                    np.around(new_input.max() + self._bin_size / 2, self._rd)
+        bins_array = np.arange(range_ext[0], range_ext[1] + self._bin_size,
+                               self._bin_size)
         weights, bins = np.histogram(new_input, bins_array)
         if self._auto_bin_size:
             self._rd = int(np.log10(1./(range_ext[1] - range_ext[0])).item()) + 2
-            self.bin_size = 1./(10**self._rd)
-            range_ext = np.around(new_input.min() - self.bin_size / 2, self._rd), \
-                        np.around(new_input.max() + self.bin_size / 2, self._rd)
-            bins_array = np.arange(range_ext[0], range_ext[1] + self.bin_size,
-                                   self.bin_size)
+            self._bin_size = 1./(10**self._rd)
+            range_ext = np.around(new_input.min() - self._bin_size / 2, self._rd), \
+                        np.around(new_input.max() + self._bin_size / 2, self._rd)
+            bins_array = np.arange(range_ext[0], range_ext[1] + self._bin_size,
+                                   self._bin_size)
             weights, bins = np.histogram(new_input, bins_array)
         self.weights, self.bins = weights, bins[:-1]
         self._empty = False
         self._fill_iplm = self._update_hist
 
     def _update_hist(self, new_input):
-        range_ext = np.around(new_input.min() - self.bin_size / 2, self._rd), \
-                    np.around(new_input.max() + self.bin_size / 2, self._rd)
-        bins_array = np.arange(range_ext[0], range_ext[1] + self.bin_size,
-                               self.bin_size)
+        range_ext = np.around(new_input.min() - self._bin_size / 2, self._rd), \
+                    np.around(new_input.max() + self._bin_size / 2, self._rd)
+        bins_array = np.arange(range_ext[0], range_ext[1] + self._bin_size,
+                               self._bin_size)
         weights, bins = np.histogram(new_input, bins_array)
         self.weights, self.bins = concat_hists(self.weights, self.bins,
                                                weights, bins[:-1],
-                                               self.bin_size, self._rd)
+                                               self._bin_size, self._rd)
 
     def __repr__(self):
         if self.is_empty:
             rtrn = "Empty Histogram"
         else:
             rtrn = f"Histogram on range {self.bins[0]}, {self.bins[-1]}, of " + \
-                   f"bin_size {self.bin_size}, with {self.weights.sum()} total" + \
+                   f"bin_size {self._bin_size}, with {self.weights.sum()} total" + \
                    f"elements"
         if self._verbose:
             rtrn += f" {hex(id(self))}"
@@ -87,7 +87,7 @@ class Histogram():
                 padded = np.pad(self.weights, (0, to_add), mode='constant',
                                 constant_values=np.NaN).reshape(-1, div)
                 weights = np.nanmean(padded, axis=1)
-                last = self.bins[-1] + self.bin_size * to_add
+                last = self.bins[-1] + self._bin_size * to_add
             bins = np.linspace(self.bins[0], last, len(weights),
                                endpoint=False)
             return weights / weights.sum(), bins
@@ -96,7 +96,7 @@ class Histogram():
 
     def _from_physt(self, phystogram):
         if (phystogram.bin_sizes == phystogram.bin_sizes[0]).all():
-            self.bin_size = phystogram.bin_sizes[0]
+            self._bin_size = phystogram.bin_sizes[0]
         self.bins = np.array(phystogram.bin_left_edges)
         self.weights = np.array(phystogram.frequencies)
         return self
@@ -105,6 +105,22 @@ class Histogram():
         kde = sts.gaussian_kde(self.bins, bw_method=0.13797296614612148,
                                weights=self.weights)
         return kde.pdf
+
+    @property
+    def bin_size(self):
+        return self._bin_size
+
+    @bin_size.setter
+    def bin_size(self, value):
+        self._bin_size = value
+    #     if value < 0:
+    #         raise TypeError("Cannot have a negative bin size")
+    #     elif value < self._bin_size:
+    #         raise Error("Cannot decrease the bin size, only increase it")
+    #     self._bin_size = value
+    #     bin_min = min(self.bins) // value * value
+    #     import ipdb; ipdb.set_trace()
+
 
 
 class LayerHistogram():
@@ -120,11 +136,11 @@ class LayerHistogram():
             self.__weights = [np.array([], dtype=np.uint32) for _ in range(nb_neurons)]
         if bin_size == "auto":
             self._auto_bin_size = True
-            self.bin_size = 0.0001
+            self._bin_size = 0.0001
             self._rd = 4
         else:
             self._auto_bin_size = False
-            self.bin_size = bin_size
+            self._bin_size = bin_size
             self._rd = int(np.log10(1./bin_size).item())
         self._fill_iplm = self._first_time_fill
 
@@ -143,19 +159,19 @@ class LayerHistogram():
             self.__weights = [np.array([], dtype=np.uint32) for _ in range(n_neurs)]
         if self._auto_bin_size:
             # on the complete input to get the total range
-            range_ext = np.around(new_input.min() - self.bin_size / 2, self._rd), \
-                        np.around(new_input.max() + self.bin_size / 2, self._rd)
+            range_ext = np.around(new_input.min() - self._bin_size / 2, self._rd), \
+                        np.around(new_input.max() + self._bin_size / 2, self._rd)
             self._rd = int(np.log10(1./(range_ext[1] - range_ext[0])).item()) + 2
-            self.bin_size = 1./(10**self._rd)
-            range_ext = np.around(new_input.min() - self.bin_size / 2, self._rd), \
-                        np.around(new_input.max() + self.bin_size / 2, self._rd)
-            bins_array = np.arange(range_ext[0], range_ext[1] + self.bin_size,
-                                   self.bin_size)
+            self._bin_size = 1./(10**self._rd)
+            range_ext = np.around(new_input.min() - self._bin_size / 2, self._rd), \
+                        np.around(new_input.max() + self._bin_size / 2, self._rd)
+            bins_array = np.arange(range_ext[0], range_ext[1] + self._bin_size,
+                                   self._bin_size)
         for n, neur_inp in enumerate(new_input):
-            range_ext = np.around(neur_inp.min() - self.bin_size / 2, self._rd), \
-                        np.around(neur_inp.max() + self.bin_size / 2, self._rd)
-            bins_array = np.arange(range_ext[0], range_ext[1] + self.bin_size,
-                                   self.bin_size)
+            range_ext = np.around(neur_inp.min() - self._bin_size / 2, self._rd), \
+                        np.around(neur_inp.max() + self._bin_size / 2, self._rd)
+            bins_array = np.arange(range_ext[0], range_ext[1] + self._bin_size,
+                                   self._bin_size)
             weights, bins = np.histogram(neur_inp, bins_array)
             self.__weights[n], self.__bins[n] = weights, bins[:-1]
         self._empty = False
@@ -163,14 +179,14 @@ class LayerHistogram():
 
     def _update_hist(self, new_input):
         for n, (neur_inp, neur_b, neur_w) in enumerate(zip(new_input, self.__bins, self.__weights)):
-            range_ext = np.around(new_input.min() - self.bin_size / 2, self._rd), \
-                        np.around(new_input.max() + self.bin_size / 2, self._rd)
-            bins_array = np.arange(range_ext[0], range_ext[1] + self.bin_size,
-                                   self.bin_size)
+            range_ext = np.around(new_input.min() - self._bin_size / 2, self._rd), \
+                        np.around(new_input.max() + self._bin_size / 2, self._rd)
+            bins_array = np.arange(range_ext[0], range_ext[1] + self._bin_size,
+                                   self._bin_size)
             weights, bins = np.histogram(new_input, bins_array)
             self.__weights[n], self.__bins[n] = concat_hists(neur_w, neur_b,
                                                              weights, bins[:-1],
-                                                             self.bin_size, self._rd)
+                                                             self._bin_size, self._rd)
 
     def __repr__(self):
         if self.is_empty:
@@ -185,7 +201,7 @@ class LayerHistogram():
     def range(self):
         x_min = float(min([b[0] for b in self.__bins]))
         x_max = float(max([b[-1] for b in self.__bins]))
-        return np.arange(x_min, x_max, self.bin_size/100)
+        return np.arange(x_min, x_max, self._bin_size/100)
 
     @property
     def bins(self):

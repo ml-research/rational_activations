@@ -64,7 +64,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
         self.use_kde = True
 
     def input_retrieve_mode(self, auto_stop=False, max_saves=1000,
-                            bin_width=0.01, mode="all", category_name=None):
+                            bin_width=0.2, mode="all", category_name=None):
         """
         Will retrieve the distribution of the input in self.distribution. \n
         This will slow down the function, as it has to retrieve the input \
@@ -157,7 +157,8 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
             x = torch.tensor(x.float())
         with sns.axes_style("whitegrid"):
             if axis is None:
-                fig, axis = plt.subplots(1, 1, figsize=(8, 6))
+                # fig, axis = plt.subplots(1, 1, figsize=(8, 6))
+                fig, axis = plt.subplots(1, 1, figsize=(20, 12))
         if self.distributions:
             if self.distribution_display_mode in ["kde", "bar"]:
                 ax2 = axis.twinx()
@@ -165,8 +166,6 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
                     x = self.plot_layer_distributions(ax2)
                 else:
                     x = self.plot_distributions(ax2, color)
-                # axis.set_zorder(ax2.get_zorder()+1)
-                # axis.patch.set_visible(False)
             elif self.distribution_display_mode == "points":
                 x0, x_last, _ = self.get_distributions_range()
                 x_edges = torch.tensor([x0, x_last]).float()
@@ -174,9 +173,11 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
                 axis.scatter(x_edges, y_edges, color=color)
         y = self.forward(x.to(self.device)).detach().cpu().numpy()
         if label:
+            # axis.twinx().plot(x, y, label=label, color=color)
             axis.plot(x, y, label=label, color=color)
         else:
-            axis.plot(x, y, color=color)
+            # axis.twinx().plot(x, y, label=label, color=color)
+            axis.plot(x, y, label=label, color=color)
         if writer is not None:
             try:
                 writer.add_figure(title, fig, step)
@@ -210,7 +211,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
         self.categories.append(value)
         self._selected_distribution_name = value
 
-    def plot_distributions(self, ax, colors=None):
+    def plot_distributions(self, ax, colors=None, bin_size=None):
         """
         Plot the distribution and returns the corresponding x
         """
@@ -227,7 +228,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
             colors = self.histograms_colors
         elif not(isinstance(colors, list) or isinstance(colors, tuple)):
             colors = [colors] * len(self.distributions)
-        for distribution, inp_label, color in zip(self.distributions, self.categories, colors):
+        for i, (distribution, inp_label, color) in enumerate(zip(self.distributions, self.categories, colors)):
             if distribution.is_empty:
                 if self.distribution_display_mode == "kde" and scipy_imported:
                     fill = ax.fill_between([], [], label=inp_label,  alpha=0.)
@@ -235,7 +236,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
                     fill = ax.bar([], [], label=inp_label,  alpha=0.)
                 dists_fb.append(fill)
             else:
-                weights, x = _cleared_arrays(distribution.weights, distribution.bins, 0.0001)
+                weights, x = _cleared_arrays(distribution.weights, distribution.bins, 0.001)
                 # weights, x = distribution.weights, distribution.bins
                 if self.distribution_display_mode == "kde" and scipy_imported:
                     if len(x) > 5:
@@ -249,7 +250,8 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
                               "elements.\nbins:", x)
                         fill = ax.bar([], []) # in case of remove needed
                 else:
-                    fill = ax.bar(x, weights/weights.max(), width=x[1] - x[0],
+                    width = (x[1] - x[0])/len(self.distributions)
+                    fill = ax.bar(x[1:]+i*width, weights/weights.max(), width=width,
                                   linewidth=0, alpha=0.3, label=inp_label)
                 dists_fb.append(fill)
                 x_min, x_max = min(x_min, x[0]), max(x_max, x[-1])
@@ -261,7 +263,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
                 legline.set_picker(5)  # 5 pts tolerance
                 _LINED[legline] = origline
             fig = plt.gcf()
-            def toggle_fill_between(event):
+            def toggle_distribution(event):
                 # on the pick event, find the orig line corresponding to the
                 # legend proxy line, and toggle the visibility
                 leg = event.artist
@@ -283,7 +285,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
                     leg.set_alpha(0.)
                 leg.set_facecolor(color)
                 fig.canvas.draw()
-            fig.canvas.mpl_connect('pick_event', toggle_fill_between)
+            fig.canvas.mpl_connect('pick_event', toggle_distribution)
         if x_min == np.inf or x_max == np.inf:
             torch.arange(-3, 3, 0.01)
         return torch.arange(x_min, x_max, size)
@@ -317,8 +319,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
                                   linewidth=0, alpha=0.4, color=color,
                                   label=f"{inp_label} ({n})")
                 dists_fb.append(fill)
-        ax.set_zorder(ax.get_zorder()+1) # put a x in front of ax
-        # ax.patch.set_visible(False)
+
         if self.distribution_display_mode in ["kde", "bar"]:
             leg = ax.legend(fancybox=True, shadow=True)
             leg.get_frame().set_alpha(0.4)
@@ -326,7 +327,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
                 legline.set_picker(5)  # 5 pts tolerance
                 _LINED[legline] = origline
             fig = plt.gcf()
-            def toggle_fill_between(event):
+            def toggle_distribution(event):
                 # on the pick event, find the orig line corresponding to the
                 # legend proxy line, and toggle the visibility
                 leg = event.artist
@@ -348,7 +349,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
                     leg.set_alpha(0.)
                 leg.set_facecolor(color)
                 fig.canvas.draw()
-            fig.canvas.mpl_connect('pick_event', toggle_fill_between)
+            fig.canvas.mpl_connect('pick_event', toggle_distribution)
         return torch.arange(*self.get_distributions_range())
 
     def get_distributions_range(self):
@@ -407,7 +408,8 @@ if __name__ == '__main__':
             # gau(inp.cuda())
         gau.show()
 
-    for device in ["cuda:0", "cpu"]:
-    # for device in ["cpu"]:
+    ActivationModule.distribution_display_mode = "bar"
+    # for device in ["cuda:0", "cpu"]:
+    for device in ["cpu"]:
         for mode in ["categories", "layer", "layer_categories"]:
             plot_gaussian(mode, device)

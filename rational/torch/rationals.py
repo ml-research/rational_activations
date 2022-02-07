@@ -15,7 +15,7 @@ from rational.utils.warnings import RationalWarning, RationalLoadWarning
 from rational._base.rational_base import Rational_base
 from rational.torch.rational_pytorch_functions import Rational_PYTORCH_A_F, \
     Rational_PYTORCH_B_F, Rational_PYTORCH_C_F, Rational_PYTORCH_D_F, \
-    Rational_NONSAFE_F, Rational_CUDA_NONSAFE_F, Rational_TENT_F, _get_xps
+    Rational_NONSAFE_F, Rational_CUDA_NONSAFE_F, Rational_Spline_F, _get_xps
 from .functions import ActivationModule
 
 
@@ -108,8 +108,8 @@ class Rational(ActivationModule, Rational_base):
             elif version == "N":
                 self.activation_function = Rational_NONSAFE_F
                 return
-            elif version == "T":
-                self.activation_function = Rational_TENT_F
+            elif version == "S":
+                self.activation_function = Rational_Spline_F
                 return
             else:
                 raise NotImplementedError(f"version {version} not implemented")
@@ -128,8 +128,8 @@ class Rational(ActivationModule, Rational_base):
                 rational_func = Rational_PYTORCH_D_F
             elif version == "N":
                 rational_func = Rational_NONSAFE_F
-            elif version == "T":
-                self.activation_function = Rational_TENT_F
+            elif version == "S":
+                self.activation_function = Rational_Spline_F
                 return
             else:
                 raise NotImplementedError(f"version {version} not implemented")
@@ -137,7 +137,6 @@ class Rational(ActivationModule, Rational_base):
             self.activation_function = rational_func
 
     def forward(self, x):
-
         return self.activation_function(x, self.numerator, self.denominator,
                                         self.training)
 
@@ -168,8 +167,8 @@ class Rational(ActivationModule, Rational_base):
             rational_func = Rational_CUDA_D_F
         elif self.version == "N":
             rational_func = Rational_CUDA_NONSAFE_F
-        elif self.version == "T":
-            rational_func = Rational_TENT_F
+        elif self.version == "S":
+            rational_func = Rational_Spline_F
         else:
             raise ValueError("version %s not implemented" % self.version)
         if "cuda" in str(device):
@@ -415,6 +414,10 @@ class Rational(ActivationModule, Rational_base):
         else:
             print("saving_input of rationals should be set with booleans")
 
+
+class PieceWiseRational(Rational):
+    def __init__(self):
+        super(name="PieceWiseRational", version="S")
 
 class AugmentedRational(nn.Module):
     """
