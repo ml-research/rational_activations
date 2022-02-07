@@ -51,7 +51,8 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
         if function is not None:
             self.activation_function = function
             if "__forward__" in dir(function):
-                self.forward = self.activation_function.forward
+                #TODO: changed to __forward__ from forward because that is what is searched for
+                self.forward = self.activation_function.__forward__
             else:
                 self.forward = lambda *args, **kwargs: self.activation_function(*args, **kwargs)
         self._handle_retrieve_mode = None
@@ -286,6 +287,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
             fig.canvas.mpl_connect('pick_event', toggle_fill_between)
         if x_min == np.inf or x_max == np.inf:
             torch.arange(-3, 3, 0.01)
+        #TODO: when distribution is always empty, size wont be assigned and will throw an error
         return torch.arange(x_min, x_max, size)
 
     def plot_layer_distributions(self, ax):
@@ -393,12 +395,12 @@ if __name__ == '__main__':
         _2pi_sqrt = 2.5066
         tanh = torch.tanh
         relu = F.relu
+
         leaky_relu = F.leaky_relu
         gaussian = lambda x: torch.exp(-0.5*x**2) / _2pi_sqrt
         gaussian.__name__ = "gaussian"
         gau = ActivationModule(gaussian, device=device)
         gau.input_retrieve_mode(mode=mode, category_name="neg") # Wrong
-        inp = torch.stack([(torch.rand(10000)-(i+1))*2 for i in range(5)], 1)
         gau(inp.to(device))
         if "categories" in mode:
             gau.current_inp_category = "pos"
@@ -407,7 +409,7 @@ if __name__ == '__main__':
             # gau(inp.cuda())
         gau.show()
 
-    for device in ["cuda:0", "cpu"]:
+    for device in ["cpu"]:
     # for device in ["cpu"]:
         for mode in ["categories", "layer", "layer_categories"]:
             plot_gaussian(mode, device)
