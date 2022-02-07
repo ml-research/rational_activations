@@ -299,7 +299,6 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
         except ImportError:
             RationalImportScipyWarning.warn()
         dists_fb = []
-        import ipdb; ipdb.set_trace()
         for distribution, inp_label, color in zip(self.distributions, self.categories, self.histograms_colors):
             for n, (weights, x) in enumerate(zip(distribution.weights, distribution.bins)):
                 if self.use_kde and scipy_imported:
@@ -408,7 +407,7 @@ if __name__ == '__main__':
             # gau(inp.cuda())
         gau.show()
 
-    # for device in ["cuda:0", "cpu"]:
-    for device in ["cpu"]:
+    for device in ["cuda:0", "cpu"]:
+    # for device in ["cpu"]:
         for mode in ["categories", "layer", "layer_categories"]:
             plot_gaussian(mode, device)
