@@ -21,7 +21,11 @@ class Histogram():
         else:
             self._auto_bin_size = False
             self.bin_size = float(bin_size)
-            self._rd = int(cp.log10(1./bin_size).item())
+            rd = cp.log10(1./bin_size).item()
+            if abs(round(rd)-rd) > 0.0001:
+                print("The bin size of the histogram should be 0.01, 0.1, 1., 10., ... etc")
+                exit()
+            self._rd = round(rd)
             self._fill_iplm = self._first_time_fill
 
     def fill_n(self, input):
@@ -78,10 +82,6 @@ class Histogram():
             self.__bins = var
 
     @property
-    def weights(self):
-        return self.__weights.get().flatten()
-
-    @property
     def is_empty(self):
         if self._empty is True and len(self.bins) > 0:
             self._empty = False
@@ -90,6 +90,10 @@ class Histogram():
     @property
     def total(self):
         return self.weights.sum()
+
+    @property
+    def weights(self):
+        return self.__weights.get().flatten()
 
     @weights.setter
     def weights(self, var):

@@ -58,7 +58,6 @@ def Rational_PYTORCH_D_F(x, weight_numerator, weight_denominator, training, rand
         return Rational_PYTORCH_B_F(x, weight_numerator, weight_denominator, training)
     z = x.view(-1)
     len_num, len_deno = len(weight_numerator), len(weight_denominator)
-    # xps = torch.vander(z, max(len_num, len_deno), increasing=True)
     xps = _get_xps(z, len_num, len_deno)
     numerator = xps.mul(weight_numerator.mul(
         torch.FloatTensor(len_num).uniform_(1-random_deviation,
@@ -80,10 +79,21 @@ def Rational_NONSAFE_F(x, weight_numerator, weight_denominator, training):
     return numerator.div(1 + denominator).view(x.shape)
 
 
-def Rational_Spline_F(x, weight_numerator, weight_denominator, training):
+# def Rational_Spline_F(x, weight_numerator, weight_denominator, training):
+#     # P(X) / Q(X) = (X - ~a_0) * (X + ~a0) * (a0 + a1*x + ... + a_n-1 * X^n-2) /
+#     #               1 + b_1 * X + b_1 * X^2 + ... + b_m * X^m
+#     k = weight_numerator[0]
+#     z = x.view(-1)
+#     len_num, len_deno = len(weight_numerator), len(weight_denominator)
+#     xps = _get_xps(z, len_num-2, len_deno).to(weight_numerator.device)
+#     numerator = (xps[:, :len_num-1].mul(weight_numerator[1:]).sum(1)).mul(torch.relu(z+k)).mul(-torch.relu(-z+k))
+#     denominator = xps[:, 1:len_deno+1].mul(weight_denominator).sum(1).abs()
+#     return numerator.div(1 + denominator).view(x.shape)
+
+def Rational_Spline_F(x, k, weight_numerator, weight_denominator, training):
     # P(X) / Q(X) = (X - ~a_0) * (X + ~a0) * (a0 + a1*x + ... + a_n-1 * X^n-2) /
     #               1 + b_1 * X + b_1 * X^2 + ... + b_m * X^m
-    k = weight_numerator[0]
+    # k = weight_numerator[0]
     z = x.view(-1)
     len_num, len_deno = len(weight_numerator), len(weight_denominator)
     xps = _get_xps(z, len_num-2, len_deno).to(weight_numerator.device)

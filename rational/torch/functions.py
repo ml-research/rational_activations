@@ -64,7 +64,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
         self.use_kde = True
 
     def input_retrieve_mode(self, auto_stop=False, max_saves=1000,
-                            bin_width=0.2, mode="all", category_name=None):
+                            bin_width=0.1, mode="all", category_name=None):
         """
         Will retrieve the distribution of the input in self.distribution. \n
         This will slow down the function, as it has to retrieve the input \
@@ -140,10 +140,12 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
 
     def __repr__(self):
         if "type" in dir(self):
-            return  f"{self.type} ActivationModule at {hex(id(self))}"
+            # return  f"{self.type} ActivationModule at {hex(id(self))}"
+            return  f"{self.type} ActivationModule"
         if "__name__" in dir(self.activation_function):
-            return f"{self.activation_function.__name__} ActivationModule at {hex(id(self))}"
-        return f"{self.activation_function} ActivationModule at {hex(id(self))}"
+            # return f"{self.activation_function.__name__} ActivationModule at {hex(id(self))}"
+            return f"{self.activation_function.__name__} ActivationModule"
+        return f"{self.activation_function} ActivationModule"
 
 
     def show(self, x=None, fitted_function=True, other_func=None, display=True,
@@ -157,8 +159,8 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
             x = torch.tensor(x.float())
         with sns.axes_style("whitegrid"):
             if axis is None:
-                # fig, axis = plt.subplots(1, 1, figsize=(8, 6))
-                fig, axis = plt.subplots(1, 1, figsize=(20, 12))
+                fig, axis = plt.subplots(1, 1, figsize=(8, 6))
+                # fig, axis = plt.subplots(1, 1, figsize=(20, 12))
         if self.distributions:
             if self.distribution_display_mode in ["kde", "bar"]:
                 ax2 = axis.twinx()
@@ -186,7 +188,8 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
         elif display:
             plt.show()
         else:
-            return fig
+            if axis is None:
+                return fig
 
     @property
     def current_inp_category(self):

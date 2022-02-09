@@ -16,8 +16,8 @@ known_functions = {
 
 def get_parameters(rational_version, degrees, approx_func):
     nd, dd = degrees
-    if rational_version == 'T':
-        return [1.] + [1, 1, 1], [1, 1, 1]
+    if rational_version == 'S':
+        return [1.] + [1, 1, 1], [1, 1., 1]
     if approx_func == "identity":
         return [0., 1.] + [0.] * (nd - 1), [0.] * dd
     elif approx_func == "ones":

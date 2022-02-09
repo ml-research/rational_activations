@@ -672,17 +672,3 @@ class Rational_base():
         """
         raise NotImplementedError("the numpy method is not implemented for",
                                   " this class, only for the mother class")
-
-    def __repr__(self):
-        if "_verbose" in dir(self) and self._verbose:
-            return (f"Rational Activation Function "
-                    f"{self.version}) of degrees {self.degrees} running on "
-                    f"{self.device} {hex(id(self))}\n")
-        else:
-            return (f"Rational Activation Function "
-                    f"({self.version}) of degrees {self.degrees} running on "
-                    f"{self.device}")
-
-    def __str__(self):
-        deg = f"{self.degrees[0]}_{self.degrees[1]}"
-        return f"Rational_{deg}_{self.func_name}"

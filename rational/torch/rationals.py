@@ -61,12 +61,11 @@ class Rational(ActivationModule, Rational_base):
     Returns:
         Module: Rational module
     """
-
     def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=None,
                  version="A", trainable=True, train_numerator=True,
                  train_denominator=True, name=None):
         if name is None:
-            name = approx_func
+            name = f"Rational ({approx_func} init approx)"
         ActivationModule.__init__(self, name)
         Rational_base.__init__(self, name)
 
@@ -269,7 +268,6 @@ class Rational(ActivationModule, Rational_base):
         self._handle_retrieve_mode = None
         self._handle_gradient_retrieve_mode = None
         self.distribution = None
-        return self
 
     def change_version(self, version):
         assert version in ["A", "B", "C", "D"]
@@ -415,9 +413,53 @@ class Rational(ActivationModule, Rational_base):
             print("saving_input of rationals should be set with booleans")
 
 
-class PieceWiseRational(Rational):
-    def __init__(self):
-        super(name="PieceWiseRational", version="S")
+class PieceWiseRational(ActivationModule, Rational_base):
+    # methods from rat
+    saving_input = Rational.saving_input
+    save_all_inputs = Rational.save_all_inputs
+    training_mode = Rational.training_mode
+
+    def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=None,
+                 k=1, k_trainable=True, name=None):
+        if name is None:
+            name = f"Piecewise Rational {degrees}"
+        ActivationModule.__init__(self, name)
+        Rational_base.__init__(self, name)
+
+        if cuda is None:
+            cuda = torch_cuda_available()
+        if cuda is True:
+            device = "cuda"
+        elif cuda is False:
+            device = "cpu"
+        else:
+            device = cuda
+
+        self.k = nn.Parameter(torch.FloatTensor([k]).to(device),
+                              requires_grad=k_trainable)
+        _m, _n = degrees
+        self.numerator = nn.Parameter(torch.FloatTensor([-1. for _ in range(_m-2)]).to(device),
+                                      requires_grad=True)
+        self.denominator = nn.Parameter(torch.FloatTensor([1. for _ in range(_n)]).to(device),
+                                        requires_grad=True)
+        self.register_parameter("numerator", self.numerator)
+        self.register_parameter("denominator", self.denominator)
+        self.device = device
+        self.degrees = degrees
+        self.version = "PieceWise"
+        self.training = True
+
+        self.init_approximation = approx_func
+        self._saving_input = False
+
+        self.activation_function = Rational_Spline_F
+        self._handle_retrieve_mode = None
+        self._handle_gradient_retrieve_mode = None
+        self.distributions = None
+
+    def forward(self, x):
+        return self.activation_function(x, self.k, self.numerator,
+                                        self.denominator, self.training)
 
 class AugmentedRational(nn.Module):
     """
@@ -769,17 +811,6 @@ class RecurrentRationalModule(nn.Module):
 
     def show(self, input_range=None, display=True):
         return self.rational.show(input_range=input_range, display=display)
-
-
-# def _save_input(self, input, output):
-#     self.distribution.fill_n(input[0])
-#
-#
-# def _save_input_auto_stop(self, input, output):
-#     self.inputs_saved += 1
-#     self.distribution.fill_n(input[0])
-#     if self.inputs_saved > self._max_saves:
-#         self.training_mode()
 
 
 def _save_gradient(self, gradient):
