@@ -15,7 +15,8 @@ from rational.utils.warnings import RationalWarning, RationalLoadWarning
 from rational._base.rational_base import Rational_base
 from rational.torch.rational_pytorch_functions import Rational_PYTORCH_A_F, \
     Rational_PYTORCH_B_F, Rational_PYTORCH_C_F, Rational_PYTORCH_D_F, \
-    Rational_NONSAFE_F, Rational_CUDA_NONSAFE_F, Rational_Spline_F, _get_xps
+    Rational_NONSAFE_F, Rational_CUDA_NONSAFE_F, Rational_Spline_F, \
+    Rational_Positive_Spline_F, _get_xps
 from .functions import ActivationModule
 
 
@@ -438,9 +439,9 @@ class PieceWiseRational(ActivationModule, Rational_base):
         self.k = nn.Parameter(torch.FloatTensor([k]).to(device),
                               requires_grad=k_trainable)
         _m, _n = degrees
-        self.numerator = nn.Parameter(torch.FloatTensor([-1. for _ in range(_m-2)]).to(device),
+        self.numerator = nn.Parameter(torch.randn(_m-2).to(device),
                                       requires_grad=True)
-        self.denominator = nn.Parameter(torch.FloatTensor([1. for _ in range(_n)]).to(device),
+        self.denominator = nn.Parameter(torch.randn(_n).to(device),
                                         requires_grad=True)
         self.register_parameter("numerator", self.numerator)
         self.register_parameter("denominator", self.denominator)
@@ -460,6 +461,59 @@ class PieceWiseRational(ActivationModule, Rational_base):
     def forward(self, x):
         return self.activation_function(x, self.k, self.numerator,
                                         self.denominator, self.training)
+
+class PieceWisePositiveRational(ActivationModule, Rational_base):
+    # methods from rat
+    saving_input = Rational.saving_input
+    save_all_inputs = Rational.save_all_inputs
+    training_mode = Rational.training_mode
+
+    def __init__(self, approx_func="leaky_relu", degrees=(8, 7), cuda=None,
+                 k=2., k_trainable=True, name=None):
+        if name is None:
+            name = f"Piecewise Rational {degrees}"
+        ActivationModule.__init__(self, name)
+        Rational_base.__init__(self, name)
+
+        if cuda is None:
+            cuda = torch_cuda_available()
+        if cuda is True:
+            device = "cuda"
+        elif cuda is False:
+            device = "cpu"
+        else:
+            device = cuda
+
+        self.k = nn.Parameter(torch.FloatTensor([k]).to(device),
+                              requires_grad=k_trainable)
+        _m, _n = degrees
+        # self.numerator = nn.Parameter(torch.FloatTensor([-1. for _ in range(_m-2)]).to(device),
+        #                               requires_grad=True)
+        # self.denominator = nn.Parameter(torch.FloatTensor([1. for _ in range(_n)]).to(device),
+        #                                 requires_grad=True)
+        self.numerator = nn.Parameter(torch.randn(_m-2).to(device),
+                                      requires_grad=True)
+        self.denominator = nn.Parameter(torch.randn(_n).to(device),
+                                        requires_grad=True)
+        self.register_parameter("numerator", self.numerator)
+        self.register_parameter("denominator", self.denominator)
+        self.device = device
+        self.degrees = degrees
+        self.version = "PieceWise"
+        self.training = True
+
+        self.init_approximation = approx_func
+        self._saving_input = False
+
+        self.activation_function = Rational_Positive_Spline_F
+        self._handle_retrieve_mode = None
+        self._handle_gradient_retrieve_mode = None
+        self.distributions = None
+
+    def forward(self, x):
+        return self.activation_function(x, self.k, self.numerator,
+                                        self.denominator, self.training)
+
 
 class AugmentedRational(nn.Module):
     """

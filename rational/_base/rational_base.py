@@ -115,12 +115,12 @@ class Rational_base():
         if isinstance(x, list):
             for rat, ax, x_rat, color in zip(cls.list, axes.flatten(), x, colors):
                 rat.show(x_rat, fitted_function, other_func, False, tolerance,
-                         title, axis=ax, writer=writer, step=step,
+                         title, axis=ax, writer=None, step=step,
                          color=color)
         else:
             for rat, ax, color in zip(cls.list, axes.flatten(), colors):
                 rat.show(x, fitted_function, other_func, False, tolerance,
-                         title, axis=ax, writer=writer, step=step,
+                         title, axis=ax, writer=None, step=step,
                          color=color)
         if title is not None:
             fig.suptitle(title, y=0.95)

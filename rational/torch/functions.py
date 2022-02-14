@@ -159,8 +159,8 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
             x = torch.tensor(x.float())
         with sns.axes_style("whitegrid"):
             if axis is None:
-                fig, axis = plt.subplots(1, 1, figsize=(8, 6))
-                # fig, axis = plt.subplots(1, 1, figsize=(20, 12))
+                # fig, axis = plt.subplots(1, 1, figsize=(8, 6))
+                fig, axis = plt.subplots(1, 1, figsize=(20, 12))
         if self.distributions:
             if self.distribution_display_mode in ["kde", "bar"]:
                 ax2 = axis.twinx()
@@ -254,8 +254,13 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
                         fill = ax.bar([], []) # in case of remove needed
                 else:
                     width = (x[1] - x[0])/len(self.distributions)
-                    fill = ax.bar(x[1:]+i*width, weights/weights.max(), width=width,
-                                  linewidth=0, alpha=0.3, label=inp_label)
+                    print(width)
+                    if len(x) == len(weights):
+                        fill = ax.bar(x+i*width, weights/weights.max(), width=width,
+                                  linewidth=0, alpha=0.7, label=inp_label)
+                    else:
+                        fill = ax.bar(x[1:]+i*width, weights/weights.max(), width=width,
+                                  linewidth=0, alpha=0.7, label=inp_label)
                 dists_fb.append(fill)
                 x_min, x_max = min(x_min, x[0]), max(x_max, x[-1])
                 size = x[1] - x[0]
