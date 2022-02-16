@@ -107,6 +107,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
             else:
                 from rational.utils.histograms_numpy import Histogram
         if "categor" in mode.lower():
+            #TODO: is this valid, in this case no histogram is constructed which most likely leads to an error
             if category_name is None:
                 self._selected_distribution_name = None
                 self.categories = []
@@ -152,6 +153,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
     def show(self, x=None, fitted_function=True, other_func=None, display=True,
              tolerance=0.001, title=None, axis=None, writer=None, step=None, label=None,
              color=None):
+        #Construct x axis 
         if x is None:
             x = torch.arange(-3., 3, 0.01)
         elif isinstance(x, tuple) and len(x) in (2, 3):
@@ -160,8 +162,13 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
             x = torch.tensor(x.float())
         with sns.axes_style("whitegrid"):
             if axis is None:
+<<<<<<< HEAD
                 # fig, axis = plt.subplots(1, 1, figsize=(8, 6))
                 fig, axis = plt.subplots(1, 1, figsize=(20, 12))
+=======
+                fig, axis = plt.subplots(1, 1, figsize=(8, 6))
+        #the histogram function in an array
+>>>>>>> added functions to visualize on
         if self.distributions:
             if self.distribution_display_mode in ["kde", "bar"]:
                 ax2 = axis.twinx()
@@ -174,6 +181,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
                 x_edges = torch.tensor([x0, x_last]).float()
                 y_edges = self.forward(x_edges.to(self.device)).detach().cpu().numpy()
                 axis.scatter(x_edges, y_edges, color=color)
+        #TODO: this should enable showing without input data from before
         y = self.forward(x.to(self.device)).detach().cpu().numpy()
         if label:
             # axis.twinx().plot(x, y, label=label, color=color)
@@ -232,7 +240,12 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
             colors = self.histograms_colors
         elif not(isinstance(colors, list) or isinstance(colors, tuple)):
             colors = [colors] * len(self.distributions)
+<<<<<<< HEAD
         for i, (distribution, inp_label, color) in enumerate(zip(self.distributions, self.categories, colors)):
+=======
+        for distribution, inp_label, color in zip(self.distributions, self.categories, colors):
+            #TODO: what if all distributions are empty? 
+>>>>>>> added functions to visualize on
             if distribution.is_empty:
                 if self.distribution_display_mode == "kde" and scipy_imported:
                     fill = ax.fill_between([], [], label=inp_label,  alpha=0.)
@@ -312,6 +325,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
             RationalImportScipyWarning.warn()
         dists_fb = []
         for distribution, inp_label, color in zip(self.distributions, self.categories, self.histograms_colors):
+            #TODO: why is there no empty distribution check here?
             for n, (weights, x) in enumerate(zip(distribution.weights, distribution.bins)):
                 if self.use_kde and scipy_imported:
                     if len(x) > 5:
