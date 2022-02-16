@@ -162,16 +162,8 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
             x = torch.tensor(x.float())
         with sns.axes_style("whitegrid"):
             if axis is None:
-<<<<<<< HEAD
                 # fig, axis = plt.subplots(1, 1, figsize=(8, 6))
                 fig, axis = plt.subplots(1, 1, figsize=(20, 12))
-=======
-                fig, axis = plt.subplots(1, 1, figsize=(8, 6))
-        #the histogram function in an array
-<<<<<<< HEAD
->>>>>>> added functions to visualize on
-=======
->>>>>>> 5275a60e003ae1bc515956c8ff3b6cec6720a8cd
         if self.distributions:
             if self.distribution_display_mode in ["kde", "bar"]:
                 ax2 = axis.twinx()
@@ -243,15 +235,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
             colors = self.histograms_colors
         elif not(isinstance(colors, list) or isinstance(colors, tuple)):
             colors = [colors] * len(self.distributions)
-<<<<<<< HEAD
         for i, (distribution, inp_label, color) in enumerate(zip(self.distributions, self.categories, colors)):
-=======
-        for distribution, inp_label, color in zip(self.distributions, self.categories, colors):
-            #TODO: what if all distributions are empty? 
-<<<<<<< HEAD
->>>>>>> added functions to visualize on
-=======
->>>>>>> 5275a60e003ae1bc515956c8ff3b6cec6720a8cd
             if distribution.is_empty:
                 if self.distribution_display_mode == "kde" and scipy_imported:
                     fill = ax.fill_between([], [], label=inp_label,  alpha=0.)
@@ -421,6 +405,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
 
 if __name__ == '__main__':
     def plot_gaussian(mode, device):
+        print("commit")
         _2pi_sqrt = 2.5066
         tanh = torch.tanh
         relu = F.relu
@@ -438,13 +423,8 @@ if __name__ == '__main__':
             # gau(inp.cuda())
         gau.show()
 
-<<<<<<< HEAD
     ActivationModule.distribution_display_mode = "bar"
     # for device in ["cuda:0", "cpu"]:
     for device in ["cpu"]:
-=======
-    for device in ["cpu"]:
-    # for device in ["cpu"]:
->>>>>>> 5275a60e003ae1bc515956c8ff3b6cec6720a8cd
         for mode in ["categories", "layer", "layer_categories"]:
             plot_gaussian(mode, device)
