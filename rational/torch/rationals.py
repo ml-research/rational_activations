@@ -414,14 +414,14 @@ class Rational(ActivationModule, Rational_base):
             print("saving_input of rationals should be set with booleans")
 
 
-class PieceWiseRational(ActivationModule, Rational_base):
+class RARE(ActivationModule, Rational_base):
     # methods from rat
     saving_input = Rational.saving_input
     save_all_inputs = Rational.save_all_inputs
     training_mode = Rational.training_mode
 
-    def __init__(self, approx_func="leaky_relu", degrees=(5, 4), cuda=None,
-                 k=1, k_trainable=True, name=None):
+    def __init__(self, approx_func="leaky_relu", degrees=(6, 4), cuda=None,
+                 k=2., k_trainable=True, name=None):
         if name is None:
             name = f"Piecewise Rational {degrees}"
         ActivationModule.__init__(self, name)
@@ -447,7 +447,7 @@ class PieceWiseRational(ActivationModule, Rational_base):
         self.register_parameter("denominator", self.denominator)
         self.device = device
         self.degrees = degrees
-        self.version = "PieceWise"
+        self.version = "RARE"
         self.training = True
 
         self.init_approximation = approx_func
