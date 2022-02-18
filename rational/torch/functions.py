@@ -51,7 +51,8 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
         if function is not None:
             self.activation_function = function
             if "__forward__" in dir(function):
-                self.forward = self.activation_function.forward
+                #TODO: changed to __forward__ from forward because that is what is searched for
+                self.forward = self.activation_function.__forward__
             else:
                 self.forward = lambda *args, **kwargs: self.activation_function(*args, **kwargs)
         self._handle_retrieve_mode = None
@@ -106,6 +107,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
             else:
                 from rational.utils.histograms_numpy import Histogram
         if "categor" in mode.lower():
+            #TODO: is this valid, in this case no histogram is constructed which most likely leads to an error
             if category_name is None:
                 self._selected_distribution_name = None
                 self.categories = []
@@ -151,6 +153,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
     def show(self, x=None, fitted_function=True, other_func=None, display=True,
              tolerance=0.001, title=None, axis=None, writer=None, step=None, label=None,
              color=None):
+        #Construct x axis 
         if x is None:
             x = torch.arange(-3., 3, 0.01)
         elif isinstance(x, tuple) and len(x) in (2, 3):
@@ -173,6 +176,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
                 x_edges = torch.tensor([x0, x_last]).float()
                 y_edges = self.forward(x_edges.to(self.device)).detach().cpu().numpy()
                 axis.scatter(x_edges, y_edges, color=color)
+        #TODO: this should enable showing without input data from before
         y = self.forward(x.to(self.device)).detach().cpu().numpy()
         if label:
             # axis.twinx().plot(x, y, label=label, color=color)
@@ -296,6 +300,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
             fig.canvas.mpl_connect('pick_event', toggle_distribution)
         if x_min == np.inf or x_max == np.inf:
             torch.arange(-3, 3, 0.01)
+        #TODO: when distribution is always empty, size wont be assigned and will throw an error
         return torch.arange(x_min, x_max, size)
 
     def plot_layer_distributions(self, ax):
@@ -310,6 +315,7 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
             RationalImportScipyWarning.warn()
         dists_fb = []
         for distribution, inp_label, color in zip(self.distributions, self.categories, self.histograms_colors):
+            #TODO: why is there no empty distribution check here?
             for n, (weights, x) in enumerate(zip(distribution.weights, distribution.bins)):
                 if self.use_kde and scipy_imported:
                     if len(x) > 5:
@@ -399,15 +405,16 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
 
 if __name__ == '__main__':
     def plot_gaussian(mode, device):
+        print("commit")
         _2pi_sqrt = 2.5066
         tanh = torch.tanh
         relu = F.relu
+
         leaky_relu = F.leaky_relu
         gaussian = lambda x: torch.exp(-0.5*x**2) / _2pi_sqrt
         gaussian.__name__ = "gaussian"
         gau = ActivationModule(gaussian, device=device)
         gau.input_retrieve_mode(mode=mode, category_name="neg") # Wrong
-        inp = torch.stack([(torch.rand(10000)-(i+1))*2 for i in range(5)], 1)
         gau(inp.to(device))
         if "categories" in mode:
             gau.current_inp_category = "pos"
